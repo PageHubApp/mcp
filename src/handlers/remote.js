@@ -81,6 +81,7 @@ module.exports = {
   list_templates: delegated.list_templates,
   pull_template: delegated.pull_template,
   save_template: delegated.save_template,
+  publish_site_as_template: delegated.publish_site_as_template,
   update_template: delegated.update_template,
   list_sites: delegated.list_sites,
   pull_site: delegated.pull_site,

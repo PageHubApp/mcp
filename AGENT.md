@@ -251,12 +251,49 @@ PageHub has a built-in icon system with 2000+ Google Material Symbols. **Never u
 }
 ```
 
+**CRITICAL: `ref-google:*` ONLY works on Button `icon.value`.** Putting `ref-google:account_balance` as text content in a Text node renders the literal string, not an icon. For icon-only display, use a Button with `icon.only: true`.
+
 **Where NOT to use icons (use Text instead):**
 - Star ratings in testimonials — use `★` characters in a Text node (these are content, not UI icons)
 - Decorative separators — use `·` or `—` in text
 - Arrows in menu lists — these are presentational, a Text node with `→` is acceptable
 
-### 8. Image Validation
+### 8. Background Overlay (Image + Gradient)
+
+To layer a gradient overlay on top of a background image (e.g. dark hero with readable text), use the `backgroundOverlay` prop on any Container. **Do NOT use `root.style` for this — the overlay prop handles it cleanly.**
+
+**Preset strings (easiest):**
+```json
+{
+  "backgroundImage": "https://...",
+  "backgroundOverlay": "dark-left",
+  "mobile": { "backgroundSize": "bg-cover", "backgroundPosition": "bg-center", "backgroundRepeat": "bg-no-repeat" }
+}
+```
+
+| Preset | Effect |
+|--------|--------|
+| `dark-left` | Dark gradient from left, fading right |
+| `dark-right` | Dark gradient from right, fading left |
+| `dark-bottom` | Dark gradient from bottom, fading up |
+| `dark-top` | Dark gradient from top, fading down |
+| `dark` | Uniform dark overlay |
+| `light` | Uniform light overlay |
+
+**Custom object (full control):**
+```json
+{
+  "backgroundOverlay": {
+    "direction": "to right",
+    "from": { "color": "#0F1A2E", "opacity": 85 },
+    "to": { "color": "#0F1A2E", "opacity": 20 }
+  }
+}
+```
+
+The renderer combines the overlay gradient and image into a single CSS `background-image: linear-gradient(...), url(...)` declaration — no conflicts, no `root.style` needed.
+
+### 9. Image Validation
 
 - **Use reliable image sources.** Unsplash URLs with `?w=600` or `?w=800` are reliable. Always include width parameter.
 - **Never use placeholder URLs** like `via.placeholder.com` or broken CDN links.
@@ -568,6 +605,23 @@ ftr_inner (Container, flex-col, gap-4, items-center)
 
 **Link colors:** Links in ButtonList get their color from the button's `root.color` prop. For footer links on dark backgrounds, use `text-(--ph-primary-text)`. For body links, the styleGuide `linkColor` and `linkHoverColor` tokens control `<a>` tag colors — set these in `set_theme` if the defaults don't match your palette.
 
+### Special Characters — Always Use HTML Entities
+
+Never use unicode escapes (`\u00a9`) or raw special characters in text content — they can fail to render across different contexts. Always use HTML entities:
+
+| Character | Entity | Use |
+|-----------|--------|-----|
+| © | `&copy;` | Copyright |
+| — | `&mdash;` | Em dash |
+| – | `&ndash;` | En dash |
+| · | `&middot;` | Middle dot separator |
+| → | `&rarr;` | Arrow (in text, not icons) |
+| " " | `&ldquo;` `&rdquo;` | Smart quotes |
+| ' ' | `&lsquo;` `&rsquo;` | Smart apostrophes |
+| & | `&amp;` | Ampersand (when literal) |
+| ™ | `&trade;` | Trademark |
+| ® | `&reg;` | Registered |
+
 ### Template Variables — Never Hardcode Business Info
 
 | Variable | Use |
@@ -621,24 +675,97 @@ ftr_inner (Container, flex-col, gap-4, items-center)
 
 ---
 
-## Design Analysis — From Reference to Template
+## Design Analysis — Extracting & Transferring Design Techniques
 
-When given a design reference (screenshot, description, or URL):
+When building from a reference site, you're not copying a design — you're extracting **techniques** and transferring them to a new context. The reference's identity (palette, copy, imagery, brand) gets replaced. The reference's techniques (how it creates visual interest) get kept.
 
-### 1. Decompose Sections (top to bottom)
-List every section with: layout type, column count, key elements, visual weight (light/dark/accented), and background color.
+### Step 1: Extract Design Techniques (the most important step)
 
-### 2. Map Each Section
-For each: check `list_sections` → check `get_design_patterns` → check `list_example_sections` → build custom. **Most sections from a polished reference will need custom builds.**
+Study the reference and extract **specific, reusable techniques** — not generic descriptions. "It has a hero section" is useless. "The hero uses a full-bleed background image with a linear-gradient overlay from rgba(0,0,0,0.6) to transparent, text pinned bottom-left, and a pill-shaped CTA with arrow icon" — that's a technique you can transfer.
 
-### 3. Extract Palette
-Identify dominant colors → map to 12 slots. Or use `list_presets(mood)` and override specific slots.
+**Extract these categories:**
 
-### 4. Match Typography
-Heading: serif or sans? → find Google Font match. Body: clean sans-serif. Set in `set_theme` styleGuide.
+#### Micro-design elements (the details that separate "designed" from "wireframe")
+| Element | What to look for | Example extraction |
+|---------|-----------------|-------------------|
+| **Eyebrow badges** | Pill shape? Colored dot prefix? Background fill? Border? | "Rounded-full pill, bg-gray-100, text-xs tracking-widest, gold dot before text" |
+| **Buttons** | Shape, fill, icon, hover effect | "Dark pill buttons with arrow_forward icon right, text-swap on hover" |
+| **Dividers** | Vertical between stats? Accent underlines? Border widths? | "1px vertical divider between stat blocks, border-neutral/30 opacity" |
+| **Stat numbers** | Oversized with suffix? Colored? Font contrast? | "Giant 72px heading-font number + smaller 24px 'Y+' suffix inline" |
+| **Section labels** | Just text? In a badge? With icon/dot? | "Pill badge with colored dot + uppercase text, not plain uppercase" |
 
-### 5. Build and Verify
-After building, review every section against the reference. Use `update_node` to fix spacing, colors, typography until it matches.
+#### Typography tricks
+| Trick | What to look for |
+|-------|-----------------|
+| **Fading text** | Last line of a paragraph in muted/lighter color — draws reader in then trails off |
+| **Size contrast** | Massive stat numbers vs tiny labels. Large serif heading vs small sans body |
+| **Mixed families** | Serif headings + sans body creates instant sophistication |
+| **Weight play** | Thin body text (300) vs black headings (900) within same family |
+
+#### Layout structures (copy these 1:1 — they're patterns, not identity)
+| Pattern | What to look for |
+|---------|-----------------|
+| **Nav** | Logo position, separator line, link arrangement, right-side CTA button styling |
+| **Hero** | Full-bleed image + overlay? Split layout? Centered text-only? What's the gradient? |
+| **Split sections** | Column ratio, vertical alignment, what goes on each side |
+| **Card grids** | Column count, card styling (border vs shadow vs bg), internal layout |
+| **Form cards** | Shadow, border-radius, header text, subtitle, response-time note, input styling |
+| **Footer** | Column count, link grouping, dark/light, social icon placement |
+
+#### Visual depth (what creates the "wow moment")
+- Background images with gradient overlays — extract the gradient direction and opacity
+- Section background alternation rhythm — map the exact sequence (white → tinted → white → dark)
+- `root.style` effects: `backdrop-filter: blur()`, `background: linear-gradient(...)`, complex shadows
+- Card hover states, image treatments, accent color usage patterns
+
+### Step 2: Transfer Techniques to New Context
+
+For each section you build, explicitly check your extracted techniques:
+
+```
+Before building: "Which techniques from my extraction am I applying here?"
+If the answer is "none" → you're building from muscle memory. Stop and re-read.
+```
+
+**What transfers 1:1 (structural patterns):**
+- Nav layout (logo | separator | links ... CTA)
+- Form card structure (title, subtitle, inputs, CTA, response note)
+- Badge/pill styling
+- Divider patterns
+- Button shapes and icon placement
+- Section background rhythm
+
+**What gets replaced (brand identity):**
+- Color palette → new palette for new niche
+- Copy/text → new copy for new niche
+- Imagery → new images for new niche
+- Font pairing → can change, but match the weight/contrast ratio
+- Business details → new company
+
+### Step 3: Palette & Typography
+
+Identify the reference's **color relationships** (not just the colors):
+- What's the accent usage pattern? (CTAs only? Badges + CTAs? Large bands?)
+- What creates contrast between sections? (bg alternation? border? shadow?)
+- Map to 12 palette slots, or use `list_presets(mood)` and override.
+
+Match **typographic weight contrast**, not specific fonts:
+- If reference uses heavy serif headings + light sans body, pick fonts with similar weight range
+- Verify Google Font weight availability before committing
+
+### Step 4: Build Section by Section
+
+Build one section at a time. After each, screenshot and verify the techniques are visible:
+- Does the eyebrow have the pill/badge treatment from the reference? Or is it plain text?
+- Does the hero have the gradient overlay / image treatment? Or is it flat?
+- Do the buttons have the right shape/icon/style? Or are they generic rectangles?
+- Does the form card have the polish (shadow, subtitle, response note)? Or is it bare inputs?
+
+If a section doesn't show evidence of transferred techniques, fix it before moving on.
+
+### Step 5: The "Could You Tell?" Test
+
+Compare your output to the reference. A viewer should see the family resemblance in *technique* — similar rhythm, similar polish, similar structural patterns — but NOT mistake it for the same site. Different niche, different palette, different imagery, different copy. Same level of craft.
 
 ---
 
