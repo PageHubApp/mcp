@@ -63,6 +63,9 @@ module.exports = {
 
   list_templates: delegated.list_templates,
   pull_template: delegated.pull_template,
+  save_template: delegated.save_template,
+  update_template: delegated.update_template,
+  delete_template: delegated.delete_template,
   list_sites: delegated.list_sites,
   pull_site: delegated.pull_site,
   upload_image: delegated.upload_image,
