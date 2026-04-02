@@ -39,10 +39,19 @@ module.exports = {
     };
   },
 
-  // ── MCP overrides: delegate then persist activeSite in memory ──
+  // ── MCP overrides: delegate then persist active target in memory ──
 
   async select_site(args) {
     const result = await delegated.select_site(args);
+    config.activeTemplate = null;
+    return result;
+  },
+
+  async select_template(args) {
+    const result = await delegated.select_template(args);
+    // Persist activeTemplate to outer config so it survives across tool calls
+    config.activeTemplate = { slug: args.slug, title: result.content?.[0]?.text || '' };
+    config.activeSite = null;
     return result;
   },
 
@@ -59,13 +68,20 @@ module.exports = {
     return result;
   },
 
+  async delete_template(args) {
+    const result = await delegated.delete_template(args);
+    if (config.activeTemplate?.slug === args.slug) {
+      config.activeTemplate = null;
+    }
+    return result;
+  },
+
   // ── Pure delegation ──
 
   list_templates: delegated.list_templates,
   pull_template: delegated.pull_template,
   save_template: delegated.save_template,
   update_template: delegated.update_template,
-  delete_template: delegated.delete_template,
   list_sites: delegated.list_sites,
   pull_site: delegated.pull_site,
   upload_image: delegated.upload_image,

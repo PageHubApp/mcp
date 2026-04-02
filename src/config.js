@@ -4,12 +4,16 @@ const path = require('path');
 // ── Re-export shared context & HTTP utilities from mcp-core ──
 const {
   runWithContext,
-  getContext,
+  getContext: _getContext,
   normalizeBaseUrl,
   parseMaybeJson,
   applyNodePatches,
   normalizeNodePatchArgs,
 } = require('@pagehub/mcp-core');
+
+// Re-export getContext as-is for handlers, but internally we need
+// to distinguish "real context" from the {} fallback for the Proxy.
+const getContext = _getContext;
 
 /* ── Project directory detection (MCP-only, needs filesystem) ── */
 
@@ -45,6 +49,7 @@ const _config = {
   apiKey: process.env.PAGEHUB_API_KEY || null,
   apiBaseUrl: normalizeBaseUrl(process.env.PAGEHUB_API_BASE_URL) || 'https://pagehub.dev',
   activeSite: null, // in-memory only, per session
+  activeTemplate: null, // in-memory only, per session
 };
 
 /**
@@ -60,7 +65,9 @@ const config = new Proxy(_config, {
   },
   set(target, prop, value) {
     const ctx = getContext();
-    if (ctx) { ctx[prop] = value; return true; }
+    // Only write to context if we're inside a real runWithContext call
+    // (the {} fallback from getContext() has no apiKey).
+    if (ctx && ctx.apiKey) { ctx[prop] = value; return true; }
     target[prop] = value;
     return true;
   },
@@ -86,9 +93,18 @@ async function apiFetch(pathStr, opts = {}) {
 /* ── Shared helpers (eliminate repeated boilerplate in handlers) ── */
 
 function getActiveSiteId(args) {
-  const siteId = args.id || config.activeSite?.id;
-  if (!siteId) throw new Error('No site id provided and no active site set. Run select_site first.');
+  if (args.slug && !args.id) return args.slug;
+  const siteId = args.id || config.activeTemplate?.slug || config.activeSite?.id;
+  if (!siteId) throw new Error('No site or template selected. Run select_site or select_template first.');
   return siteId;
+}
+
+function getActiveTarget(args = {}) {
+  if (args.slug && !args.id) return { type: 'template', id: args.slug };
+  if (args.id) return { type: 'site', id: args.id };
+  if (config.activeTemplate) return { type: 'template', id: config.activeTemplate.slug };
+  if (config.activeSite) return { type: 'site', id: config.activeSite.id };
+  throw new Error('No site or template selected. Run select_site or select_template first.');
 }
 
 function getEditorUrl(siteId) {
@@ -108,6 +124,7 @@ function delegateHandlers(coreHandlers) {
       apiKey: config.apiKey,
       apiBaseUrl: config.apiBaseUrl,
       activeSite: config.activeSite,
+      activeTemplate: config.activeTemplate,
     }, () => fn(args));
   }
   return wrapped;
@@ -120,6 +137,7 @@ module.exports = {
   apiFetch,
   runWithContext,
   getActiveSiteId,
+  getActiveTarget,
   getEditorUrl,
   delegateHandlers,
 };

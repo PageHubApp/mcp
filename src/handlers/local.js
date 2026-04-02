@@ -1,5 +1,5 @@
 const path = require('path');
-const { getProjectDir, config, apiFetch, getActiveSiteId, getEditorUrl, delegateHandlers } = require('../config');
+const { getProjectDir, config, apiFetch, getActiveTarget, getEditorUrl, delegateHandlers } = require('../config');
 const { parseMaybeJson, applyNodePatches, validateImageUrls, collectAllImageUrls, extractImageUrls } = require('../helpers');
 
 // Node-level tools delegated to mcp-core
@@ -7,24 +7,41 @@ const coreNodes = require('@pagehub/mcp-core/src/handlers/nodes');
 const delegatedNodes = delegateHandlers(coreNodes);
 
 /**
- * Helper: GET site content from API, return { siteId, flat, data }.
+ * Helper: fetch content for the active target (site or template).
  */
-async function fetchSite(args) {
-  const siteId = getActiveSiteId(args);
-  const data = await apiFetch(`/api/v1/sites/${encodeURIComponent(siteId)}`);
+async function fetchForTarget(args) {
+  const target = getActiveTarget(args);
+  if (target.type === 'template') {
+    const data = await apiFetch(`/api/v1/templates/${encodeURIComponent(target.id)}`);
+    if (!data.content || typeof data.content !== 'object') {
+      throw new Error('Template has no decoded content (empty or corrupt).');
+    }
+    return { targetId: target.id, targetType: 'template', flat: JSON.parse(JSON.stringify(data.content)), data };
+  }
+  const data = await apiFetch(`/api/v1/sites/${encodeURIComponent(target.id)}`);
   if (!data.content || typeof data.content !== 'object') {
     throw new Error('Site has no decoded content (empty or corrupt).');
   }
-  return { siteId, flat: JSON.parse(JSON.stringify(data.content)), data };
+  return { targetId: target.id, targetType: 'site', flat: JSON.parse(JSON.stringify(data.content)), data };
 }
 
 /**
- * Helper: PUT site content back to API.
+ * Helper: save content for the active target (site or template).
  */
-async function saveSite(siteId, flat, extra = {}) {
+async function saveForTarget(targetId, targetType, flat, extra = {}) {
+  if (targetType === 'template') {
+    const body = { content: flat, ...extra };
+    const put = await apiFetch(`/api/v1/templates/${encodeURIComponent(targetId)}`, { method: 'PUT', body });
+    return { id: put.slug || targetId, url: null, type: 'template' };
+  }
   const body = { content: flat, ...extra };
-  const put = await apiFetch(`/api/v1/sites/${encodeURIComponent(siteId)}`, { method: 'PUT', body });
-  return { id: put.id, url: getEditorUrl(put.id) };
+  const put = await apiFetch(`/api/v1/sites/${encodeURIComponent(targetId)}`, { method: 'PUT', body });
+  return { id: put.id, url: getEditorUrl(put.id), type: 'site' };
+}
+
+function resultLabel(result) {
+  if (result.type === 'template') return `Template "${result.id}" updated.`;
+  return `Editor: ${result.url}`;
 }
 
 /**
@@ -51,17 +68,16 @@ async function loadTemplateIndex() {
   return idx;
 }
 
-async function tbFromSite(args) {
+async function tbFromTarget(args) {
   const TemplateBuilder = getTemplateBuilder();
-  const { siteId, flat } = await fetchSite(args);
-  const tb = TemplateBuilder.fromNodes(flat, getProjectDir(), { slug: siteId });
-  return { siteId, tb };
+  const { targetId, targetType, flat } = await fetchForTarget(args);
+  const tb = TemplateBuilder.fromNodes(flat, getProjectDir(), { slug: targetId });
+  return { targetId, targetType, tb };
 }
 
 module.exports = {
   async create_template(args) {
     const TemplateBuilder = getTemplateBuilder();
-    // Build empty template from acme base in memory
     const tb = TemplateBuilder.fromAcme(getProjectDir(), {
       slug: args.slug || 'new-site',
       title: args.title || 'New Template',
@@ -81,6 +97,7 @@ module.exports = {
       },
     });
     config.activeSite = { id: data.id, name: data.name, draftId: data.draftId };
+    config.activeTemplate = null;
     return {
       content: [{
         type: 'text',
@@ -91,18 +108,17 @@ module.exports = {
 
   async set_theme(args) {
     const TemplateBuilder = getTemplateBuilder();
-    const { id, preset, palette, styleGuide, fonts, jsonLd } = args;
+    const { preset, palette, styleGuide, fonts, jsonLd } = args;
 
-    let siteId, tb;
-    // If no existing site, create from acme base
-    const targetId = id || config.activeSite?.id;
-    if (!targetId) {
-      // Create new site first
+    // If no existing target, create from acme base
+    let hasTarget;
+    try { getActiveTarget(args); hasTarget = true; } catch { hasTarget = false; }
+    if (!hasTarget) {
       const result = await module.exports.create_template(args);
       return result;
     }
 
-    ({ siteId, tb } = await tbFromSite({ id: targetId }));
+    const { targetId, targetType, tb } = await tbFromTarget(args);
 
     let resolvedPalette = parseMaybeJson(palette);
     let resolvedStyleGuide = parseMaybeJson(styleGuide);
@@ -123,15 +139,14 @@ module.exports = {
       jsonLd: parseMaybeJson(jsonLd),
     });
 
-    const result = await saveSite(siteId, tb.nodes);
+    const result = await saveForTarget(targetId, targetType, tb.nodes);
     const presetMsg = preset ? ` (preset: ${preset})` : '';
-    return { content: [{ type: 'text', text: `Theme saved${presetMsg}.\nEditor: ${result.url}` }] };
+    return { content: [{ type: 'text', text: `Theme saved${presetMsg}.\n${resultLabel(result)}` }] };
   },
 
   async add_section(args) {
     const { templateId, contentOverrides, propOverrides, position, pageId } = args;
-    const { siteId, tb } = await tbFromSite(args);
-    // Load component structures from API so TemplateBuilder can find them
+    const { targetId, targetType, tb } = await tbFromTarget(args);
     const templateIndex = await loadTemplateIndex();
     tb.setTemplateIndex(templateIndex);
     tb.addSection(templateId, {
@@ -140,13 +155,13 @@ module.exports = {
       position,
       pageId,
     });
-    const result = await saveSite(siteId, tb.nodes);
-    return { content: [{ type: 'text', text: `Section ${templateId} added.\nEditor: ${result.url}` }] };
+    const result = await saveForTarget(targetId, targetType, tb.nodes);
+    return { content: [{ type: 'text', text: `Section ${templateId} added.\n${resultLabel(result)}` }] };
   },
 
   async add_custom_section(args) {
     const { sectionRootId, nodes, parentNodeId, position } = args;
-    const { siteId, tb } = await tbFromSite(args);
+    const { targetId, targetType, tb } = await tbFromTarget(args);
     const nodeMap = parseMaybeJson(nodes);
     if (!nodeMap || typeof nodeMap !== 'object') throw new Error('nodes must be an object map');
     const allImgUrls = collectAllImageUrls(nodeMap);
@@ -161,28 +176,28 @@ module.exports = {
       }
     }
     tb.addCustomSection(sectionRootId, nodeMap, { parentNodeId, position });
-    const result = await saveSite(siteId, tb.nodes);
-    return { content: [{ type: 'text', text: `Custom section ${sectionRootId} added. (${allImgUrls.length} image URLs validated)\nEditor: ${result.url}` }] };
+    const result = await saveForTarget(targetId, targetType, tb.nodes);
+    return { content: [{ type: 'text', text: `Custom section ${sectionRootId} added. (${allImgUrls.length} image URLs validated)\n${resultLabel(result)}` }] };
   },
 
   async set_nav(args) {
     const { menuId, menuTitle, logoText, logoFont, headerBg, headerColor, links, phone } = args;
-    const { siteId, tb } = await tbFromSite(args);
+    const { targetId, targetType, tb } = await tbFromTarget(args);
     tb.setNav({
       menuId, menuTitle, logoText, logoFont, headerBg, headerColor,
       links: parseMaybeJson(links) || [],
       phone: parseMaybeJson(phone),
     });
-    const result = await saveSite(siteId, tb.nodes);
-    return { content: [{ type: 'text', text: `Nav updated.\nEditor: ${result.url}` }] };
+    const result = await saveForTarget(targetId, targetType, tb.nodes);
+    return { content: [{ type: 'text', text: `Nav updated.\n${resultLabel(result)}` }] };
   },
 
   async set_footer(args) {
     const { contentBackground, contentColor, copyrightHtml, copyrightTagName, copyrightRootColor } = args;
-    const { siteId, tb } = await tbFromSite(args);
+    const { targetId, targetType, tb } = await tbFromTarget(args);
     tb.setFooter({ contentBackground, contentColor, copyrightHtml, copyrightTagName, copyrightRootColor });
-    const result = await saveSite(siteId, tb.nodes);
-    return { content: [{ type: 'text', text: `Footer updated.\nEditor: ${result.url}` }] };
+    const result = await saveForTarget(targetId, targetType, tb.nodes);
+    return { content: [{ type: 'text', text: `Footer updated.\n${resultLabel(result)}` }] };
   },
 
   // Node-level tools — delegated to mcp-core
