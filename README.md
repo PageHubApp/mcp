@@ -13,7 +13,7 @@ Zero install. Add the URL to your MCP client config — authentication is handle
 ```json
 {
   "mcpServers": {
-    "pagehub": {
+    "PageHub": {
       "url": "https://pagehub.dev/api/mcp"
     }
   }
@@ -27,7 +27,7 @@ Your MCP client opens a browser, you sign in or register, and you're done.
 ```json
 {
   "mcpServers": {
-    "pagehub": {
+    "PageHub": {
       "command": "npx",
       "args": ["-y", "@pagehub/mcp"],
       "env": {
