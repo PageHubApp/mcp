@@ -1,0 +1,276 @@
+# @pagehub/mcp
+
+MCP server that lets AI assistants build, theme, and deploy complete websites on [PageHub](https://pagehub.dev).
+
+Works with Claude Desktop, Cursor, VS Code, and any MCP-compatible client.
+
+## Quick Start
+
+### Remote (Recommended)
+
+Zero install. Add the URL to your MCP client config — authentication is handled automatically via OAuth:
+
+```json
+{
+  "mcpServers": {
+    "pagehub": {
+      "url": "https://pagehub.dev/api/mcp"
+    }
+  }
+}
+```
+
+Your MCP client opens a browser, you sign in or register, and you're done.
+
+### Local (stdio)
+
+```json
+{
+  "mcpServers": {
+    "pagehub": {
+      "command": "npx",
+      "args": ["-y", "@pagehub/mcp"],
+      "env": {
+        "PAGEHUB_API_KEY": "ph_your_key_here"
+      }
+    }
+  }
+}
+```
+
+Get your API key from [pagehub.dev/dashboard](https://pagehub.dev/dashboard), or let the AI register for you automatically — the `register` tool creates a free account and returns a key.
+
+### From Source
+
+```bash
+git clone https://github.com/PageHubJS/mcp.git
+cd mcp
+npm install
+npm start
+```
+
+## Requirements
+
+- **Node.js 18+** (stdio mode only)
+
+## Configuration
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `PAGEHUB_API_KEY` | Yes | API key from [pagehub.dev/dashboard](https://pagehub.dev/dashboard) |
+| `PAGEHUB_API_BASE_URL` | No | API base URL (default: `https://pagehub.dev`) |
+| `PAGEHUB_PROJECT_DIR` | No | Path to pagehub.dev repo root (for local template building) |
+
+All configuration is passed via environment variables in the `env` block of your MCP client config. No config files are written to your project.
+
+## Tools
+
+### Discovery
+
+| Tool | Description |
+|------|-------------|
+| `list_sections` | Browse pre-built section templates with visual descriptions and overridable displayNames |
+| `get_component_schema` | CraftJS component types and props reference (Container, Text, Image, Button, Form, etc.) |
+| `get_style_reference` | Palette CSS variables, styleGuide tokens, layout prop keys, responsive patterns |
+| `get_design_patterns` | Concrete node structure recipes for rich layouts (see [Design Patterns](#design-patterns)) |
+| `list_presets` | Curated theme presets by mood (see [Theme Presets](#theme-presets)) |
+
+### Template Building
+
+| Tool | Description |
+|------|-------------|
+| `create_template` | Scaffold a new template from the acme base |
+| `set_theme` | Configure palette, fonts, spacing, JSON-LD — supports loading a preset as base |
+| `add_section` | Add a pre-built section with content/prop overrides |
+| `add_custom_section` | Add a hand-crafted CraftJS node map (validates image URLs) |
+| `set_nav` | Configure header navigation, logo, and auto-generated mobile menu |
+| `set_footer` | Configure footer background, text color, and copyright |
+| `update_node` | Patch a single node's props/mobile/root (validates image URLs) |
+| `insert_node` | Add a new node to an existing parent (validates image URLs) |
+| `delete_node` | Remove a node and descendants (protects structural nodes) |
+| `set_integrations` | Configure analytics/tracking (GA4, GTM, Search Console, Meta Pixel) — just pass the ID |
+| `set_redirects` | Configure 301/302 redirect rules for SEO (old path → new path) |
+
+### Section Library
+
+| Tool | Description |
+|------|-------------|
+| `list_example_sections` | List sections in an existing site by page |
+| `extract_section` | Convert a section to reusable template format (with optional templatize) |
+| `shuffle_section` | Swap a section for another template in the same category, preserving content |
+| `save_as_section_template` | Save extracted section as a new reusable template with metadata |
+
+### Remote API
+
+| Tool | Description |
+|------|-------------|
+| `register` | Create a free account — returns an API key automatically |
+| `list_templates` / `pull_template` | Browse and download stock templates from the API |
+| `list_sites` / `select_site` | List tenant's sites and set active site context |
+| `pull_site` / `save_site` / `delete_site` | Site CRUD |
+| `upload_image` | Upload to tenant CDN (validates MIME type) |
+| `patch_site_node` | Edit a single node on a live site |
+| `patch_site_bulk` | Apply multiple node patches atomically (race-condition safe — GET/PATCH/PUT in one operation) |
+
+### Pages
+
+| Tool | Description |
+|------|-------------|
+| `list_pages` | List all pages in a site with flags (home, 404, hidden) |
+| `add_page` | Create a new page with SEO props and auto-positioning |
+| `update_page` | Update page name, home/404/hidden flags, and SEO metadata |
+| `delete_page` | Remove a page and descendants (auto-promotes new home page) |
+
+### Components
+
+| Tool | Description |
+|------|-------------|
+| `list_components` | Search the component library with filters (category, tags, source) |
+| `get_component` | Get full component structure by slug |
+| `save_component` | Save a new component to the library |
+| `update_component` | Update component metadata or structure |
+| `delete_component` | Remove a component from the library |
+
+### Portal
+
+| Tool | Description |
+|------|-------------|
+| `set_portal` | Enable a portal on a site |
+| `get_portal` | Get portal configuration |
+| `remove_portal` | Disable and remove portal |
+
+### AI
+
+| Tool | Description |
+|------|-------------|
+| `generate_image` | Generate an image with AI, upload to CDN, and optionally apply to a node |
+| `generate_copy` | Generate or improve text copy with site context and tone awareness |
+
+### Auditing
+
+| Tool | Description |
+|------|-------------|
+| `audit_accessibility` | WCAG audit using axe-core (see [Accessibility Audit](#accessibility-audit)) |
+| `audit_seo` | SEO audit — meta tags, heading hierarchy, image alt text, content depth |
+
+## Key Features
+
+### Theme Presets
+
+Curated presets bundling palette (12 colors), Google Fonts, and styleGuide tokens (spacing, radius, input styling). Filter by mood keyword:
+
+```
+list_presets()              → all presets
+list_presets(mood: "warm")  → warm-toned presets
+list_presets(mood: "dark")  → dark-themed presets
+```
+
+Use a preset as a base in `set_theme`, then override individual values:
+
+```
+set_theme(preset: "warm-editorial", palette: [...overrides])
+```
+
+Every preset includes input styling tokens (`inputBorderColor`, `inputBorderRadius`, etc.) so forms render correctly out of the box.
+
+### Design Patterns
+
+Production-ready node structure recipes for layouts that pre-built templates don't cover:
+
+| Pattern | Description |
+|---------|-------------|
+| `bento-gallery` | Asymmetric photo grid (2x2 with one tall image) |
+| `rich-contact` | Hours + address + map + multi-field form |
+| `quote-testimonials` | Star ratings + quote cards in a grid |
+| `offering-list` | Menu/service list with title, description, optional price |
+| `split-feature` | Text left + image right (or reversed), with eyebrow label |
+| `multi-column-footer` | 3-4 column footer with nav links, contact, social |
+| `horizontal-scroller` | Horizontal scroll strip of tags/categories |
+
+Each pattern returns a complete flat node map ready for `add_custom_section`.
+
+### Image Validation
+
+`add_custom_section`, `update_node`, and `insert_node` validate all image URLs before writing. A HEAD request is sent with an 8-second timeout. If any URL returns a non-200 status or times out, the operation is blocked with a detailed error listing each failed URL and its status.
+
+This prevents broken images from being saved into templates.
+
+### Concurrency Safety
+
+File write operations (`update_node`, `delete_node`, `insert_node`) are serialized through a mutex to prevent concurrent writes from corrupting template JSON files. `patch_site_bulk` uses atomic GET/PATCH/PUT to prevent race conditions on live sites.
+
+### Accessibility Audit
+
+WCAG compliance auditing with two engines:
+
+| Engine | When Used | Capabilities |
+|--------|-----------|-------------|
+| **Playwright + axe-core** | When `playwright-core` and `@axe-core/playwright` are installed | Full audit: contrast ratios, CSS evaluation, real browser rendering |
+| **jsdom + axe-core** | Fallback when Playwright unavailable | Structural audit only: heading hierarchy, form labels, ARIA — no contrast/CSS checks |
+
+Supports WCAG levels A, AA (default), and AAA. Results are grouped by severity (critical, serious, moderate, minor) with HTML snippets and fix suggestions.
+
+```bash
+# For full audits including contrast checks, install Playwright:
+npm install playwright-core @axe-core/playwright
+npx playwright install chromium
+```
+
+### Site Integrations & Redirects
+
+**Integrations** — analytics and site verification via simple ID fields, rendered as proper `<script>`/`<meta>` tags on published pages.
+
+| Provider | ID Format | What it renders |
+|----------|-----------|-----------------|
+| Google Analytics (GA4) | `G-XXXXXXXXXX` | gtag.js + config script |
+| Google Tag Manager | `GTM-XXXXXXX` | GTM container script |
+| Google Search Console | verification code | `<meta name="google-site-verification">` |
+| Meta Pixel (Facebook) | pixel ID | fbevents.js + init/PageView |
+
+**Redirects** — server-side 301/302 redirect rules evaluated before page rendering.
+
+```
+set_redirects(redirects: [
+  { from: "/old-page", to: "/new-page", permanent: true },
+  { from: "/temp", to: "/promo", permanent: false }
+])
+```
+
+### Authentication
+
+**Remote** — OAuth 2.1. Your MCP client opens a browser, you sign in or register, token is stored automatically. Zero configuration.
+
+**Local (stdio)** — Set `PAGEHUB_API_KEY` in the `env` block of your MCP client config. Get your key from [pagehub.dev/dashboard](https://pagehub.dev/dashboard), or use the `register` tool to create a free account automatically.
+
+No config files are written to your project.
+
+## Agent Instructions
+
+See [AGENT.md](./AGENT.md) for detailed tool usage rules and design guidelines.
+
+## Project Structure
+
+```
+index.js              Entry point (shebang)
+src/
+  server.js           MCP server setup and request routing
+  config.js           Project detection, config persistence, API client
+  helpers.js          Mutex, JSON parsing, image validation, node patching
+  tools.js            Tool schema loading from mcp-core
+  handlers/
+    discovery.js      Schema, style reference, design patterns, presets
+    local.js          Template building (create, theme, sections, nav, footer, nodes)
+    sections.js       Section library (list, extract, shuffle, save)
+    remote.js         API tools (register, sites, templates, upload)
+    pages.js          Page CRUD (list, add, update, delete)
+    components.js     Component library (list, get, save, update, delete)
+    portal.js         Portal configuration
+    ai.js             AI image generation and copy writing
+    accessibility.js  WCAG audit (Playwright + jsdom fallback)
+    seo.js            SEO audit (meta, headings, images, content)
+    patterns.js       Design pattern node maps
+```
+
+## License
+
+MIT
