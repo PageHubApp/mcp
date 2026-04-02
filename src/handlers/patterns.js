@@ -1,5 +1,5 @@
 /**
- * Design pattern node maps — concrete CraftJS recipes for add_custom_section.
+ * Design pattern node maps — concrete CraftJS recipes for add_custom_block.
  * Each pattern is { description, usage, nodes }.
  */
 

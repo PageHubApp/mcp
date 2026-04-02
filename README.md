@@ -69,7 +69,7 @@ All configuration is passed via environment variables in the `env` block of your
 
 | Tool | Description |
 |------|-------------|
-| `list_sections` | Browse pre-built section templates with visual descriptions and overridable displayNames |
+| `list_blocks` | Browse pre-built block templates with visual descriptions and overridable displayNames |
 | `get_component_schema` | CraftJS component types and props reference (Container, Text, Image, Button, Form, etc.) |
 | `get_style_reference` | Palette CSS variables, styleGuide tokens, layout prop keys, responsive patterns |
 | `get_design_patterns` | Concrete node structure recipes for rich layouts (see [Design Patterns](#design-patterns)) |
@@ -81,8 +81,8 @@ All configuration is passed via environment variables in the `env` block of your
 |------|-------------|
 | `create_template` | Scaffold a new template from the acme base |
 | `set_theme` | Configure palette, fonts, spacing, JSON-LD — supports loading a preset as base |
-| `add_section` | Add a pre-built section with content/prop overrides |
-| `add_custom_section` | Add a hand-crafted CraftJS node map (validates image URLs) |
+| `add_block` | Add a pre-built block with content/prop overrides |
+| `add_custom_block` | Add a hand-crafted CraftJS node map (validates image URLs) |
 | `set_nav` | Configure header navigation, logo, and auto-generated mobile menu |
 | `set_footer` | Configure footer background, text color, and copyright |
 | `update_node` | Patch a single node's props/mobile/root (validates image URLs) |
@@ -91,14 +91,14 @@ All configuration is passed via environment variables in the `env` block of your
 | `set_integrations` | Configure analytics/tracking (GA4, GTM, Search Console, Meta Pixel) — just pass the ID |
 | `set_redirects` | Configure 301/302 redirect rules for SEO (old path → new path) |
 
-### Section Library
+### Block Library
 
 | Tool | Description |
 |------|-------------|
-| `list_example_sections` | List sections in an existing site by page |
-| `extract_section` | Convert a section to reusable template format (with optional templatize) |
-| `shuffle_section` | Swap a section for another template in the same category, preserving content |
-| `save_as_section_template` | Save extracted section as a new reusable template with metadata |
+| `list_example_blocks` | List blocks in an existing site by page |
+| `extract_block` | Convert a block to reusable template format (with optional templatize) |
+| `shuffle_block` | Swap a block for another template in the same category, preserving content |
+| `save_as_block_template` | Save extracted block as a new reusable template with metadata |
 
 ### Remote API
 
@@ -121,15 +121,15 @@ All configuration is passed via environment variables in the `env` block of your
 | `update_page` | Update page name, home/404/hidden flags, and SEO metadata |
 | `delete_page` | Remove a page and descendants (auto-promotes new home page) |
 
-### Components
+### Blocks
 
 | Tool | Description |
 |------|-------------|
-| `list_components` | Search the component library with filters (category, tags, source) |
-| `get_component` | Get full component structure by slug |
-| `save_component` | Save a new component to the library |
-| `update_component` | Update component metadata or structure |
-| `delete_component` | Remove a component from the library |
+| `search_blocks` | Search the block library with filters (category, tags, source) |
+| `get_block` | Get full block structure by slug |
+| `save_block` | Save a new block to the library |
+| `update_block` | Update block metadata or structure |
+| `delete_block` | Remove a block from the library |
 
 ### Portal
 
@@ -187,11 +187,11 @@ Production-ready node structure recipes for layouts that pre-built templates don
 | `multi-column-footer` | 3-4 column footer with nav links, contact, social |
 | `horizontal-scroller` | Horizontal scroll strip of tags/categories |
 
-Each pattern returns a complete flat node map ready for `add_custom_section`.
+Each pattern returns a complete flat node map ready for `add_custom_block`.
 
 ### Image Validation
 
-`add_custom_section`, `update_node`, and `insert_node` validate all image URLs before writing. A HEAD request is sent with an 8-second timeout. If any URL returns a non-200 status or times out, the operation is blocked with a detailed error listing each failed URL and its status.
+`add_custom_block`, `update_node`, and `insert_node` validate all image URLs before writing. A HEAD request is sent with an 8-second timeout. If any URL returns a non-200 status or times out, the operation is blocked with a detailed error listing each failed URL and its status.
 
 This prevents broken images from being saved into templates.
 
@@ -259,11 +259,11 @@ src/
   tools.js            Tool schema loading from mcp-core
   handlers/
     discovery.js      Schema, style reference, design patterns, presets
-    local.js          Template building (create, theme, sections, nav, footer, nodes)
-    sections.js       Section library (list, extract, shuffle, save)
+    local.js          Template building (create, theme, blocks, nav, footer, nodes)
+    sections.js       Block library (list, extract, shuffle, save)
     remote.js         API tools (register, sites, templates, upload)
     pages.js          Page CRUD (list, add, update, delete)
-    components.js     Component library (list, get, save, update, delete)
+    components.js     Block library (search, get, save, update, delete)
     portal.js         Portal configuration
     ai.js             AI image generation and copy writing
     accessibility.js  WCAG audit (Playwright + jsdom fallback)

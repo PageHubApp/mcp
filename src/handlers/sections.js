@@ -64,7 +64,7 @@ function extractContentMap(nodes, rootId) {
 }
 
 module.exports = {
-  async list_example_sections(args) {
+  async list_example_blocks(args) {
     const TemplateBuilder = getTemplateBuilder();
     const target = getActiveTarget(args);
     const fetchUrl = target.type === 'template'
@@ -75,7 +75,7 @@ module.exports = {
     const nodes = data.content;
     const sections = TemplateBuilder.listSections(nodes, args.pageId);
     if (sections.length === 0) {
-      return { content: [{ type: 'text', text: `No sections found. The page container may be empty.` }] };
+      return { content: [{ type: 'text', text: `No blocks found. The page container may be empty.` }] };
     }
     const lines = sections.map((s, i) =>
       `${i + 1}. **${s.id}** — "${s.displayName}" (${s.type}, ${s.childCount} descendants)`
@@ -84,12 +84,12 @@ module.exports = {
     return {
       content: [{
         type: 'text',
-        text: `# Sections in ${label}\n\nUse these IDs with extract_section(sectionRootId).\n\n${lines.join('\n')}`,
+        text: `# Blocks in ${label}\n\nUse these IDs with extract_block(sectionRootId).\n\n${lines.join('\n')}`,
       }],
     };
   },
 
-  async extract_section(args) {
+  async extract_block(args) {
     const TemplateBuilder = getTemplateBuilder();
     const { sectionRootId, templatize } = args;
     const target = getActiveTarget(args);
@@ -103,12 +103,12 @@ module.exports = {
     return {
       content: [{
         type: 'text',
-        text: `# Extracted Section: ${sectionRootId}\n\nPass this structure to save_as_section_template to save it as a reusable template.\n\n\`\`\`json\n${JSON.stringify(structure, null, 2)}\n\`\`\``,
+        text: `# Extracted Block: ${sectionRootId}\n\nPass this structure to save_as_block_template to save it as a reusable template.\n\n\`\`\`json\n${JSON.stringify(structure, null, 2)}\n\`\`\``,
       }],
     };
   },
 
-  async shuffle_section(args) {
+  async shuffle_block(args) {
     const TemplateBuilder = getTemplateBuilder();
     const { sectionRootId, targetTemplateId, pageId } = args;
     const target = getActiveTarget(args);
@@ -146,9 +146,9 @@ module.exports = {
 
     if (!categoryId) {
       throw new Error(
-        `Could not identify the template category for section "${sectionRootId}". ` +
-        `This section may have been created via add_custom_section or manual editing. ` +
-        `Tip: use list_sections to browse categories, then delete_node + add_section manually.`
+        `Could not identify the template category for block "${sectionRootId}". ` +
+        `This block may have been created via add_custom_block or manual editing. ` +
+        `Tip: use list_blocks to browse categories, then delete_node + add_block manually.`
       );
     }
 
@@ -210,7 +210,7 @@ module.exports = {
     };
   },
 
-  async save_as_section_template(args) {
+  async save_as_block_template(args) {
     const { category, templateId, name: tplName, visual, tags, structure } = args;
 
     const resolvedStructure = parseMaybeJson(structure) || structure;
@@ -234,7 +234,7 @@ module.exports = {
     return {
       content: [{
         type: 'text',
-        text: `Template "${templateId}" saved as component (category: ${category}). Use add_section(templateId: "${templateId}") to use it.`,
+        text: `Template "${templateId}" saved as block (category: ${category}). Use add_block(templateId: "${templateId}") to use it.`,
       }],
     };
   },

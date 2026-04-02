@@ -101,7 +101,7 @@ module.exports = {
     return {
       content: [{
         type: 'text',
-        text: `Site created: ${data.id}\nEditor: ${getEditorUrl(data.id)}\nPreview: ${data.staticUrl}\n\nAuto-selected as active site. Next: set_theme, then add_section.`,
+        text: `Site created: ${data.id}\nEditor: ${getEditorUrl(data.id)}\nPreview: ${data.staticUrl}\n\nAuto-selected as active site. Next: set_theme, then add_block.`,
       }],
     };
   },
@@ -144,7 +144,7 @@ module.exports = {
     return { content: [{ type: 'text', text: `Theme saved${presetMsg}.\n${resultLabel(result)}` }] };
   },
 
-  async add_section(args) {
+  async add_block(args) {
     const { templateId, contentOverrides, propOverrides, position, pageId } = args;
     const { targetId, targetType, tb } = await tbFromTarget(args);
     const templateIndex = await loadTemplateIndex();
@@ -156,10 +156,10 @@ module.exports = {
       pageId,
     });
     const result = await saveForTarget(targetId, targetType, tb.nodes);
-    return { content: [{ type: 'text', text: `Section ${templateId} added.\n${resultLabel(result)}` }] };
+    return { content: [{ type: 'text', text: `Block ${templateId} added.\n${resultLabel(result)}` }] };
   },
 
-  async add_custom_section(args) {
+  async add_custom_block(args) {
     const { sectionRootId, nodes, parentNodeId, position } = args;
     const { targetId, targetType, tb } = await tbFromTarget(args);
     const nodeMap = parseMaybeJson(nodes);

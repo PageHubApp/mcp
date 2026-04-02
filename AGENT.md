@@ -1,12 +1,12 @@
 # PageHub MCP — Agent Rules
 
-You are building websites through the PageHub MCP server. Your output must be **production-quality** — not wireframes, not "technically correct," but sites that look like they were designed by a professional. If a section looks generic or unfinished, you failed. Build custom sections rather than forcing pre-built templates that don't fit.
+You are building websites through the PageHub MCP server. Your output must be **production-quality** — not wireframes, not "technically correct," but sites that look like they were designed by a professional. If a block looks generic or unfinished, you failed. Build custom blocks rather than forcing pre-built templates that don't fit.
 
 ## Quick Start
 
 Before building anything, call these discovery tools:
 
-1. **`list_sections`** — see pre-built section templates with visual descriptions
+1. **`list_blocks`** — see pre-built block templates with visual descriptions
 2. **`get_component_schema`** — learn component types and their props
 3. **`get_style_reference`** — palette variables, layout props, styling rules
 4. **`list_presets`** — curated theme presets by mood
@@ -17,7 +17,7 @@ Before building anything, call these discovery tools:
 ```
 1. create_template(slug)             → scaffold empty template
 2. set_theme(slug, preset, ...)      → set colors, fonts, spacing
-3. add_section / add_custom_section  → (repeat for each section)
+3. add_block / add_custom_block  → (repeat for each block)
 4. set_nav(slug, ...)                → header navigation + mobile menu
 5. set_footer(slug, ...)             → footer text and colors
 6. set_integrations(...)             → GA4, GTM, Search Console, Meta Pixel
@@ -50,7 +50,7 @@ Patterns provide battle-tested node structures for complex layouts. Always check
 1. get_design_patterns()                          → list all 7 patterns
 2. get_design_patterns(pattern: "rich-contact")   → get specific recipe
 3. Copy the node map, change IDs and content
-4. add_custom_section(slug, sectionRootId, nodes) → add to template
+4. add_custom_block(slug, sectionRootId, nodes) → add to template
 ```
 
 | Pattern | When to use |
@@ -300,13 +300,13 @@ The renderer combines the overlay gradient and image into a single CSS `backgrou
 - **Alt text is required** on every image. It should describe what's in the image, not be generic ("image 1").
 - **Image type:** Use `"type": "url"` for external URLs. Only use `"type": "cdn"` for uploaded media IDs.
 
-**Automatic URL validation:** `add_custom_section`, `update_node`, and `insert_node` send a HEAD request to every image URL before writing. The timeout is 8 seconds. If any URL fails (non-200 status or timeout), the entire operation is **blocked** — you'll get an error listing each bad URL and its status. Fix the URLs and retry.
+**Automatic URL validation:** `add_custom_block`, `update_node`, and `insert_node` send a HEAD request to every image URL before writing. The timeout is 8 seconds. If any URL fails (non-200 status or timeout), the entire operation is **blocked** — you'll get an error listing each bad URL and its status. Fix the URLs and retry.
 
 **What's validated:**
 - `Image` component `content` prop (when `type: "url"` or URL starts with `http`)
 - `backgroundImage` props on any node
 
-**Not validated:** `add_section` does NOT validate image URLs passed via `contentOverrides`. If you need guaranteed validation, use `add_custom_section` instead.
+**Not validated:** `add_block` does NOT validate image URLs passed via `contentOverrides`. If you need guaranteed validation, use `add_custom_block` instead.
 
 ### 8. Color Usage
 
@@ -396,24 +396,24 @@ Results are grouped by severity (critical → serious → moderate → minor) wi
 
 ---
 
-## Section Building — Pre-built vs Custom
+## Block Building — Pre-built vs Custom
 
 ### Decision Tree
 
-For EVERY section, follow this process:
+For EVERY block, follow this process:
 
-1. Call `list_sections` — does a template **actually match** the layout?
+1. Call `list_blocks` — does a template **actually match** the layout?
    - Match the VISUAL DESCRIPTION, not just the name
    - "Kinda close" = NOT a match
 2. Call `get_design_patterns` — is there a recipe for this layout type?
-   - YES → use the recipe with `add_custom_section`
-3. Call `list_example_sections` on decoded examples — similar section in an existing site?
-   - YES → `extract_section` → adapt → `add_custom_section`
-4. None of the above? Build from scratch with `add_custom_section` using the component schema
+   - YES → use the recipe with `add_custom_block`
+3. Call `list_example_blocks` on decoded examples — similar block in an existing site?
+   - YES → `extract_block` → adapt → `add_custom_block`
+4. None of the above? Build from scratch with `add_custom_block` using the component schema
 
 ### The Golden Rule
 
-**Default to `add_custom_section`.** Pre-built templates are shortcuts for common patterns. If the design has any complexity — split layouts, image grids, mixed content, forms with multiple fields — build it custom. It takes slightly longer but the output is 10x better than forcing a generic template.
+**Default to `add_custom_block`.** Pre-built templates are shortcuts for common patterns. If the design has any complexity — split layouts, image grids, mixed content, forms with multiple fields — build it custom. It takes slightly longer but the output is 10x better than forcing a generic template.
 
 ### Anti-Patterns — NEVER DO THESE
 
@@ -424,7 +424,7 @@ For EVERY section, follow this process:
 | Using `optin-1` for contact form | Single email field ≠ multi-field form | Build custom with Form + multiple FormElements |
 | Using `texts-1` for anything complex | It's literally just a centered heading + paragraph | Build custom |
 | Forcing ANY pre-built template when it doesn't match | Generic output, broken proportions | Always build custom when no template fits |
-| Making every section centered text | Page looks like a PowerPoint slide | Use split layouts, left-aligned text, asymmetric compositions |
+| Making every block centered text | Page looks like a PowerPoint slide | Use split layouts, left-aligned text, asymmetric compositions |
 
 ---
 
@@ -652,7 +652,8 @@ Never use unicode escapes (`\u00a9`) or raw special characters in text content �
 | position | `"relative"`, `"absolute"` |
 | overflow | `"overflow-hidden"` |
 
-### Node Structure (for add_custom_section)
+### Node Structure (for add_custom_block)
+
 
 ```json
 {
@@ -772,14 +773,14 @@ Compare your output to the reference. A viewer should see the family resemblance
 ## Inspecting and Debugging
 
 - `read_template(slug)` — dump full node tree for IDs and current props
-- `list_sections()` — available templates with visual descriptions
+- `list_blocks()` — available block templates with visual descriptions
 - `list_presets(mood?)` — theme presets (18 curated, filterable by mood)
 - `get_component_schema(component?)` — component prop reference
 - `get_style_reference()` — full prop key and variable list
 - `get_design_patterns(pattern?)` — concrete node recipes for 7 rich layout types
-- `list_example_sections(slug)` — sections in decoded examples
-- `extract_section(slug, sectionRootId)` — extract for reuse
-- `save_as_section_template(...)` — save to template library
+- `list_example_blocks(slug)` — blocks in decoded examples
+- `extract_block(slug, sectionRootId)` — extract for reuse
+- `save_as_block_template(...)` — save to block library
 - `audit_accessibility(url/html)` — WCAG audit (Playwright full or jsdom structural)
 
 ### Concurrency Notes
