@@ -313,7 +313,7 @@ The renderer combines the overlay gradient and image into a single CSS `backgrou
 - **Alternate section backgrounds:** Every 2nd or 3rd section should have `bg-(--card)` to create visual rhythm. Don't make every section the same background.
 - **Dark accent bands:** Use `bg-(--primary)` with `text-(--primary-foreground)` for CTA or statement sections. These break up the page and add drama.
 - **Accent color sparingly:** Use `var(--accent)` for CTAs, badges, links, and small highlights — not large backgrounds (unless it's a CTA band).
-- **Text color matching:** Body text on default bg uses `var(--text)`. Muted/supporting text uses `var(--card-foreground)`. Text on colored backgrounds MUST use the matching `-text` variable.
+- **Text color matching:** Body text on default bg uses `var(--foreground)` / `text-(--foreground)`. Muted/supporting text uses `text-(--muted-foreground)` or `text-(--card-foreground)` on card surfaces. Text on colored backgrounds MUST use the matching `-foreground` variable (e.g. `text-(--primary-foreground)` on `bg-(--primary)`).
 
 ### 9. Section Rhythm
 
