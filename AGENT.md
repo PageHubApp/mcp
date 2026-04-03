@@ -86,7 +86,7 @@ Every page needs at least 4 levels of visual type weight. If all your text looks
 ### 2. Whitespace and Proportion
 
 - **Section padding:** Use generous vertical padding. Desktop sections should have `py-20` to `py-32`, not `py-8`. Mobile can be `py-12` to `py-20`.
-- **Content width:** Constrain content with `max-w-(--ph-content-width)` and `mx-auto`. Text blocks should be narrower: `max-w-3xl` or `max-w-2xl` for readability.
+- **Content width:** Constrain content with `max-w-(--content-width)` and `mx-auto`. Text blocks should be narrower: `max-w-3xl` or `max-w-2xl` for readability.
 - **Gap hierarchy:** Gaps between sections > gaps between content blocks > gaps between elements. Example: section py=24, content gap=12, element gap=4.
 - **Asymmetric spacing:** Not everything needs to be centered. Left-aligned text with right-side images creates visual tension. Use `items-start` and `text-left` on editorial sections.
 
@@ -94,7 +94,7 @@ Every page needs at least 4 levels of visual type weight. If all your text looks
 
 - **Always set height AND width** on images. `w-full` + `h-[400px]` or `h-[500px]` with `object-cover`. Never leave images to auto-size — they collapse or stretch.
 - **Aspect ratios:** Hero images should be tall (h-[500px] to h-[600px] desktop). Card images should be landscape (h-48 to h-64). Gallery images should vary for visual interest.
-- **Rounded corners:** Use `rounded-(--ph-border-radius)` or `rounded-lg`. Sharp-cornered images look unfinished unless the design is intentionally brutalist.
+- **Rounded corners:** Use `rounded-(--radius)` or `rounded-lg`. Sharp-cornered images look unfinished unless the design is intentionally brutalist.
 - **Shadows on images:** `shadow-lg` or `shadow-2xl` on hero/feature images adds depth. Don't put shadows on every image.
 - **Object fit:** Almost always `object-cover`. Only use `object-contain` for logos or icons.
 
@@ -104,10 +104,10 @@ Cards (feature cards, testimonial cards, pricing cards) need these properties to
 
 ```
 root: {
-  background: "bg-(--ph-alternate-background)" or "bg-(--ph-background)",
-  radius: "rounded-(--ph-border-radius)" or "rounded-lg",
+  background: "bg-(--card)" or "bg-(--background)",
+  radius: "rounded-(--radius)" or "rounded-lg",
   border: "border",
-  borderColor: "border-(--ph-alternate-background)",
+  borderColor: "border-(--card)",
   shadow: "shadow-sm" or "shadow-md"
 }
 mobile: {
@@ -127,9 +127,9 @@ Forms are the most commonly broken element. Without explicit styling, they look 
 **Buttons (especially submit):**
 ```
 root: {
-  background: "bg-(--ph-primary)",
-  color: "text-(--ph-primary-text)",
-  radius: "rounded-(--ph-border-radius)"
+  background: "bg-(--primary)",
+  color: "text-(--primary-foreground)",
+  radius: "rounded-(--radius)"
 }
 mobile: {
   width: "w-full",
@@ -171,15 +171,15 @@ mobile: {
 {
   "root": {
     "border": "border",
-    "borderWidth": "border-(--ph-input-border-width)",
+    "borderWidth": "border-(--input-border-width)",
     "borderStyle": "border-solid",
-    "borderColor": "border-(--ph-input-border-color)",
-    "radius": "rounded-(--ph-input-border-radius)",
-    "background": "bg-(--ph-input-bg-color)",
-    "color": "text-(--ph-input-text-color)"
+    "borderColor": "border-(--input-border-color)",
+    "radius": "rounded-(--input-border-radius)",
+    "background": "bg-(--input-bg-color)",
+    "color": "text-(--input-text-color)"
   },
   "mobile": {
-    "p": "p-(--ph-input-padding)",
+    "p": "p-(--input-padding)",
     "width": "w-full"
   }
 }
@@ -188,7 +188,7 @@ mobile: {
 **This is non-negotiable.** Copy this exact root/mobile block onto every FormElement node. The CSS variables pull values from the styleGuide tokens you set in `set_theme`.
 
 **Form card wrapper:** Always wrap forms in a card container with:
-- Background (`bg-(--ph-background)`)
+- Background (`bg-(--background)`)
 - Padding (`p-8` to `p-10`)
 - Border radius
 - Shadow (`shadow-md`)
@@ -200,7 +200,7 @@ Tabular data like hours, pricing rows, or stats need tight, consistent formattin
 
 - **Hours rows:** Use `flex-row` + `justify-between` with compact padding (`py-2` to `py-3`). Days should be `font-medium`, times should be muted color. Keep font size consistent (`text-sm`).
 - **NO excessive vertical spacing** on data rows. `py-2` is enough. `py-6` makes hours look like they're floating in space.
-- **Separator lines:** Use `border-b` + `border-(--ph-alternate-background)` between rows for visual structure if needed — but don't overdo it. The reference site uses clean rows without heavy dividers.
+- **Separator lines:** Use `border-b` + `border-(--card)` between rows for visual structure if needed — but don't overdo it. The reference site uses clean rows without heavy dividers.
 - **Tabular alignment:** Times/prices should align right on mobile, left with min-width on desktop.
 
 ### 7. Icons — Use Google Material Symbols, NOT Emojis
@@ -310,10 +310,10 @@ The renderer combines the overlay gradient and image into a single CSS `backgrou
 
 ### 8. Color Usage
 
-- **Alternate section backgrounds:** Every 2nd or 3rd section should have `bg-(--ph-alternate-background)` to create visual rhythm. Don't make every section the same background.
-- **Dark accent bands:** Use `bg-(--ph-primary)` with `text-(--ph-primary-text)` for CTA or statement sections. These break up the page and add drama.
-- **Accent color sparingly:** Use `var(--ph-accent)` for CTAs, badges, links, and small highlights — not large backgrounds (unless it's a CTA band).
-- **Text color matching:** Body text on default bg uses `var(--ph-text)`. Muted/supporting text uses `var(--ph-alternate-text)`. Text on colored backgrounds MUST use the matching `-text` variable.
+- **Alternate section backgrounds:** Every 2nd or 3rd section should have `bg-(--card)` to create visual rhythm. Don't make every section the same background.
+- **Dark accent bands:** Use `bg-(--primary)` with `text-(--primary-foreground)` for CTA or statement sections. These break up the page and add drama.
+- **Accent color sparingly:** Use `var(--accent)` for CTAs, badges, links, and small highlights — not large backgrounds (unless it's a CTA band).
+- **Text color matching:** Body text on default bg uses `var(--text)`. Muted/supporting text uses `var(--card-foreground)`. Text on colored backgrounds MUST use the matching `-text` variable.
 
 ### 9. Section Rhythm
 
@@ -444,7 +444,7 @@ Components can animate into view when the user scrolls to them. Set `root.animat
 ```json
 {
   "root": {
-    "background": "bg-(--ph-alternate-background)",
+    "background": "bg-(--card)",
     "animation": "spring"
   }
 }
@@ -526,14 +526,14 @@ Container "Panel Food" (id: "panel-food", tabGroup: "menu-tabs", display: hidden
 ### Colors — ALWAYS Use CSS Variables
 
 ```
-✅ "bg-(--ph-primary)"     ❌ "bg-black"
-✅ "text-(--ph-primary-text)"  ❌ "text-white"
-✅ "border-(--ph-alternate-background)"  ❌ "border-gray-200"
+✅ "bg-(--primary)"     ❌ "bg-black"
+✅ "text-(--primary-foreground)"  ❌ "text-white"
+✅ "border-(--card)"  ❌ "border-gray-200"
 ```
 
 Exception: `bg-transparent`, opacity modifiers (`bg-white/10`).
 
-Match text to background: `bg-(--ph-primary)` → `text-(--ph-primary-text)`.
+Match text to background: `bg-(--primary)` → `text-(--primary-foreground)`.
 
 ### Palette Slot Order (12 slots)
 
@@ -603,7 +603,7 @@ ftr_inner (Container, flex-col, gap-4, items-center)
   └── ftr_copyright (Text, "© {{year}} {{company.name}}", p, text-xs, muted)
 ```
 
-**Link colors:** Links in ButtonList get their color from the button's `root.color` prop. For footer links on dark backgrounds, use `text-(--ph-primary-text)`. For body links, the styleGuide `linkColor` and `linkHoverColor` tokens control `<a>` tag colors — set these in `set_theme` if the defaults don't match your palette.
+**Link colors:** Links in ButtonList get their color from the button's `root.color` prop. For footer links on dark backgrounds, use `text-(--primary-foreground)`. For body links, the styleGuide `linkColor` and `linkHoverColor` tokens control `<a>` tag colors — set these in `set_theme` if the defaults don't match your palette.
 
 ### Special Characters — Always Use HTML Entities
 
@@ -641,11 +641,11 @@ Never use unicode escapes (`\u00a9`) or raw special characters in text content �
 | display | `"flex"`, `"grid"`, `"block"`, `"none"` |
 | flexDirection | `"flex-row"`, `"flex-col"` |
 | gridCols | `"grid-cols-1"` to `"grid-cols-12"` (NOT gridTemplateColumns) |
-| gap | `"gap-4"`, `"gap-(--ph-container-gap)"` |
+| gap | `"gap-4"`, `"gap-(--container-gap)"` |
 | alignItems | `"items-start"`, `"items-center"`, `"items-end"` |
 | justifyContent | `"justify-start"`, `"justify-center"`, `"justify-between"` |
 | width | `"w-full"`, `"w-1/2"`, `"w-[75%]"` |
-| maxWidth | `"max-w-(--ph-content-width)"` |
+| maxWidth | `"max-w-(--content-width)"` |
 | height | `"h-auto"`, `"h-[400px]"` |
 | py/px/p | `"py-20"`, `"px-6"` |
 | mx | `"mx-auto"` |
@@ -662,7 +662,7 @@ Never use unicode escapes (`\u00a9`) or raw special characters in text content �
   "props": {
     "canDelete": true, "canEditName": true,
     "type": "section",
-    "root": { "background": "bg-(--ph-background)" },
+    "root": { "background": "bg-(--background)" },
     "mobile": { "display": "flex", "flexDirection": "flex-col", "width": "w-full", "py": "py-16", "px": "px-6" },
     "desktop": { "py": "py-24" },
     "custom": { "displayName": "Section Name" }
