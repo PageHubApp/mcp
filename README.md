@@ -123,12 +123,17 @@ All configuration is passed via environment variables in the `env` block of your
 
 ### Blocks
 
+**Editing existing library blocks:** prefer `list_block_nodes` then `patch_block` / `patch_block_bulk` (same patch fields as `patch_site_node`). Use `update_block` for metadata or a full `structure` replace. See repo root `BLOCKS-AI-CONTEXT.md`.
+
 | Tool | Description |
 |------|-------------|
 | `search_blocks` | Search the block library with filters (category, tags, source) |
 | `get_block` | Get full block structure by slug |
+| `list_block_nodes` | List deterministic `lib_*` node ids for patching a library block |
+| `patch_block` | Patch one node inside a library block (same fields as `patch_site_node`) |
+| `patch_block_bulk` | Patch many library block nodes in one GET/PUT |
 | `save_block` | Save a new block to the library |
-| `update_block` | Update block metadata or structure |
+| `update_block` | Update block metadata or replace full structure |
 | `delete_block` | Remove a block from the library |
 
 ### Portal
@@ -263,7 +268,7 @@ src/
     sections.js       Block library (list, extract, shuffle, save)
     remote.js         API tools (register, sites, templates, upload)
     pages.js          Page CRUD (list, add, update, delete)
-    components.js     Block library (search, get, save, update, delete)
+    components.js     Block library (search, get, list nodes, patch, save, update, delete)
     portal.js         Portal configuration
     ai.js             AI image generation and copy writing
     accessibility.js  WCAG audit (Playwright + jsdom fallback)

@@ -12,6 +12,16 @@ Before building anything, call these discovery tools:
 4. **`list_presets`** — curated theme presets by mood
 5. **`get_design_patterns`** — concrete node structure recipes for rich layouts
 
+### Editing blocks in the **library** (not on a site)
+
+The live block catalog is API-backed. **Do not edit repo seed JSON** to change what users get from `search_blocks` / `apply_kit_block`.
+
+**Preferred:** `list_block_nodes(slug)` to get **`lib_*`** ids, then **`patch_block`** or **`patch_block_bulk`** with the same patch shapes as `patch_site_node` (`propsPatch`, `mobilePatch`, `desktopPatch`, `rootPatch`, `unset*`, etc.). Use **`get_block(slug)`** when you need the full tree in context.
+
+**Fallback:** **`update_block`** for metadata-only, or a full **`structure`** replacement when a rewrite is truly whole-tree.
+
+Full policy, layering rules, and icons: **`BLOCKS-AI-CONTEXT.md`** in the repo root.
+
 ## Build Workflow
 
 ```
@@ -714,9 +724,9 @@ Study the reference and extract **specific, reusable techniques** — not generi
 | **Footer** | Column count, link grouping, dark/light, social icon placement |
 
 #### Visual depth (what creates the "wow moment")
-- Background images with gradient overlays — extract the gradient direction and opacity
+- Background images with gradient overlays — extract the gradient direction and opacity; implement with **`backgroundOverlay`** on Container (not `root.style`) for blocks/kit JSON
 - Section background alternation rhythm — map the exact sequence (white → tinted → white → dark)
-- `root.style` effects: `backdrop-filter: blur()`, `background: linear-gradient(...)`, complex shadows
+- For **library blocks / MCP structures:** no `root.style` — use `mobile`/`desktop` for layout, `root` for tokens, `className` array only for rare Tailwind-only escapes (see `BLOCKS-AI-CONTEXT.md`). For **ad-hoc editor sites**, `root.style` may still be used for effects Tailwind cannot express (`backdrop-filter`, complex shadows, etc.)
 - Card hover states, image treatments, accent color usage patterns
 
 ### Step 2: Transfer Techniques to New Context
