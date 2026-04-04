@@ -378,6 +378,7 @@ Sites MUST comply with WCAG 2.1 Level AA to avoid lawsuits under California's Un
 #### Navigation
 - Every site gets a skip navigation link automatically (built into the renderer).
 - Navigation menus use `<nav>` (Container type `"nav"`) — this happens automatically with `set_nav()`.
+- **Header blocks and MCP structures:** Prefer the **`Nav`** component (not a lone `ButtonList`) for editable desktop links + hamburger + slide overlay. It matches templates (`acme` header) and the library seed `navbar` (`packages/mcp-core/fixtures/navbar.structure.json`): `menu.id` must match the overlay `Container` `id` and hamburger `click.value`; duplicate link buttons inside the panel `ButtonList` for static/preview (omit `source` unless you have stable Craft node ids).
 
 #### Motion & Animation
 - The SDK respects `prefers-reduced-motion` automatically. No action needed, but don't rely on animation to convey essential information.
