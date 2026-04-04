@@ -104,7 +104,8 @@ Every page needs at least 4 levels of visual type weight. If all your text looks
 
 - **Always set height AND width** on images. `w-full` + `h-[400px]` or `h-[500px]` with `object-cover`. Never leave images to auto-size — they collapse or stretch.
 - **Aspect ratios:** Hero images should be tall (h-[500px] to h-[600px] desktop). Card images should be landscape (h-48 to h-64). Gallery images should vary for visual interest.
-- **Rounded corners:** Use `rounded-(--radius)` or `rounded-lg`. Sharp-cornered images look unfinished unless the design is intentionally brutalist.
+- **Rounded corners:** Use tokenized radius on surfaces (`rounded-(--radius)`, `rounded-(--card-radius)`). Sharp-cornered images look unfinished unless the design is intentionally brutalist.
+- **Image inside a rounded card or split frame:** Put **`overflow: "overflow-hidden"`** on the **parent** card Container (same node as `radius`) when the Image is full-bleed to an edge. That clips the photo to the card’s curve; otherwise you get square image corners against a rounded border.
 - **Shadows on images:** `shadow-lg` or `shadow-2xl` on hero/feature images adds depth. Don't put shadows on every image.
 - **Object fit:** Almost always `object-cover`. Only use `object-contain` for logos or icons.
 
@@ -115,7 +116,7 @@ Cards (feature cards, testimonial cards, pricing cards) need these properties to
 ```
 root: {
   background: "bg-(--card)" or "bg-(--background)",
-  radius: "rounded-(--radius)" or "rounded-lg",
+  radius: "rounded-(--card-radius)" or "rounded-(--radius)",
   border: "border",
   borderColor: "border-(--card)",
   shadow: "shadow-sm" or "shadow-md"
@@ -127,6 +128,8 @@ mobile: {
   gap: "gap-3" to "gap-4"
 }
 ```
+
+Split / full-bleed media on the card outline: add **`overflow: "overflow-hidden"`** on that same **`root`** (with **`radius`**) so the image clips to the rounded corners.
 
 **Rule:** Cards without padding, border, AND either shadow or background look like unstyled divs. Always apply all three.
 
@@ -569,11 +572,18 @@ ROOT → NO gap/padding/margin
 ### Responsive — Mobile First
 
 - `props.mobile` → base styles (all sizes)
-- `props.desktop` → `md:` prefixed (768px+)
+- `props.desktop` → `md:` prefixed (768px+). There is **no** `props` bucket for `lg:` — ClassGenerator only maps `desktop` → **`md:`**.
+- For layout that should start at **lg (1024px+)** (asymmetric image grids, split heroes, half-width columns at large screens only), put **`lg:*`** utilities on **`props.className`** (string array) on the node, and keep the base layout on `mobile` (e.g. `grid-cols-1`, `flex-col`). Otherwise `desktop.gridCols` becomes `md:grid-cols-*` and can look wrong on tablet-width viewports.
 
 ```json
 { "mobile": { "flexDirection": "flex-col", "gridCols": "grid-cols-1" },
   "desktop": { "flexDirection": "flex-row", "gridCols": "grid-cols-3" } }
+```
+
+```json
+{ "mobile": { "display": "grid", "gridCols": "grid-cols-1", "gap": "gap-4" },
+  "className": ["lg:grid-cols-4"],
+  "desktop": {} }
 ```
 
 ### Text Nodes — One Job Per Node
