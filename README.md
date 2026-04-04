@@ -253,6 +253,10 @@ No config files are written to your project.
 
 See [AGENT.md](./AGENT.md) for detailed tool usage rules and design guidelines.
 
+### Working in the `pagehub.dev` monorepo (block library + fixtures)
+
+Library **structures** in **`scripts/seed-components.js`** and **`packages/mcp-core/fixtures/*.structure.json`** are not the live MCP library until synced to the API. See the main repo’s **`BLOCKS-AI-CONTEXT.md`** and run **`node scripts/sync-library-blocks-api.js`** (`--dry-run` / `--slugs=`) with **`PAGEHUB_API_KEY`** to compare or push.
+
 ## Project Structure
 
 ```

@@ -105,7 +105,7 @@ Every page needs at least 4 levels of visual type weight. If all your text looks
 - **Always set height AND width** on images. `w-full` + `h-[400px]` or `h-[500px]` with `object-cover`. Never leave images to auto-size — they collapse or stretch.
 - **Aspect ratios:** Hero images should be tall (h-[500px] to h-[600px] desktop). Card images should be landscape (h-48 to h-64). Gallery images should vary for visual interest.
 - **Rounded corners:** Use tokenized radius on surfaces (`rounded-(--radius)`, `rounded-(--card-radius)`). Sharp-cornered images look unfinished unless the design is intentionally brutalist.
-- **Image inside a rounded card or split frame:** Put **`overflow: "overflow-hidden"`** on the **parent** card Container (same node as `radius`) when the Image is full-bleed to an edge. That clips the photo to the card’s curve; otherwise you get square image corners against a rounded border.
+- **Image inside a rounded card or split frame:** Put **`radius` on `root`** and **`overflow: "overflow-hidden"` on `mobile`** on that same Container when the image is full-bleed to an edge (overflow is a layout prop, not root). Use **`desktop.overflow`** if you need a different value from md up.
 - **Shadows on images:** `shadow-lg` or `shadow-2xl` on hero/feature images adds depth. Don't put shadows on every image.
 - **Object fit:** Almost always `object-cover`. Only use `object-contain` for logos or icons.
 
@@ -129,7 +129,7 @@ mobile: {
 }
 ```
 
-Split / full-bleed media on the card outline: add **`overflow: "overflow-hidden"`** on that same **`root`** (with **`radius`**) so the image clips to the rounded corners.
+Split / full-bleed media: **`root`** = radius (and border/shadow); **`mobile.overflow`** = `"overflow-hidden"` so the image clips. Do not put overflow on `root`.
 
 **Rule:** Cards without padding, border, AND either shadow or background look like unstyled divs. Always apply all three.
 
@@ -670,7 +670,7 @@ Never use unicode escapes (`\u00a9`) or raw special characters in text content �
 | py/px/p | `"py-20"`, `"px-6"` |
 | mx | `"mx-auto"` |
 | position | `"relative"`, `"absolute"` |
-| overflow | `"overflow-hidden"` |
+| overflow | `"overflow-hidden"`, `"overflow-auto"`, etc. — always under **`mobile` / `desktop`**, not `root` |
 
 ### Node Structure (for add_custom_block)
 
