@@ -8,6 +8,7 @@ const discoveryHandlers = require('./handlers/discovery');
 const localHandlers = require('./handlers/local');
 const sectionHandlers = require('./handlers/sections');
 const remoteHandlers = require('./handlers/remote');
+const kitHandlers = require('@pagehub/mcp-core/src/handlers/kit');
 const accessibilityHandlers = require('./handlers/accessibility');
 const portalHandlers = require('./handlers/portal');
 const componentHandlers = require('./handlers/components');
@@ -20,6 +21,7 @@ const handlers = {
   ...localHandlers,
   ...sectionHandlers,
   ...remoteHandlers,
+  ...kitHandlers,
   ...portalHandlers,
   ...accessibilityHandlers,
   ...componentHandlers,
