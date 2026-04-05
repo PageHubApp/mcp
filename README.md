@@ -85,7 +85,7 @@ All configuration is passed via environment variables in the `env` block of your
 | `add_custom_block` | Add a hand-crafted CraftJS node map (validates image URLs) |
 | `set_nav` | Configure header navigation, logo, and auto-generated mobile menu |
 | `set_footer` | Configure footer background, text color, and copyright |
-| `update_node` | Patch a single node's props/mobile/root (validates image URLs) |
+| `update_node` | Patch a single node's props (`className`, allowlisted `root`, content fields; validates image URLs) |
 | `insert_node` | Add a new node to an existing parent (validates image URLs) |
 | `delete_node` | Remove a node and descendants (protects structural nodes) |
 | `set_integrations` | Configure analytics/tracking (GA4, GTM, Search Console, Meta Pixel) — just pass the ID |
@@ -255,7 +255,7 @@ See [AGENT.md](./AGENT.md) for detailed tool usage rules and design guidelines.
 
 ### Working in the `pagehub.dev` monorepo (block library + fixtures)
 
-Library **structures** in **`scripts/seed-components.js`** and **`packages/mcp-core/fixtures/*.structure.json`** are not the live MCP library until synced to the API. See the main repo’s **`BLOCKS-AI-CONTEXT.md`** and run **`node scripts/sync-library-blocks-api.js`** (`--dry-run` / `--slugs=`) with **`PAGEHUB_API_KEY`** to compare or push.
+Library **structures** in **`scripts/seed-components.js`** and **`packages/mcp-core/fixtures/*.structure.json`** are not the live MCP library until the same rows exist in the database the API uses. See the main repo’s **`BLOCKS-AI-CONTEXT.md`** and run **`node scripts/sync-repo-to-mongo.js`** (`--dry-run` / `--slugs=`) with **`MONGODB_URI`** to compare or push directly to Mongo.
 
 ## Project Structure
 

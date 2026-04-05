@@ -703,7 +703,7 @@ Study the reference and extract **specific, reusable techniques** — not generi
 #### Visual depth (what creates the "wow moment")
 - Background images with gradient overlays — extract the gradient direction and opacity; implement with **`backgroundOverlay`** on Container (not `root.style`) for blocks/kit JSON
 - Section background alternation rhythm — map the exact sequence (white → tinted → white → dark)
-- For **library blocks / MCP structures:** no `root.style` — use `className` for all styling (layout, surface, typography). For **ad-hoc editor sites**, `root.style` may still be used for effects Tailwind cannot express (`backdrop-filter`, complex shadows, etc.)
+- **Styling model:** layout, surface, and typography use **`props.className`** only. **`props.root`** carries allowlisted non-class fields (**`ROOT_KEPT`** in `scripts/TemplateBuilder.js`): animations, patterns, presets, layout metadata, and optional **`root.style`** for CSS effects Tailwind cannot express (`backdrop-filter`, complex shadows). Do **not** use **`root.style`** for gradients over images — use **`backgroundOverlay`** or utilities in **`className`**. New **library / MCP** blocks avoid **`root.style`** unless unavoidable; prefer tokens in **`className`**.
 - Card hover states, image treatments, accent color usage patterns
 
 ### Step 2: Transfer Techniques to New Context
