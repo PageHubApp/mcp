@@ -774,3 +774,7 @@ Compare your output to the reference. A viewer should see the family resemblance
 
 - `update_node`, `delete_node`, and `insert_node` are serialized through a mutex — safe to call rapidly without race conditions on the template file.
 - `patch_site_bulk` is atomic on the API side — fetches, patches, and saves in one operation. Prefer it over multiple `patch_site_node` calls when editing several nodes at once.
+
+## pagehub.dev monorepo (when you edit the repo, not only MCP over HTTP)
+
+The main **pagehub.dev** codebase is a **pnpm** workspace: **`pnpm install`** and **`pnpm run build`** from the **repository root**; lockfile **`pnpm-lock.yaml`**. SDK source is **`packages/sdk`** (`@pagehub/sdk`). Authoritative rules for coding agents: repo root **`README.md`**, **`.cursorrules`**, **`CLAUDE.md`**, and **`packages/mcp/README.md`** (section *Working in the pagehub.dev monorepo*).

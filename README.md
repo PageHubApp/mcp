@@ -255,6 +255,8 @@ See [AGENT.md](./AGENT.md) for detailed tool usage rules and design guidelines.
 
 ### Working in the `pagehub.dev` monorepo (block library + fixtures)
 
+The main app is a **pnpm** monorepo: install and run from the **repo root** (`pnpm install`, `pnpm run build`). See root **`README.md`**, **`.cursorrules`**, and **`CLAUDE.md`** for workspace rules (`pnpm-lock.yaml`, **`@pagehub/sdk`** deps, **`verify:vercel`**, CI).
+
 Library **structures** in **`scripts/seed-components.js`** and **`packages/mcp-core/fixtures/*.structure.json`** are not the live MCP library until the same rows exist in the database the API uses. See the main repo’s **`BLOCKS-AI-CONTEXT.md`** and run **`node scripts/sync-repo-to-mongo.js`** (`--dry-run` / `--slugs=`) with **`MONGODB_URI`** to compare or push directly to Mongo.
 
 ## Project Structure
