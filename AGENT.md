@@ -16,7 +16,7 @@ Before building anything, call these discovery tools:
 
 The live block catalog is API-backed. **Do not edit repo seed JSON** to change what users get from `search_blocks` / `apply_kit_block`.
 
-**Preferred:** `list_block_nodes(slug)` to get **`lib_*`** ids, then **`patch_block`** or **`patch_block_bulk`** with the same patch shapes as `patch_site_node` (`propsPatch`, `mobilePatch`, `desktopPatch`, `rootPatch`, `unset*`, etc.). Use **`get_block(slug)`** when you need the full tree in context.
+**Preferred:** `list_block_nodes(slug)` to get **`lib_*`** ids, then **`patch_block`** or **`patch_block_bulk`** — patch fields: `propsPatch` (non-class props like text, src, alt), `classNamePatch` (className string to merge/replace), `rootPatch` (animation only), `nodesPatch`, `unsetProps`. Use **`get_block(slug)`** when you need the full tree in context.
 
 **Fallback:** **`update_block`** for metadata-only, or a full **`structure`** replacement when a rewrite is truly whole-tree.
 
@@ -105,7 +105,7 @@ Every page needs at least 4 levels of visual type weight. If all your text looks
 - **Always set height AND width** on images. `w-full` + `h-[400px]` or `h-[500px]` with `object-cover`. Never leave images to auto-size — they collapse or stretch.
 - **Aspect ratios:** Hero images should be tall (h-[500px] to h-[600px] desktop). Card images should be landscape (h-48 to h-64). Gallery images should vary for visual interest.
 - **Rounded corners:** Use tokenized radius on surfaces (`rounded-(--radius)`, `rounded-(--card-radius)`). Sharp-cornered images look unfinished unless the design is intentionally brutalist.
-- **Image inside a rounded card or split frame:** Put **`radius` on `root`** and **`overflow: "overflow-hidden"` on `mobile`** on that same Container when the image is full-bleed to an edge (overflow is a layout prop, not root). Use **`desktop.overflow`** if you need a different value from md up.
+- **Image inside a rounded card or split frame:** Include both radius token and `overflow-hidden` in className on that Container when the image is full-bleed to an edge (e.g. `"rounded-(--card-radius) overflow-hidden"`).
 - **Shadows on images:** `shadow-lg` or `shadow-2xl` on hero/feature images adds depth. Don't put shadows on every image.
 - **Object fit:** Almost always `object-cover`. Only use `object-contain` for logos or icons.
 
@@ -114,22 +114,11 @@ Every page needs at least 4 levels of visual type weight. If all your text looks
 Cards (feature cards, testimonial cards, pricing cards) need these properties to not look flat:
 
 ```
-root: {
-  background: "bg-(--card)" or "bg-(--background)",
-  radius: "rounded-(--card-radius)" or "rounded-(--radius)",
-  border: "border",
+className: "bg-(--card) text-(--card-foreground) rounded-(--card-radius) border border-(--card) shadow-sm p-6 flex flex-col gap-3"
   borderColor: "border-(--card)",
-  shadow: "shadow-sm" or "shadow-md"
-}
-mobile: {
-  p: "p-6" to "p-8",
-  display: "flex",
-  flexDirection: "flex-col",
-  gap: "gap-3" to "gap-4"
-}
 ```
 
-Split / full-bleed media: **`root`** = radius (and border/shadow); **`mobile.overflow`** = `"overflow-hidden"` so the image clips. Do not put overflow on `root`.
+Split / full-bleed media: include both radius and `overflow-hidden` in className so the image clips (e.g. `"rounded-(--card-radius) overflow-hidden border shadow-sm"`).
 
 **Rule:** Cards without padding, border, AND either shadow or background look like unstyled divs. Always apply all three.
 
@@ -139,22 +128,7 @@ Forms are the most commonly broken element. Without explicit styling, they look 
 
 **Buttons (especially submit):**
 ```
-root: {
-  background: "bg-(--primary)",
-  color: "text-(--primary-foreground)",
-  radius: "rounded-(--radius)"
-}
-mobile: {
-  width: "w-full",
-  py: "py-3.5",
-  px: "px-6",
-  fontWeight: "font-semibold",
-  fontSize: "text-sm",
-  textAlign: "text-center",
-  display: "flex",
-  justifyContent: "justify-center",
-  alignItems: "items-center"
-}
+className: "bg-(--primary) text-(--primary-foreground) rounded-(--radius) w-full py-3.5 px-6 font-semibold text-sm text-center flex justify-center items-center md:w-fit"
 ```
 
 **Rule:** Buttons MUST have: padding (py AND px), font-weight, border-radius, background + text color. A button without these looks broken. Submit buttons should be `w-full` inside forms.
@@ -178,27 +152,15 @@ mobile: {
 
 **Key rule:** The `inputBorderColor` must be **visibly different** from the surrounding background. If your card background is `#f5f0e8` (cream), don't use `#e2e8f0` (light gray) — use something with real contrast like `#b8b0a0`. Test: can you SEE the border? If you have to squint, it's too subtle.
 
-**FormElement nodes MUST include explicit root styling.** CraftJS overrides component defaults when `root: {}` is present in the JSON, so empty root = unstyled inputs. Every FormElement MUST have:
+**FormElement nodes MUST include explicit styling in className.** CraftJS overrides component defaults when props are present in the JSON, so missing styling = unstyled inputs. Every FormElement MUST have:
 
 ```json
 {
-  "root": {
-    "border": "border",
-    "borderWidth": "border-(--input-border-width)",
-    "borderStyle": "border-solid",
-    "borderColor": "border-(--input-border-color)",
-    "radius": "rounded-(--input-border-radius)",
-    "background": "bg-(--input-bg-color)",
-    "color": "text-(--input-text-color)"
-  },
-  "mobile": {
-    "p": "p-(--input-padding)",
-    "width": "w-full"
-  }
+  "className": "border border-(--input-border-width) border-solid border-(--input-border-color) rounded-(--input-border-radius) bg-(--input-bg-color) text-(--input-text-color) p-(--input-padding) w-full"
 }
 ```
 
-**This is non-negotiable.** Copy this exact root/mobile block onto every FormElement node. The CSS variables pull values from the styleGuide tokens you set in `set_theme`.
+**This is non-negotiable.** Include these classes on every FormElement node. The CSS variables pull values from the styleGuide tokens you set in `set_theme`.
 
 **Form card wrapper:** Always wrap forms in a card container with:
 - Background (`bg-(--background)`)
@@ -280,7 +242,7 @@ To layer a gradient overlay on top of a background image (e.g. dark hero with re
 {
   "backgroundImage": "https://...",
   "backgroundOverlay": "dark-left",
-  "mobile": { "backgroundSize": "bg-cover", "backgroundPosition": "bg-center", "backgroundRepeat": "bg-no-repeat" }
+  "className": "bg-cover bg-center bg-no-repeat"
 }
 ```
 
@@ -457,8 +419,8 @@ Components can animate into view when the user scrolls to them. Set `root.animat
 **Example — cards that fade in on scroll:**
 ```json
 {
+  "className": "bg-(--card) text-(--card-foreground) rounded-(--card-radius) border shadow-sm p-6",
   "root": {
-    "background": "bg-(--card)",
     "animation": "spring"
   }
 }
@@ -487,16 +449,16 @@ Buttons can show, hide, toggle, or **tab-switch** other elements by DOM ID. The 
 {
   "id": "panel-coffee",
   "tabGroup": "menu-tabs",
-  "mobile": { "display": "flex", ... }
+  "className": "flex flex-col gap-4"
 }
 ```
 
-2. Panels that start hidden use `display: "hidden"` in mobile:
+2. Panels that start hidden use `hidden` in className:
 ```json
 {
   "id": "panel-food",
   "tabGroup": "menu-tabs",
-  "mobile": { "display": "hidden", ... }
+  "className": "hidden flex-col gap-4"
 }
 ```
 
@@ -570,21 +532,19 @@ ROOT → NO gap/padding/margin
                  └─ elements → sizing
 ```
 
-### Responsive — Mobile First
+### Responsive — Mobile First (className)
 
-- `props.mobile` → base styles (all sizes)
-- `props.desktop` → `md:` prefixed (768px+). There is **no** `props` bucket for `lg:` — ClassGenerator only maps `desktop` → **`md:`**.
-- For layout that should start at **lg (1024px+)** (asymmetric image grids, split heroes, half-width columns at large screens only), put **`lg:*`** utilities on **`props.className`** (string array) on the node, and keep the base layout on `mobile` (e.g. `grid-cols-1`, `flex-col`). Otherwise `desktop.gridCols` becomes `md:grid-cols-*` and can look wrong on tablet-width viewports.
+Every node uses a single `props.className` string with all Tailwind utilities. Mobile-first:
+- Unprefixed classes = base styles (all sizes)
+- `md:` prefix = 768px+ (desktop overrides)
+- `lg:` prefix = 1024px+ (use for dense grids, split layouts that would be squeezed on tablet)
 
 ```json
-{ "mobile": { "flexDirection": "flex-col", "gridCols": "grid-cols-1" },
-  "desktop": { "flexDirection": "flex-row", "gridCols": "grid-cols-3" } }
+{ "className": "flex flex-col grid-cols-1 md:flex-row md:grid-cols-3" }
 ```
 
 ```json
-{ "mobile": { "display": "grid", "gridCols": "grid-cols-1", "gap": "gap-4" },
-  "className": ["lg:grid-cols-4"],
-  "desktop": {} }
+{ "className": "grid grid-cols-1 gap-4 lg:grid-cols-4" }
 ```
 
 ### Text Nodes — One Job Per Node
@@ -624,7 +584,7 @@ ftr_inner (Container, flex-col, gap-4, items-center)
   └── ftr_copyright (Text, "© {{year}} {{company.name}}", p, text-xs, muted)
 ```
 
-**Link colors:** Links in ButtonList get their color from the button's `root.color` prop. For footer links on dark backgrounds, use `text-(--primary-foreground)`. For body links, the styleGuide `linkColor` and `linkHoverColor` tokens control `<a>` tag colors — set these in `set_theme` if the defaults don't match your palette.
+**Link colors:** Links in ButtonList get their color from the button's text color in className. For footer links on dark backgrounds, use `text-(--primary-foreground)`. For body links, the styleGuide `linkColor` and `linkHoverColor` tokens control `<a>` tag colors — set these in `set_theme` if the defaults don't match your palette.
 
 ### Special Characters — Always Use HTML Entities
 
@@ -655,23 +615,31 @@ Never use unicode escapes (`\u00a9`) or raw special characters in text content �
 | `{{company.email}}` | Email |
 | `{{year}}` | Current year |
 
-### Layout Prop Keys
+### className Utilities Reference
 
-| Key | Values |
-|-----|--------|
-| display | `"flex"`, `"grid"`, `"block"`, `"none"` |
-| flexDirection | `"flex-row"`, `"flex-col"` |
-| gridCols | `"grid-cols-1"` to `"grid-cols-12"` (NOT gridTemplateColumns) |
-| gap | `"gap-4"`, `"gap-(--container-gap)"` |
-| alignItems | `"items-start"`, `"items-center"`, `"items-end"` |
-| justifyContent | `"justify-start"`, `"justify-center"`, `"justify-between"` |
-| width | `"w-full"`, `"w-1/2"`, `"w-[75%]"` |
-| maxWidth | `"max-w-(--content-width)"` |
-| height | `"h-auto"`, `"h-[400px]"` |
-| py/px/p | `"py-20"`, `"px-6"` |
-| mx | `"mx-auto"` |
-| position | `"relative"`, `"absolute"` |
-| overflow | `"overflow-hidden"`, `"overflow-auto"`, etc. — always under **`mobile` / `desktop`**, not `root` |
+All styling goes in a single `props.className` string. Common utilities:
+
+| Category | Examples |
+|----------|---------|
+| Display | `flex`, `grid`, `block`, `hidden` |
+| Flex | `flex-row`, `flex-col`, `items-center`, `justify-between` |
+| Grid | `grid-cols-1` to `grid-cols-12` |
+| Gap | `gap-4`, `gap-(--container-gap)` |
+| Width | `w-full`, `w-1/2`, `w-[75%]` |
+| Max width | `max-w-(--content-width)`, `max-w-3xl` |
+| Height | `h-auto`, `h-[400px]`, `min-h-screen` |
+| Padding | `py-20`, `px-6`, `p-8` |
+| Margin | `mx-auto`, `mt-4` |
+| Position | `relative`, `absolute`, `z-10` |
+| Overflow | `overflow-hidden`, `overflow-auto` |
+| Background | `bg-(--primary)`, `bg-(--card)`, `bg-transparent` |
+| Text color | `text-(--foreground)`, `text-(--primary-foreground)` |
+| Border | `border`, `border-(--card)`, `border-2` |
+| Radius | `rounded-(--radius)`, `rounded-(--card-radius)` |
+| Shadow | `shadow-sm`, `shadow-md`, `shadow-lg` |
+| Typography | `text-4xl`, `font-bold`, `leading-relaxed` |
+
+Desktop overrides use `md:` prefix: `md:flex-row md:gap-8 md:py-24`
 
 ### Node Structure (for add_custom_block)
 
@@ -683,9 +651,7 @@ Never use unicode escapes (`\u00a9`) or raw special characters in text content �
   "props": {
     "canDelete": true, "canEditName": true,
     "type": "section",
-    "root": { "background": "bg-(--background)" },
-    "mobile": { "display": "flex", "flexDirection": "flex-col", "width": "w-full", "py": "py-16", "px": "px-6" },
-    "desktop": { "py": "py-24" },
+    "className": "flex flex-col w-full py-16 px-6 bg-(--background) text-(--foreground) md:py-24",
     "custom": { "displayName": "Section Name" }
   },
   "displayName": "Container",
@@ -737,7 +703,7 @@ Study the reference and extract **specific, reusable techniques** — not generi
 #### Visual depth (what creates the "wow moment")
 - Background images with gradient overlays — extract the gradient direction and opacity; implement with **`backgroundOverlay`** on Container (not `root.style`) for blocks/kit JSON
 - Section background alternation rhythm — map the exact sequence (white → tinted → white → dark)
-- For **library blocks / MCP structures:** no `root.style` — use `mobile`/`desktop` for layout, `root` for tokens, `className` array only for rare Tailwind-only escapes (see `BLOCKS-AI-CONTEXT.md`). For **ad-hoc editor sites**, `root.style` may still be used for effects Tailwind cannot express (`backdrop-filter`, complex shadows, etc.)
+- For **library blocks / MCP structures:** no `root.style` — use `className` for all styling (layout, surface, typography). For **ad-hoc editor sites**, `root.style` may still be used for effects Tailwind cannot express (`backdrop-filter`, complex shadows, etc.)
 - Card hover states, image treatments, accent color usage patterns
 
 ### Step 2: Transfer Techniques to New Context
