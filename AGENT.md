@@ -16,7 +16,7 @@ Before building anything, call these discovery tools:
 
 The live block catalog is API-backed. **Do not edit repo seed JSON** to change what users get from `search_blocks` / `apply_kit_block`.
 
-**Preferred:** `list_block_nodes(slug)` to get **`lib_*`** ids, then **`patch_block`** or **`patch_block_bulk`** — patch fields: `propsPatch` (non-class props like text, src, alt), `classNamePatch` (className string to merge/replace), `rootPatch` (animation only), `nodesPatch`, `unsetProps`. Use **`get_block(slug)`** when you need the full tree in context.
+**Preferred:** `list_block_nodes(slug)` to get **`lib_*`** ids, then **`patch_block`** or **`patch_block_bulk`** — patch fields: `propsPatch` (non-class props like text, src, alt, animation), `classNamePatch` (className string to merge/replace), `nodesPatch`, `unsetProps`, `unsetClasses`. Use **`get_block(slug)`** when you need the full tree in context.
 
 **Fallback:** **`update_block`** for metadata-only, or a full **`structure`** replacement when a rewrite is truly whole-tree.
 
