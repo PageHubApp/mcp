@@ -108,7 +108,7 @@ module.exports = {
 
   async set_theme(args) {
     const TemplateBuilder = getTemplateBuilder();
-    const { preset, palette, styleGuide, fonts, jsonLd } = args;
+    const { preset, palette, darkPalette, styleGuide, fonts, jsonLd } = args;
 
     // If no existing target, create from acme base
     let hasTarget;
@@ -121,6 +121,7 @@ module.exports = {
     const { targetId, targetType, tb } = await tbFromTarget(args);
 
     let resolvedPalette = parseMaybeJson(palette);
+    let resolvedDarkPalette = parseMaybeJson(darkPalette);
     let resolvedStyleGuide = parseMaybeJson(styleGuide);
     let resolvedFonts = parseMaybeJson(fonts);
     if (preset) {
@@ -128,12 +129,14 @@ module.exports = {
       const found = presetData.preset;
       if (!found) throw new Error(`Preset "${preset}" not found. Use list_presets to see available presets.`);
       if (!resolvedPalette) resolvedPalette = found.palette;
+      if (!resolvedDarkPalette && found.darkPalette) resolvedDarkPalette = found.darkPalette;
       if (!resolvedStyleGuide) resolvedStyleGuide = found.styleGuide;
       if (!resolvedFonts) resolvedFonts = found.fonts;
     }
 
     tb.setTheme({
       palette: resolvedPalette,
+      darkPalette: resolvedDarkPalette,
       styleGuide: resolvedStyleGuide,
       fonts: resolvedFonts,
       jsonLd: parseMaybeJson(jsonLd),
