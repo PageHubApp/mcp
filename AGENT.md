@@ -10,7 +10,7 @@ Before building anything, call these discovery tools:
 2. **`get_component_schema`** — learn component types and their props
 3. **`get_style_reference`** — palette variables, layout props, styling rules
 4. **`list_presets`** — curated theme presets by mood
-5. **`get_design_patterns`** — concrete node structure recipes for rich layouts
+5. **`search_blocks`** — find proven block patterns in the library; use with `apply_kit_block`. Two scopes: `blockType: "section"` (full page sections, default) and `blockType: "component"` (reusable patterns like dropdowns, cards, accordions that go inside sections)
 
 ### Editing blocks in the **library** (not on a site)
 
@@ -25,16 +25,16 @@ Full policy, layering rules, and icons: **`BLOCKS-AI-CONTEXT.md`** in the repo r
 ## Build Workflow
 
 ```
-1. create_template(slug)             → scaffold empty template
-2. set_theme(slug, preset, ...)      → set colors, fonts, spacing
-3. add_block / add_custom_block  → (repeat for each block)
-4. set_nav(slug, ...)                → header navigation + mobile menu
-5. set_footer(slug, ...)             → footer text and colors
-6. set_integrations(...)             → GA4, GTM, Search Console, Meta Pixel
-7. set_redirects(...)                → 301/302 redirect rules
-8. update_node(slug, nodeId, ...)    → surgical tweaks
-9. audit_accessibility(url/html)     → check WCAG compliance
-10. encode_all_templates()           → finalize
+1. create_template(slug)                          → scaffold empty template
+2. set_theme(slug, preset, ...)                   → set colors, fonts, spacing
+3. apply_kit_block(slug, target:"header")         → header nav from block library
+4. apply_kit_block(slug) / add_custom_block       → (repeat for each page section)
+5. apply_kit_block(slug, target:"footer")         → footer from block library
+6. set_integrations(...)                          → GA4, GTM, Search Console, Meta Pixel
+7. set_redirects(...)                             → 301/302 redirect rules
+8. update_node(slug, nodeId, ...)                 → surgical tweaks
+9. audit_accessibility(url/html)                  → check WCAG compliance
+10. encode_all_templates()                        → finalize
 ```
 
 ### Using Presets
@@ -57,10 +57,9 @@ Every preset ships with input styling tokens, so forms render correctly without 
 Patterns provide battle-tested node structures for complex layouts. Always check patterns before building from scratch:
 
 ```
-1. get_design_patterns()                          → list all 7 patterns
-2. get_design_patterns(pattern: "rich-contact")   → get specific recipe
-3. Copy the node map, change IDs and content
-4. add_custom_block(slug, sectionRootId, nodes) → add to template
+1. search_blocks(query: "contact form")            → find matching blocks
+2. apply_kit_block(slug: "contact-form")           → apply to page
+3. patch_site_node / patch_site_bulk               → customize content
 ```
 
 | Pattern | When to use |
@@ -96,7 +95,7 @@ Every page needs at least 4 levels of visual type weight. If all your text looks
 ### 2. Whitespace and Proportion
 
 - **Section padding:** Use generous vertical padding. Desktop sections should have `py-20` to `py-32`, not `py-8`. Mobile can be `py-12` to `py-20`.
-- **Content width:** Constrain content with `max-w-(--content-width)` and `mx-auto`. Text blocks should be narrower: `max-w-3xl` or `max-w-2xl` for readability.
+- **Content width:** Constrain content with `max-w-content` and `mx-auto`. Text blocks should be narrower: `max-w-3xl` or `max-w-2xl` for readability.
 - **Gap hierarchy:** Gaps between sections > gaps between content blocks > gaps between elements. Example: section py=24, content gap=12, element gap=4.
 - **Asymmetric spacing:** Not everything needs to be centered. Left-aligned text with right-side images creates visual tension. Use `items-start` and `text-left` on editorial sections.
 
@@ -104,8 +103,8 @@ Every page needs at least 4 levels of visual type weight. If all your text looks
 
 - **Always set height AND width** on images. `w-full` + `h-[400px]` or `h-[500px]` with `object-cover`. Never leave images to auto-size — they collapse or stretch.
 - **Aspect ratios:** Hero images should be tall (h-[500px] to h-[600px] desktop). Card images should be landscape (h-48 to h-64). Gallery images should vary for visual interest.
-- **Rounded corners:** Use tokenized radius on surfaces (`rounded-(--radius)`, `rounded-(--card-radius)`). Sharp-cornered images look unfinished unless the design is intentionally brutalist.
-- **Image inside a rounded card or split frame:** Include both radius token and `overflow-hidden` in className on that Container when the image is full-bleed to an edge (e.g. `"rounded-(--card-radius) overflow-hidden"`).
+- **Rounded corners:** Use tokenized radius on surfaces (`rounded-box`, `rounded-box`). Sharp-cornered images look unfinished unless the design is intentionally brutalist.
+- **Image inside a rounded card or split frame:** Include both radius token and `overflow-hidden` in className on that Container when the image is full-bleed to an edge (e.g. `"rounded-box overflow-hidden"`).
 - **Shadows on images:** `shadow-lg` or `shadow-2xl` on hero/feature images adds depth. Don't put shadows on every image.
 - **Object fit:** Almost always `object-cover`. Only use `object-contain` for logos or icons.
 
@@ -114,11 +113,11 @@ Every page needs at least 4 levels of visual type weight. If all your text looks
 Cards (feature cards, testimonial cards, pricing cards) need these properties to not look flat:
 
 ```
-className: "bg-(--card) text-(--card-foreground) rounded-(--card-radius) border border-(--card) shadow-sm p-6 flex flex-col gap-3"
-  borderColor: "border-(--card)",
+className: "bg-base-200 text-base-content rounded-box border border-base-200 shadow-sm p-6 flex flex-col gap-3"
+  borderColor: "border-base-200",
 ```
 
-Split / full-bleed media: include both radius and `overflow-hidden` in className so the image clips (e.g. `"rounded-(--card-radius) overflow-hidden border shadow-sm"`).
+Split / full-bleed media: include both radius and `overflow-hidden` in className so the image clips (e.g. `"rounded-box overflow-hidden border shadow-sm"`).
 
 **Rule:** Cards without padding, border, AND either shadow or background look like unstyled divs. Always apply all three.
 
@@ -128,7 +127,7 @@ Forms are the most commonly broken element. Without explicit styling, they look 
 
 **Buttons (especially submit):**
 ```
-className: "bg-(--primary) text-(--primary-foreground) rounded-(--radius) w-full py-3.5 px-6 font-semibold text-sm text-center flex justify-center items-center md:w-fit"
+className: "bg-primary text-primary-content rounded-box w-full py-3.5 px-6 font-semibold text-sm text-center flex justify-center items-center md:w-fit"
 ```
 
 **Rule:** Buttons MUST have: padding (py AND px), font-weight, border-radius, background + text color. A button without these looks broken. Submit buttons should be `w-full` inside forms.
@@ -138,9 +137,9 @@ className: "bg-(--primary) text-(--primary-foreground) rounded-(--radius) w-full
 **Required input tokens in styleGuide:**
 ```json
 {
-  "inputBorderWidth": "1px",
+  "border": "1px",
   "inputBorderColor": "#b8b0a0",
-  "inputBorderRadius": "0.5rem",
+  "radiusField": "0.5rem",
   "inputPadding": "0.875rem 1rem",
   "inputBgColor": "#ffffff",
   "inputTextColor": "#1a1a1a",
@@ -156,14 +155,14 @@ className: "bg-(--primary) text-(--primary-foreground) rounded-(--radius) w-full
 
 ```json
 {
-  "className": "border border-(--input-border-width) border-solid border-(--input-border-color) rounded-(--input-border-radius) bg-(--input-bg-color) text-(--input-text-color) p-(--input-padding) w-full"
+  "className": "border border-(--border) border-solid border-(--input-border-color) rounded-field bg-(--input-bg-color) text-(--input-text-color) p-(--input-padding) w-full"
 }
 ```
 
 **This is non-negotiable.** Include these classes on every FormElement node. The CSS variables pull values from the styleGuide tokens you set in `set_theme`.
 
 **Form card wrapper:** Always wrap forms in a card container with:
-- Background (`bg-(--background)`)
+- Background (`bg-base-100`)
 - Padding (`p-8` to `p-10`)
 - Border radius
 - Shadow (`shadow-md`)
@@ -285,10 +284,10 @@ The renderer combines the overlay gradient and image into a single CSS `backgrou
 
 ### 8. Color Usage
 
-- **Alternate section backgrounds:** Every 2nd or 3rd section should have `bg-(--card)` to create visual rhythm. Don't make every section the same background.
-- **Dark accent bands:** Use `bg-(--primary)` with `text-(--primary-foreground)` for CTA or statement sections. These break up the page and add drama.
+- **Alternate section backgrounds:** Every 2nd or 3rd section should have `bg-base-200` to create visual rhythm. Don't make every section the same background.
+- **Dark accent bands:** Use `bg-primary` with `text-primary-content` for CTA or statement sections. These break up the page and add drama.
 - **Accent color sparingly:** Use `var(--accent)` for CTAs, badges, links, and small highlights — not large backgrounds (unless it's a CTA band).
-- **Text color matching:** Body text on default bg uses `var(--foreground)` / `text-(--foreground)`. Muted/supporting text uses `text-(--muted-foreground)` or `text-(--card-foreground)` on card surfaces. Text on colored backgrounds MUST use the matching `-foreground` variable (e.g. `text-(--primary-foreground)` on `bg-(--primary)`).
+- **Text color matching:** Body text on default bg uses `text-base-content`. Muted/supporting text uses `text-neutral-content`. Text on colored backgrounds MUST use the matching `-content` variable (e.g. `text-primary-content` on `bg-primary`).
 
 ### 9. Section Rhythm
 
@@ -339,8 +338,8 @@ Sites MUST comply with WCAG 2.1 Level AA to avoid lawsuits under California's Un
 
 #### Navigation
 - Every site gets a skip navigation link automatically (built into the renderer).
-- Navigation menus use `<nav>` (Container type `"nav"`) — this happens automatically with `set_nav()`.
-- **Header blocks and MCP structures:** Prefer the **`Nav`** component (not a lone `ButtonList`) for editable desktop links + hamburger + slide overlay. It matches templates (`acme` header) and the library seed `navbar` (`packages/mcp-core/fixtures/navbar.structure.json`): `menu.id` must match the overlay `Container` `id` and hamburger `click.value`; duplicate link buttons inside the panel `ButtonList` for static/preview (omit `source` unless you have stable Craft node ids).
+- Navigation menus use `<nav>` (Container type `"nav"`) — this happens automatically with the Nav component in navbar blocks.
+- **Header blocks and MCP structures:** Prefer the **`Nav`** component (not a lone `ButtonList`) for editable desktop links + hamburger + slide overlay. It matches templates (`acme` header) and the library seed `navbar` (`scripts/seed/data/blocks/navbar.block.json`): `menu.id` must match the overlay `Container` `id` and hamburger `click.value`; duplicate link buttons inside the panel `ButtonList` for static/preview (omit `source` unless you have stable Craft node ids).
 
 #### Motion & Animation
 - The SDK respects `prefers-reduced-motion` automatically. No action needed, but don't rely on animation to convey essential information.
@@ -381,9 +380,7 @@ For EVERY block, follow this process:
 1. Call `list_blocks` — does a template **actually match** the layout?
    - Match the VISUAL DESCRIPTION, not just the name
    - "Kinda close" = NOT a match
-2. Call `get_design_patterns` — is there a recipe for this layout type?
-   - YES → use the recipe with `add_custom_block`
-3. Call `list_example_blocks` on decoded examples — similar block in an existing site?
+2. Call `list_example_blocks` on decoded examples — similar block in an existing site?
    - YES → `extract_block` → adapt → `add_custom_block`
 4. None of the above? Build from scratch with `add_custom_block` using the component schema
 
@@ -419,7 +416,7 @@ Components can animate into view when the user scrolls to them. Set `root.animat
 **Example — cards that fade in on scroll:**
 ```json
 {
-  "className": "bg-(--card) text-(--card-foreground) rounded-(--card-radius) border shadow-sm p-6",
+  "className": "bg-base-200 text-base-content rounded-box border shadow-sm p-6",
   "root": {
     "animation": "spring"
   }
@@ -502,33 +499,57 @@ Container "Panel Food" (id: "panel-food", tabGroup: "menu-tabs", display: hidden
 ### Colors — ALWAYS Use CSS Variables
 
 ```
-✅ "bg-(--primary)"     ❌ "bg-black"
-✅ "text-(--primary-foreground)"  ❌ "text-white"
-✅ "border-(--card)"  ❌ "border-gray-200"
+✅ "bg-primary"     ❌ "bg-black"
+✅ "text-primary-content"  ❌ "text-white"
+✅ "border-base-200"  ❌ "border-gray-200"
 ```
 
 Exception: `bg-transparent`, opacity modifiers (`bg-white/10`).
 
-Match text to background: `bg-(--primary)` → `text-(--primary-foreground)`.
+Match text to background: `bg-primary` → `text-primary-content`.
 
-### Palette Slot Order (12 slots)
+**Common mistakes:**
+- **`text-neutral-content`** is ONLY valid on `bg-neutral`. On other surfaces use `text-base-content/70` for muted text.
+- **`btn-primary` on dark themes:** if Primary ≈ Base 100 (both dark), the button is invisible. Use explicit `bg-* text-* px-* py-*` instead.
+- **`max-w-content`** is Tailwind's `max-width: max-content` (shrinks to content). NEVER use for layout containers. Use `max-w-(--content-width)` or `max-w-7xl`.
+- **Font family** goes in className only: `font-heading`, `font-body`, or `font-['Font_Name']`. NEVER put font-family in `root.style`. NEVER add Google Fonts `<link>` in `ROOT.props.header` — the system loads fonts automatically.
+
+### Palette Tokens (DaisyUI 5)
 
 ```
- 0: Primary / 1: Primary Text
- 2: Secondary / 3: Secondary Text
- 4: Accent / 5: Accent Text
- 6: Neutral / 7: Neutral Text
- 8: Background / 9: Text
-10: Alternate Background / 11: Alternate Text
+primary / primary-content
+secondary / secondary-content
+accent / accent-content
+neutral / neutral-content
+base-100 (page bg) / base-content (body text)
+base-200 (cards/alt bg) / base-300 (borders/deeper)
+error / error-content
+info / info-content
+success / success-content
+warning / warning-content
+border, input, ring
 ```
 
-### Spacing — Flows Inward
+### Spacing — Spatial Token System
+
+**5 fluid spacing tokens** (clamp-based, responsive by default — NO `md:py-*` or `md:gap-*` needed):
+| Token | Range | Use for |
+|-------|-------|---------|
+| `--space-xs` | 6→8px | Micro gaps: icon-to-label, tag padding, banner/nav vertical padding |
+| `--space-sm` | 12→16px | Element gaps: card items, form fields, button groups, card padding |
+| `--space-md` | 24→32px | Content gaps: heading-to-grid, columns, footer/compact section padding |
+| `--space-lg` | 40→64px | Section padding: standard block vertical padding |
+| `--space-xl` | 56→96px | Statement padding: heroes, full-bleed CTAs |
+
+**Two-step-minimum rule:** Section padding must be ≥ 2 tiers above inner gap. Inner gap `--space-sm` → section padding `--space-lg` or higher.
+
+**NEVER hardcode** `py-16`, `gap-8`, `p-6` etc. — always use spatial tokens. NO responsive spacing prefixes (`md:py-*`, `md:gap-*`) — the clamp() tokens scale automatically.
 
 ```
 ROOT → NO gap/padding/margin
   └─ page_home → NO gap/padding/margin
-       └─ section → YES: py, px, gap
-            └─ content → gap, padding
+       └─ section → YES: py-space-lg px-container-x (or py-space-xl for heroes)
+            └─ content → gap-space-sm, p-space-sm
                  └─ elements → sizing
 ```
 
@@ -574,17 +595,27 @@ A Text node is for **one piece of content** — a heading, a paragraph, a captio
 
 **Footer example — right way:**
 ```
-ftr_inner (Container, flex-col, gap-4, items-center)
-  ├── ftr_brand (Text, "{{company.name}}", h3, font-bold)
+ftr_inner (Container, flex-col, gap-space-md, items-center)
+  ├── ftr_brand (Text, "{{company.name}}", h3, font-bold, text-lg)
   ├── ftr_address (Text, "{{company.address}} · {{company.location}}", p, text-sm, muted)
   ├── ftr_links (ButtonList, flex-row, gap-4)
-  │     ├── Button "Privacy" → /privacy (bg-transparent, text-sm)
-  │     ├── Button "Terms" → /terms (bg-transparent, text-sm)
-  │     └── Button "{{company.phone}}" → tel:{{company.phone}} (bg-transparent, text-sm)
+  │     ├── Button "Privacy" → /privacy (link link-hover, text-sm)
+  │     ├── Button "Terms" → /terms (link link-hover, text-sm)
+  │     └── Button "{{company.phone}}" → tel:{{company.phone}} (link link-hover, text-sm)
+  ├── ftr_divider (Divider or Container with border-t border-base-300 pt-space-sm)
+  ├── ftr_social (ButtonList, flex-row, gap-space-xs)
+  │     └── Button icons (btn btn-ghost, icon-only)
   └── ftr_copyright (Text, "© {{year}} {{company.name}}", p, text-xs, muted)
 ```
 
-**Link colors:** Links in ButtonList get their color from the button's text color in className. For footer links on dark backgrounds, use `text-(--primary-foreground)`. For body links, the styleGuide `linkColor` and `linkHoverColor` tokens control `<a>` tag colors — set these in `set_theme` if the defaults don't match your palette.
+**Footer conventions:**
+- **Nav links:** use `link link-hover` classes (DaisyUI), not raw `bg-transparent border-0` button styles — gives underline-on-hover for free
+- **Social icons:** use `btn btn-ghost` for hover/focus states
+- **Dividers:** any `border-t` separator needs `pt-space-sm` for breathing room above the rule
+- **Brand name:** `text-lg` (not `text-xl md:text-2xl`)
+- **Body text / blurbs:** `text-sm` (not `text-sm md:text-base`)
+
+**Link colors:** Footer links using `link link-hover` inherit text color from the parent surface. For dark backgrounds, add `text-neutral-content` or `text-primary-content`. For body links, the styleGuide `linkColor` and `linkHoverColor` tokens control `<a>` tag colors — set these in `set_theme` if the defaults don't match your palette.
 
 ### Special Characters — Always Use HTML Entities
 
@@ -624,18 +655,18 @@ All styling goes in a single `props.className` string. Common utilities:
 | Display | `flex`, `grid`, `block`, `hidden` |
 | Flex | `flex-row`, `flex-col`, `items-center`, `justify-between` |
 | Grid | `grid-cols-1` to `grid-cols-12` |
-| Gap | `gap-4`, `gap-(--container-gap)` |
+| Gap | `gap-4`, `gap-container` |
 | Width | `w-full`, `w-1/2`, `w-[75%]` |
-| Max width | `max-w-(--content-width)`, `max-w-3xl` |
+| Max width | `max-w-content`, `max-w-3xl` |
 | Height | `h-auto`, `h-[400px]`, `min-h-screen` |
 | Padding | `py-20`, `px-6`, `p-8` |
 | Margin | `mx-auto`, `mt-4` |
 | Position | `relative`, `absolute`, `z-10` |
 | Overflow | `overflow-hidden`, `overflow-auto` |
-| Background | `bg-(--primary)`, `bg-(--card)`, `bg-transparent` |
-| Text color | `text-(--foreground)`, `text-(--primary-foreground)` |
+| Background | `bg-primary`, `bg-base-200`, `bg-transparent` |
+| Text color | `text-base-content`, `text-primary-content` |
 | Border | `border`, `border-(--card)`, `border-2` |
-| Radius | `rounded-(--radius)`, `rounded-(--card-radius)` |
+| Radius | `rounded-box`, `rounded-box` |
 | Shadow | `shadow-sm`, `shadow-md`, `shadow-lg` |
 | Typography | `text-4xl`, `font-bold`, `leading-relaxed` |
 
@@ -651,7 +682,7 @@ Desktop overrides use `md:` prefix: `md:flex-row md:gap-8 md:py-24`
   "props": {
     "canDelete": true, "canEditName": true,
     "type": "section",
-    "className": "flex flex-col w-full py-16 px-6 bg-(--background) text-(--foreground) md:py-24",
+    "className": "flex flex-col w-full py-16 px-6 bg-base-100 text-base-content md:py-24",
     "custom": { "displayName": "Section Name" }
   },
   "displayName": "Container",
@@ -764,7 +795,6 @@ Compare your output to the reference. A viewer should see the family resemblance
 - `list_presets(mood?)` — theme presets (18 curated, filterable by mood)
 - `get_component_schema(component?)` — component prop reference
 - `get_style_reference()` — full prop key and variable list
-- `get_design_patterns(pattern?)` — concrete node recipes for 7 rich layout types
 - `list_example_blocks(slug)` — blocks in decoded examples
 - `extract_block(slug, sectionRootId)` — extract for reuse
 - `save_as_block_template(...)` — save to block library

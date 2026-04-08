@@ -72,7 +72,6 @@ All configuration is passed via environment variables in the `env` block of your
 | `list_blocks` | Browse pre-built block templates with visual descriptions and overridable displayNames |
 | `get_component_schema` | CraftJS component types and props reference (Container, Text, Image, Button, Form, etc.) |
 | `get_style_reference` | Palette CSS variables, styleGuide tokens, layout prop keys, responsive patterns |
-| `get_design_patterns` | Concrete node structure recipes for rich layouts (see [Design Patterns](#design-patterns)) |
 | `list_presets` | Curated theme presets by mood (see [Theme Presets](#theme-presets)) |
 
 ### Template Building
@@ -83,8 +82,6 @@ All configuration is passed via environment variables in the `env` block of your
 | `set_theme` | Configure palette, fonts, spacing, JSON-LD — supports loading a preset as base |
 | `add_block` | Add a pre-built block with content/prop overrides |
 | `add_custom_block` | Add a hand-crafted CraftJS node map (validates image URLs) |
-| `set_nav` | Configure header navigation, logo, and auto-generated mobile menu |
-| `set_footer` | Configure footer background, text color, and copyright |
 | `update_node` | Patch a single node's props (`className`, allowlisted `root`, content fields; validates image URLs) |
 | `insert_node` | Add a new node to an existing parent (validates image URLs) |
 | `delete_node` | Remove a node and descendants (protects structural nodes) |
@@ -257,7 +254,7 @@ See [AGENT.md](./AGENT.md) for detailed tool usage rules and design guidelines.
 
 The main app is a **pnpm** monorepo: install and run from the **repo root** (`pnpm install`, `pnpm run build`). See root **`README.md`**, **`.cursorrules`**, and **`CLAUDE.md`** for workspace rules (`pnpm-lock.yaml`, **`@pagehub/sdk`** deps, **`verify:vercel`**, CI).
 
-Library **structures** in **`scripts/seed-components.js`** and **`packages/mcp-core/fixtures/*.structure.json`** are not the live MCP library until the same rows exist in the database the API uses. See the main repo’s **`BLOCKS-AI-CONTEXT.md`** and run **`node scripts/sync-repo-to-mongo.js`** (`--dry-run` / `--slugs=`) with **`MONGODB_URI`** to compare or push directly to Mongo.
+Library blocks live in **`scripts/seed/data/blocks/*.block.json`** (single source of truth — metadata + structure in one file). They are not the live MCP library until synced to the database. Run **`node scripts/sync-repo-to-mongo.js`** (`--dry-run` / `--slugs=`) with **`MONGODB_URI`** to compare or push to Mongo. See **`BLOCKS-AI-CONTEXT.md`** for block building rules.
 
 ## Project Structure
 

@@ -46,41 +46,11 @@ function collectAllImageUrls(nodes) {
   return urls;
 }
 
-// ── Mutex (MCP-only — serialize local file writes) ──
-
-class Mutex {
-  constructor() {
-    this.queue = [];
-    this.locked = false;
-  }
-  async lock() {
-    return new Promise(resolve => {
-      if (!this.locked) {
-        this.locked = true;
-        resolve();
-      } else {
-        this.queue.push(resolve);
-      }
-    });
-  }
-  release() {
-    if (this.queue.length > 0) {
-      const next = this.queue.shift();
-      next();
-    } else {
-      this.locked = false;
-    }
-  }
-}
-
-const fsMutex = new Mutex();
-
 module.exports = {
   parseMaybeJson,
   extractImageUrls,
   validateImageUrls,
   collectAllImageUrls,
-  fsMutex,
   applyNodePatches,
   normalizeNodePatchArgs,
 };

@@ -1,6 +1,7 @@
 const path = require('path');
 const { getProjectDir, config, apiFetch, getActiveTarget, getEditorUrl, delegateHandlers } = require('../config');
 const { parseMaybeJson, applyNodePatches, validateImageUrls, collectAllImageUrls, extractImageUrls } = require('../helpers');
+const { stampRootSource } = require('@pagehub/mcp-core/src/structure-ingest');
 
 // Node-level tools delegated to mcp-core
 const coreNodes = require('@pagehub/mcp-core/src/handlers/nodes');
@@ -85,6 +86,12 @@ module.exports = {
       image: args.image || '',
       hidden: args.hidden === true,
       homePage: true,
+    });
+    // Stamp provenance on ROOT so the site knows where it came from
+    stampRootSource(tb.nodes, {
+      type: 'base',
+      template: 'acme',
+      createdAt: new Date().toISOString(),
     });
     // Save as a new site via API
     const data = await apiFetch('/api/v1/sites', {
@@ -181,26 +188,6 @@ module.exports = {
     tb.addCustomSection(sectionRootId, nodeMap, { parentNodeId, position });
     const result = await saveForTarget(targetId, targetType, tb.nodes);
     return { content: [{ type: 'text', text: `Custom section ${sectionRootId} added. (${allImgUrls.length} image URLs validated)\n${resultLabel(result)}` }] };
-  },
-
-  async set_nav(args) {
-    const { menuId, menuTitle, logoText, logoFont, headerBg, headerColor, links, phone } = args;
-    const { targetId, targetType, tb } = await tbFromTarget(args);
-    tb.setNav({
-      menuId, menuTitle, logoText, logoFont, headerBg, headerColor,
-      links: parseMaybeJson(links) || [],
-      phone: parseMaybeJson(phone),
-    });
-    const result = await saveForTarget(targetId, targetType, tb.nodes);
-    return { content: [{ type: 'text', text: `Nav updated.\n${resultLabel(result)}` }] };
-  },
-
-  async set_footer(args) {
-    const { contentBackground, contentColor, copyrightHtml, copyrightTagName, copyrightRootColor } = args;
-    const { targetId, targetType, tb } = await tbFromTarget(args);
-    tb.setFooter({ contentBackground, contentColor, copyrightHtml, copyrightTagName, copyrightRootColor });
-    const result = await saveForTarget(targetId, targetType, tb.nodes);
-    return { content: [{ type: 'text', text: `Footer updated.\n${resultLabel(result)}` }] };
   },
 
   // Node-level tools — delegated to mcp-core

@@ -92,13 +92,6 @@ async function apiFetch(pathStr, opts = {}) {
 
 /* ── Shared helpers (eliminate repeated boilerplate in handlers) ── */
 
-function getActiveSiteId(args) {
-  if (args.slug && !args.id) return args.slug;
-  const siteId = args.id || config.activeTemplate?.slug || config.activeSite?.id;
-  if (!siteId) throw new Error('No site or template selected. Run select_site or select_template first.');
-  return siteId;
-}
-
 function getActiveTarget(args = {}) {
   if (args.slug && !args.id) return { type: 'template', id: args.slug };
   if (args.id) return { type: 'site', id: args.id };
@@ -136,7 +129,6 @@ module.exports = {
   config,
   apiFetch,
   runWithContext,
-  getActiveSiteId,
   getActiveTarget,
   getEditorUrl,
   delegateHandlers,
