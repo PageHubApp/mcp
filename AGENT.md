@@ -492,6 +492,50 @@ Container "Panel Food" (id: "panel-food", tabGroup: "menu-tabs", display: hidden
 - Container: `id` (DOM id), `tabGroup` (renders as `data-tab-group`)
 - Button: `click.direction: "tab"`, `click.value` (target panel id), `click.group` (must match `tabGroup`)
 
+### Action Prop — Links, Navigation, and Interactivity
+
+Text and Button components use the unified `action` prop for all link and interaction behavior. **Do not** use `<a>` tags in text HTML or legacy `url`/`click` props on new content.
+
+**Action types supported on Text and Button:**
+
+| Type | Props | Use for |
+|------|-------|---------|
+| `link-url` | `url`, `target` | External links, absolute URLs |
+| `link-page` | `pageId`, `target` | Internal page navigation |
+| `scroll-to` | `anchor` | Anchor links to sections (nav → section `id`) |
+| `email` | `email`, `subject?`, `body?` | Contact email (renders as `mailto:`) |
+| `phone` | `phone` | Phone numbers (renders as `tel:`) |
+| `copy-to-clipboard` | `text` | Copy text on click |
+| `download-file` | `url`, `filename?` | File download trigger |
+
+**Button-only action types (not on Text):**
+
+| Type | Props | Use for |
+|------|-------|---------|
+| `show-hide` | `target`, `direction`, `method`, `group?` | Mobile menus, dropdowns, tabs |
+| `open-modal` | `anchor` | Open a modal by ID |
+
+**Examples:**
+```json
+// External link on a Text heading
+{ "text": "PageHub", "tagName": "h3", "action": { "type": "link-url", "url": "https://pagehub.dev", "target": "_blank" } }
+
+// Nav button scrolling to a section
+{ "text": "Contact", "action": { "type": "scroll-to", "anchor": "contact" } }
+
+// Email button
+{ "text": "hello@example.com", "action": { "type": "email", "email": "hello@example.com" } }
+
+// Mobile menu toggle (Button only — must use method: "style")
+{ "text": "", "icon": { "value": "ref-google:menu" }, "action": { "type": "show-hide", "target": "mobile-nav", "direction": "toggle", "method": "style" } }
+```
+
+**Rules:**
+- Nav links to page sections: use `scroll-to`, not `link-url` with `#anchor`
+- Contact email/phone: use `email`/`phone` types, not `link-url` with `mailto:`/`tel:`
+- Mobile nav overlays: `show-hide` with `method: "style"` (container needs `root.style: "display: none;"`)
+- External links: always `target: "_blank"` (gets `rel="noopener noreferrer"` automatically)
+
 ---
 
 ## Critical Technical Rules
