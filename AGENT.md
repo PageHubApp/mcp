@@ -95,7 +95,7 @@ Every page needs at least 4 levels of visual type weight. If all your text looks
 ### 2. Whitespace and Proportion
 
 - **Section padding:** Use generous vertical padding. Desktop sections should have `py-20` to `py-32`, not `py-8`. Mobile can be `py-12` to `py-20`.
-- **Content width:** Constrain content with `max-w-content` and `mx-auto`. Text blocks should be narrower: `max-w-3xl` or `max-w-2xl` for readability.
+- **Content width:** Constrain content with `max-w-page` and `mx-auto`. Text blocks should be narrower: `max-w-3xl` or `max-w-2xl` for readability.
 - **Gap hierarchy:** Gaps between sections > gaps between content blocks > gaps between elements. Example: section py=24, content gap=12, element gap=4.
 - **Asymmetric spacing:** Not everything needs to be centered. Left-aligned text with right-side images creates visual tension. Use `items-start` and `text-left` on editorial sections.
 
@@ -555,7 +555,7 @@ Match text to background: `bg-primary` → `text-primary-content`.
 **Common mistakes:**
 - **`text-neutral-content`** is ONLY valid on `bg-neutral`. On other surfaces use `text-base-content/70` for muted text.
 - **`btn-primary` on dark themes:** if Primary ≈ Base 100 (both dark), the button is invisible. Use explicit `bg-* text-* px-* py-*` instead.
-- **`max-w-content`** is Tailwind's `max-width: max-content` (shrinks to content). NEVER use for layout containers. Use `max-w-(--content-width)` or `max-w-7xl`.
+- **`max-w-content`** is Tailwind's native `max-width: max-content` (shrinks to content). NEVER use for layout containers. Use `max-w-page` (maps to `--content-width`, default 80rem).
 - **Font family** goes in className only: `font-heading`, `font-body`, or `font-['Font_Name']`. NEVER put font-family in `root.style`. NEVER add Google Fonts `<link>` in `ROOT.props.header` — the system loads fonts automatically.
 
 ### Palette Tokens (DaisyUI 5)
@@ -701,7 +701,7 @@ All styling goes in a single `props.className` string. Common utilities:
 | Grid | `grid-cols-1` to `grid-cols-12` |
 | Gap | `gap-4`, `gap-container` |
 | Width | `w-full`, `w-1/2`, `w-[75%]` |
-| Max width | `max-w-content`, `max-w-3xl` |
+| Max width | `max-w-page`, `max-w-3xl` |
 | Height | `h-auto`, `h-[400px]`, `min-h-screen` |
 | Padding | `py-20`, `px-6`, `p-8` |
 | Margin | `mx-auto`, `mt-4` |
