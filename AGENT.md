@@ -183,7 +183,8 @@ PageHub has a built-in icon system with 2000+ Google Material Symbols. **Never u
 
 **How icons work:**
 - Icons are set on Button components via the `icon` prop
-- Format: `icon: { value: "ref-google:icon_name", position: "left", size: "w-5 h-5" }`
+- **Material Symbols render as a font** (ligatures), not SVG. Small `w-5` / `w-6` boxes often look **tiny** next to `btn-md` or uppercase labels — use **`w-7 h-7` or `w-8 h-8`** for typical CTAs and nav icons, **`w-8`–`w-10`** for hero chips / large tiles, **`w-6` minimum** for dense icon-only controls (menu/close), often **`w-7`** in mobile drawers.
+- Format: `icon: { value: "ref-google:icon_name", position: "left", size: "w-7 h-7", gap: "gap-2" }`
 - The renderer auto-generates an optimized Google Fonts URL for only the icons used
 
 **Common icon names:**
@@ -219,7 +220,7 @@ PageHub has a built-in icon system with 2000+ Google Material Symbols. **Never u
   "icon": {
     "value": "ref-google:location_on",
     "position": "left",
-    "size": "w-5 h-5",
+    "size": "w-7 h-7",
     "gap": "gap-2"
   }
 }
