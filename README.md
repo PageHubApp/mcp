@@ -14,13 +14,19 @@ Zero install. Add the URL to your MCP client config — authentication is handle
 {
   "mcpServers": {
     "PageHub": {
-      "url": "https://pagehub.dev/api/mcp"
+      "url": "https://pagehub.dev/api/mcp",
+      "env": {
+        "PAGEHUB_API_BASE_URL": "https://pagehub.dev",
+        "PAGEHUB_API_KEY": "ph_your_key_here"
+      }
     }
   }
 }
 ```
 
-Your MCP client opens a browser, you sign in or register, and you're done.
+Replace `ph_your_key_here` with your key from [pagehub.dev/dashboard](https://pagehub.dev/dashboard). Use `http://localhost:3000` for `PAGEHUB_API_BASE_URL` when developing against a local PageHub app.
+
+If your MCP client supports OAuth, you can omit the `env` block and sign in via the browser instead.
 
 ### Local (stdio)
 
@@ -31,6 +37,7 @@ Your MCP client opens a browser, you sign in or register, and you're done.
       "command": "npx",
       "args": ["-y", "@pagehub/mcp"],
       "env": {
+        "PAGEHUB_API_BASE_URL": "https://pagehub.dev",
         "PAGEHUB_API_KEY": "ph_your_key_here"
       }
     }
@@ -38,7 +45,7 @@ Your MCP client opens a browser, you sign in or register, and you're done.
 }
 ```
 
-Get your API key from [pagehub.dev/dashboard](https://pagehub.dev/dashboard), or let the AI register for you automatically — the `register` tool creates a free account and returns a key.
+Get your API key from [pagehub.dev/dashboard](https://pagehub.dev/dashboard), or let the AI register for you automatically — the `register` tool creates a free account and returns a key. Override `PAGEHUB_API_BASE_URL` for a local dev server when needed.
 
 ### From Source
 
@@ -118,6 +125,8 @@ All configuration is passed via environment variables in the `env` block of your
 | `update_page` | Update page name, home/404/hidden flags, and SEO metadata |
 | `delete_page` | Remove a page and descendants (auto-promotes new home page) |
 
+**Custom 404 (`is404Page`):** Paid plans can mark one page as the site’s not-found canvas; unknown URLs render that page (with HTTP 404 on subdomains, `noindex` on ISR static). Free accounts cannot persist `is404Page` — the editor hides the toggle, `/api/save` strips the flag from compressed content, and `PUT /api/v1/sites/:id` strips it from decoded JSON before save.
+
 ### Blocks
 
 **Editing existing library blocks:** prefer `list_block_nodes` then `patch_block` / `patch_block_bulk` (same patch fields as `patch_site_node`). Use `update_block` for metadata or a full `structure` replace. See repo root `BLOCKS-AI-CONTEXT.md`.
@@ -146,7 +155,7 @@ All configuration is passed via environment variables in the `env` block of your
 | Tool | Description |
 |------|-------------|
 | `generate_image` | Generate an image with AI, upload to CDN, and optionally apply to a node |
-| `generate_copy` | Generate or improve text copy with site context and tone awareness |
+| `generate_copy` | Generate or improve copy via the same `/api/ai/agent` path as the editor (`assistantScope: text`), not a separate improve API |
 
 ### Auditing
 

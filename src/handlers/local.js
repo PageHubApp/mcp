@@ -2,6 +2,7 @@ const path = require('path');
 const { getProjectDir, config, apiFetch, getActiveTarget, getEditorUrl, delegateHandlers } = require('../config');
 const { parseMaybeJson, applyNodePatches, validateImageUrls, collectAllImageUrls, extractImageUrls } = require('../helpers');
 const { stampRootSource } = require('@pagehub/mcp-core/src/structure-ingest');
+const { normalizeDesignTags, truncateDesignNotes } = require('@pagehub/mcp-core/src/root-design-intent');
 
 // Node-level tools delegated to mcp-core
 const coreNodes = require('@pagehub/mcp-core/src/handlers/nodes');
@@ -93,6 +94,13 @@ module.exports = {
       template: 'acme',
       createdAt: new Date().toISOString(),
     });
+    const desc = typeof args.description === 'string' ? args.description.trim() : '';
+    if (desc && tb.nodes?.ROOT?.props) {
+      tb.nodes.ROOT.props.designNotes = truncateDesignNotes(desc);
+    }
+    if (Array.isArray(args.tags) && args.tags.length && tb.nodes?.ROOT?.props) {
+      tb.nodes.ROOT.props.designTags = normalizeDesignTags(args.tags);
+    }
     // Save as a new site via API
     const data = await apiFetch('/api/v1/sites', {
       method: 'POST',
