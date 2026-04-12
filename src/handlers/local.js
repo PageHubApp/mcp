@@ -1,12 +1,28 @@
-const path = require('path');
-const { getProjectDir, config, apiFetch, getActiveTarget, getEditorUrl, delegateHandlers } = require('../config');
-const { parseMaybeJson, applyNodePatches, validateImageUrls, collectAllImageUrls, extractImageUrls } = require('../helpers');
-const { stampRootSource } = require('@pagehub/mcp-core/src/structure-ingest');
-const { normalizeDesignTags, truncateDesignNotes } = require('@pagehub/mcp-core/src/root-design-intent');
-const { validateNodes, formatValidationReport } = require('@pagehub/mcp-core/src/node-validation');
+const path = require("path");
+const {
+  getProjectDir,
+  config,
+  apiFetch,
+  getActiveTarget,
+  getEditorUrl,
+  delegateHandlers,
+} = require("../config");
+const {
+  parseMaybeJson,
+  applyNodePatches,
+  validateImageUrls,
+  collectAllImageUrls,
+  extractImageUrls,
+} = require("../helpers");
+const { stampRootSource } = require("@pagehub/mcp-core/src/structure-ingest");
+const {
+  normalizeDesignTags,
+  truncateDesignNotes,
+} = require("@pagehub/mcp-core/src/root-design-intent");
+const { validateNodes, formatValidationReport } = require("@pagehub/mcp-core/src/node-validation");
 
 // Node-level tools delegated to mcp-core
-const coreNodes = require('@pagehub/mcp-core/src/handlers/nodes');
+const coreNodes = require("@pagehub/mcp-core/src/handlers/nodes");
 const delegatedNodes = delegateHandlers(coreNodes);
 
 /**
@@ -14,36 +30,52 @@ const delegatedNodes = delegateHandlers(coreNodes);
  */
 async function fetchForTarget(args) {
   const target = getActiveTarget(args);
-  if (target.type === 'template') {
+  if (target.type === "template") {
     const data = await apiFetch(`/api/v1/templates/${encodeURIComponent(target.id)}`);
-    if (!data.content || typeof data.content !== 'object') {
-      throw new Error('Template has no decoded content (empty or corrupt).');
+    if (!data.content || typeof data.content !== "object") {
+      throw new Error("Template has no decoded content (empty or corrupt).");
     }
-    return { targetId: target.id, targetType: 'template', flat: JSON.parse(JSON.stringify(data.content)), data };
+    return {
+      targetId: target.id,
+      targetType: "template",
+      flat: JSON.parse(JSON.stringify(data.content)),
+      data,
+    };
   }
   const data = await apiFetch(`/api/v1/sites/${encodeURIComponent(target.id)}`);
-  if (!data.content || typeof data.content !== 'object') {
-    throw new Error('Site has no decoded content (empty or corrupt).');
+  if (!data.content || typeof data.content !== "object") {
+    throw new Error("Site has no decoded content (empty or corrupt).");
   }
-  return { targetId: target.id, targetType: 'site', flat: JSON.parse(JSON.stringify(data.content)), data };
+  return {
+    targetId: target.id,
+    targetType: "site",
+    flat: JSON.parse(JSON.stringify(data.content)),
+    data,
+  };
 }
 
 /**
  * Helper: save content for the active target (site or template).
  */
 async function saveForTarget(targetId, targetType, flat, extra = {}) {
-  if (targetType === 'template') {
+  if (targetType === "template") {
     const body = { content: flat, ...extra };
-    const put = await apiFetch(`/api/v1/templates/${encodeURIComponent(targetId)}`, { method: 'PUT', body });
-    return { id: put.slug || targetId, url: null, type: 'template' };
+    const put = await apiFetch(`/api/v1/templates/${encodeURIComponent(targetId)}`, {
+      method: "PUT",
+      body,
+    });
+    return { id: put.slug || targetId, url: null, type: "template" };
   }
   const body = { content: flat, ...extra };
-  const put = await apiFetch(`/api/v1/sites/${encodeURIComponent(targetId)}`, { method: 'PUT', body });
-  return { id: put.id, url: getEditorUrl(put.id), type: 'site' };
+  const put = await apiFetch(`/api/v1/sites/${encodeURIComponent(targetId)}`, {
+    method: "PUT",
+    body,
+  });
+  return { id: put.id, url: getEditorUrl(put.id), type: "site" };
 }
 
 function resultLabel(result) {
-  if (result.type === 'template') return `Template "${result.id}" updated.`;
+  if (result.type === "template") return `Template "${result.id}" updated.`;
   return `Editor: ${result.url}`;
 }
 
@@ -51,7 +83,7 @@ function resultLabel(result) {
  * Helper: get a TemplateBuilder loaded with site content from API.
  */
 function getTemplateBuilder() {
-  return require(path.join(getProjectDir(), 'scripts/TemplateBuilder.js'));
+  return require(path.join(getProjectDir(), "scripts/TemplateBuilder.js"));
 }
 
 /**
@@ -59,7 +91,7 @@ function getTemplateBuilder() {
  * This replaces the filesystem-based template loading in TemplateBuilder.
  */
 async function loadTemplateIndex() {
-  const data = await apiFetch('/api/v1/components?limit=500');
+  const data = await apiFetch("/api/v1/components?limit=500");
   const idx = {};
   for (const comp of data.components || []) {
     // Fetch full structure (list view excludes it)
@@ -82,20 +114,20 @@ module.exports = {
   async create_template(args) {
     const TemplateBuilder = getTemplateBuilder();
     const tb = TemplateBuilder.fromAcme(getProjectDir(), {
-      slug: args.slug || 'new-site',
-      title: args.title || 'New Template',
-      description: args.description || '',
-      image: args.image || '',
+      slug: args.slug || "new-site",
+      title: args.title || "New Template",
+      description: args.description || "",
+      image: args.image || "",
       hidden: args.hidden === true,
       homePage: true,
     });
     // Stamp provenance on ROOT so the site knows where it came from
     stampRootSource(tb.nodes, {
-      type: 'base',
-      template: 'acme',
+      type: "base",
+      template: "acme",
       createdAt: new Date().toISOString(),
     });
-    const desc = typeof args.description === 'string' ? args.description.trim() : '';
+    const desc = typeof args.description === "string" ? args.description.trim() : "";
     if (desc && tb.nodes?.ROOT?.props) {
       tb.nodes.ROOT.props.designNotes = truncateDesignNotes(desc);
     }
@@ -103,11 +135,11 @@ module.exports = {
       tb.nodes.ROOT.props.designTags = normalizeDesignTags(args.tags);
     }
     // Save as a new site via API
-    const data = await apiFetch('/api/v1/sites', {
-      method: 'POST',
+    const data = await apiFetch("/api/v1/sites", {
+      method: "POST",
       body: {
         content: tb.nodes,
-        name: args.title || args.slug || 'New Site',
+        name: args.title || args.slug || "New Site",
         title: args.title,
         description: args.description,
       },
@@ -115,10 +147,12 @@ module.exports = {
     config.activeSite = { id: data.id, name: data.name, draftId: data.draftId };
     config.activeTemplate = null;
     return {
-      content: [{
-        type: 'text',
-        text: `Site created: ${data.id}\nEditor: ${getEditorUrl(data.id)}\nPreview: ${data.staticUrl}\n\nAuto-selected as active site. Next: set_theme, then add_block.`,
-      }],
+      content: [
+        {
+          type: "text",
+          text: `Site created: ${data.id}\nEditor: ${getEditorUrl(data.id)}\nPreview: ${data.staticUrl}\n\nAuto-selected as active site. Next: set_theme, then add_block.`,
+        },
+      ],
     };
   },
 
@@ -128,7 +162,12 @@ module.exports = {
 
     // If no existing target, create from acme base
     let hasTarget;
-    try { getActiveTarget(args); hasTarget = true; } catch { hasTarget = false; }
+    try {
+      getActiveTarget(args);
+      hasTarget = true;
+    } catch {
+      hasTarget = false;
+    }
     if (!hasTarget) {
       const result = await module.exports.create_template(args);
       return result;
@@ -143,7 +182,8 @@ module.exports = {
     if (preset) {
       const presetData = await apiFetch(`/api/v1/presets/${encodeURIComponent(preset)}`);
       const found = presetData.preset;
-      if (!found) throw new Error(`Preset "${preset}" not found. Use list_presets to see available presets.`);
+      if (!found)
+        throw new Error(`Preset "${preset}" not found. Use list_presets to see available presets.`);
       if (!resolvedPalette) resolvedPalette = found.palette;
       if (!resolvedDarkPalette && found.darkPalette) resolvedDarkPalette = found.darkPalette;
       if (!resolvedStyleGuide) resolvedStyleGuide = found.styleGuide;
@@ -159,8 +199,10 @@ module.exports = {
     });
 
     const result = await saveForTarget(targetId, targetType, tb.nodes);
-    const presetMsg = preset ? ` (preset: ${preset})` : '';
-    return { content: [{ type: 'text', text: `Theme saved${presetMsg}.\n${resultLabel(result)}` }] };
+    const presetMsg = preset ? ` (preset: ${preset})` : "";
+    return {
+      content: [{ type: "text", text: `Theme saved${presetMsg}.\n${resultLabel(result)}` }],
+    };
   },
 
   async add_block(args) {
@@ -175,21 +217,23 @@ module.exports = {
       pageId,
     });
     const result = await saveForTarget(targetId, targetType, tb.nodes);
-    return { content: [{ type: 'text', text: `Block ${templateId} added.\n${resultLabel(result)}` }] };
+    return {
+      content: [{ type: "text", text: `Block ${templateId} added.\n${resultLabel(result)}` }],
+    };
   },
 
   async add_custom_block(args) {
     const { sectionRootId, nodes, parentNodeId, position } = args;
     const { targetId, targetType, tb } = await tbFromTarget(args);
     const nodeMap = parseMaybeJson(nodes);
-    if (!nodeMap || typeof nodeMap !== 'object') throw new Error('nodes must be an object map');
+    if (!nodeMap || typeof nodeMap !== "object") throw new Error("nodes must be an object map");
 
     // Validate & auto-fix nodes before image validation and save
     const validation = validateNodes(nodeMap, { autoFix: true, warnColors: true });
     const validationReport = formatValidationReport(validation);
     if (validation.errors.length > 0) {
       throw new Error(
-        `Cannot add block — ${validation.errors.length} structural error(s):\n${validation.errors.join('\n')}\n\nFix these before saving.`
+        `Cannot add block — ${validation.errors.length} structural error(s):\n${validation.errors.join("\n")}\n\nFix these before saving.`
       );
     }
 
@@ -197,17 +241,28 @@ module.exports = {
     if (allImgUrls.length > 0) {
       const failures = await validateImageUrls(allImgUrls.map(u => u.url));
       if (failures.length > 0) {
-        const msg = failures.map(f => {
-          const nodeRef = allImgUrls.find(u => u.url === f.url);
-          return `  ${nodeRef?.nodeId || '?'}: ${f.url} → ${f.status}`;
-        }).join('\n');
-        throw new Error(`Image validation failed — these URLs are broken:\n${msg}\n\nFix the URLs and try again.`);
+        const msg = failures
+          .map(f => {
+            const nodeRef = allImgUrls.find(u => u.url === f.url);
+            return `  ${nodeRef?.nodeId || "?"}: ${f.url} → ${f.status}`;
+          })
+          .join("\n");
+        throw new Error(
+          `Image validation failed — these URLs are broken:\n${msg}\n\nFix the URLs and try again.`
+        );
       }
     }
     tb.addCustomSection(sectionRootId, nodeMap, { parentNodeId, position });
     const result = await saveForTarget(targetId, targetType, tb.nodes);
-    const reportSuffix = validationReport ? `\n\n---\n${validationReport}` : '';
-    return { content: [{ type: 'text', text: `Custom section ${sectionRootId} added. (${allImgUrls.length} image URLs validated)\n${resultLabel(result)}${reportSuffix}` }] };
+    const reportSuffix = validationReport ? `\n\n---\n${validationReport}` : "";
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Custom section ${sectionRootId} added. (${allImgUrls.length} image URLs validated)\n${resultLabel(result)}${reportSuffix}`,
+        },
+      ],
+    };
   },
 
   // Node-level tools — delegated to mcp-core

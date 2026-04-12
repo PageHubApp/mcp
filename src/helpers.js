@@ -1,21 +1,21 @@
 // Re-export shared helpers from mcp-core
-const {
-  parseMaybeJson,
-  applyNodePatches,
-  normalizeNodePatchArgs,
-} = require('@pagehub/mcp-core');
+const { parseMaybeJson, applyNodePatches, normalizeNodePatchArgs } = require("@pagehub/mcp-core");
 
 // ── Image URL validation (MCP-only — uses fetch HEAD) ──
 
 function extractImageUrls(props, resolvedName) {
   const urls = [];
   if (!props) return urls;
-  if (resolvedName === 'Image' && props.content && typeof props.content === 'string') {
-    if (props.type === 'url' || (!props.type && props.content.startsWith('http'))) {
+  if (resolvedName === "Image" && props.content && typeof props.content === "string") {
+    if (props.type === "url" || (!props.type && props.content.startsWith("http"))) {
       urls.push(props.content);
     }
   }
-  if (props.backgroundImage && typeof props.backgroundImage === 'string' && props.backgroundImage.startsWith('http')) {
+  if (
+    props.backgroundImage &&
+    typeof props.backgroundImage === "string" &&
+    props.backgroundImage.startsWith("http")
+  ) {
     urls.push(props.backgroundImage);
   }
   return urls;
@@ -25,7 +25,7 @@ async function validateImageUrls(urls) {
   const failures = [];
   for (const url of urls) {
     try {
-      const resp = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(8000) });
+      const resp = await fetch(url, { method: "HEAD", signal: AbortSignal.timeout(8000) });
       if (!resp.ok) {
         failures.push({ url, status: resp.status });
       }

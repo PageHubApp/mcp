@@ -62,11 +62,11 @@ npm start
 
 ## Configuration
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `PAGEHUB_API_KEY` | Yes | API key from [pagehub.dev/dashboard](https://pagehub.dev/dashboard) |
-| `PAGEHUB_API_BASE_URL` | No | API base URL (default: `https://pagehub.dev`) |
-| `PAGEHUB_PROJECT_DIR` | No | Path to pagehub.dev repo root (for local template building) |
+| Variable               | Required | Description                                                         |
+| ---------------------- | -------- | ------------------------------------------------------------------- |
+| `PAGEHUB_API_KEY`      | Yes      | API key from [pagehub.dev/dashboard](https://pagehub.dev/dashboard) |
+| `PAGEHUB_API_BASE_URL` | No       | API base URL (default: `https://pagehub.dev`)                       |
+| `PAGEHUB_PROJECT_DIR`  | No       | Path to pagehub.dev repo root (for local template building)         |
 
 All configuration is passed via environment variables in the `env` block of your MCP client config. No config files are written to your project.
 
@@ -74,55 +74,55 @@ All configuration is passed via environment variables in the `env` block of your
 
 ### Discovery
 
-| Tool | Description |
-|------|-------------|
-| `list_blocks` | Browse pre-built block templates with visual descriptions and overridable displayNames |
+| Tool                   | Description                                                                              |
+| ---------------------- | ---------------------------------------------------------------------------------------- |
+| `list_blocks`          | Browse pre-built block templates with visual descriptions and overridable displayNames   |
 | `get_component_schema` | CraftJS component types and props reference (Container, Text, Image, Button, Form, etc.) |
-| `get_style_reference` | Palette CSS variables, styleGuide tokens, layout prop keys, responsive patterns |
-| `list_presets` | Curated theme presets by mood (see [Theme Presets](#theme-presets)) |
+| `get_style_reference`  | Palette CSS variables, styleGuide tokens, layout prop keys, responsive patterns          |
+| `list_presets`         | Curated theme presets by mood (see [Theme Presets](#theme-presets))                      |
 
 ### Template Building
 
-| Tool | Description |
-|------|-------------|
-| `create_template` | Scaffold a new template from the acme base |
-| `set_theme` | Configure palette, fonts, spacing, JSON-LD — supports loading a preset as base |
-| `add_block` | Add a pre-built block with content/prop overrides |
-| `add_custom_block` | Add a hand-crafted CraftJS node map (validates image URLs) |
-| `update_node` | Patch a single node's props (`className`, allowlisted `root`, content fields; validates image URLs) |
-| `insert_node` | Add a new node to an existing parent (validates image URLs) |
-| `delete_node` | Remove a node and descendants (protects structural nodes) |
-| `set_integrations` | Configure analytics/tracking (GA4, GTM, Search Console, Meta Pixel) — just pass the ID |
-| `set_redirects` | Configure 301/302 redirect rules for SEO (old path → new path) |
+| Tool               | Description                                                                                         |
+| ------------------ | --------------------------------------------------------------------------------------------------- |
+| `create_template`  | Scaffold a new template from the acme base                                                          |
+| `set_theme`        | Configure palette, fonts, spacing, JSON-LD — supports loading a preset as base                      |
+| `add_block`        | Add a pre-built block with content/prop overrides                                                   |
+| `add_custom_block` | Add a hand-crafted CraftJS node map (validates image URLs)                                          |
+| `update_node`      | Patch a single node's props (`className`, allowlisted `root`, content fields; validates image URLs) |
+| `insert_node`      | Add a new node to an existing parent (validates image URLs)                                         |
+| `delete_node`      | Remove a node and descendants (protects structural nodes)                                           |
+| `set_integrations` | Configure analytics/tracking (GA4, GTM, Search Console, Meta Pixel) — just pass the ID              |
+| `set_redirects`    | Configure 301/302 redirect rules for SEO (old path → new path)                                      |
 
 ### Block Library
 
-| Tool | Description |
-|------|-------------|
-| `list_example_blocks` | List blocks in an existing site by page |
-| `extract_block` | Convert a block to reusable template format (with optional templatize) |
-| `shuffle_block` | Swap a block for another template in the same category, preserving content |
-| `save_as_block_template` | Save extracted block as a new reusable template with metadata |
+| Tool                     | Description                                                                |
+| ------------------------ | -------------------------------------------------------------------------- |
+| `list_example_blocks`    | List blocks in an existing site by page                                    |
+| `extract_block`          | Convert a block to reusable template format (with optional templatize)     |
+| `shuffle_block`          | Swap a block for another template in the same category, preserving content |
+| `save_as_block_template` | Save extracted block as a new reusable template with metadata              |
 
 ### Remote API
 
-| Tool | Description |
-|------|-------------|
-| `register` | Create a free account — returns an API key automatically |
-| `list_templates` / `pull_template` | Browse and download stock templates from the API |
-| `list_sites` / `select_site` | List tenant's sites and set active site context |
-| `pull_site` / `save_site` / `delete_site` | Site CRUD |
-| `upload_image` | Upload to tenant CDN (validates MIME type) |
-| `patch_site_node` | Edit a single node on a live site |
-| `patch_site_bulk` | Apply multiple node patches atomically (race-condition safe — GET/PATCH/PUT in one operation) |
+| Tool                                      | Description                                                                                   |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `register`                                | Create a free account — returns an API key automatically                                      |
+| `list_templates` / `pull_template`        | Browse and download stock templates from the API                                              |
+| `list_sites` / `select_site`              | List tenant's sites and set active site context                                               |
+| `pull_site` / `save_site` / `delete_site` | Site CRUD                                                                                     |
+| `upload_image`                            | Upload to tenant CDN (validates MIME type)                                                    |
+| `patch_site_node`                         | Edit a single node on a live site                                                             |
+| `patch_site_bulk`                         | Apply multiple node patches atomically (race-condition safe — GET/PATCH/PUT in one operation) |
 
 ### Pages
 
-| Tool | Description |
-|------|-------------|
-| `list_pages` | List all pages in a site with flags (home, 404, hidden) |
-| `add_page` | Create a new page with SEO props and auto-positioning |
-| `update_page` | Update page name, home/404/hidden flags, and SEO metadata |
+| Tool          | Description                                                 |
+| ------------- | ----------------------------------------------------------- |
+| `list_pages`  | List all pages in a site with flags (home, 404, hidden)     |
+| `add_page`    | Create a new page with SEO props and auto-positioning       |
+| `update_page` | Update page name, home/404/hidden flags, and SEO metadata   |
 | `delete_page` | Remove a page and descendants (auto-promotes new home page) |
 
 **Custom 404 (`is404Page`):** Paid plans can mark one page as the site’s not-found canvas; unknown URLs render that page (with HTTP 404 on subdomains, `noindex` on ISR static). Free accounts cannot persist `is404Page` — the editor hides the toggle, `/api/save` strips the flag from compressed content, and `PUT /api/v1/sites/:id` strips it from decoded JSON before save.
@@ -131,38 +131,38 @@ All configuration is passed via environment variables in the `env` block of your
 
 **Editing existing library blocks:** prefer `list_block_nodes` then `patch_block` / `patch_block_bulk` (same patch fields as `patch_site_node`). Use `update_block` for metadata or a full `structure` replace. See repo root `BLOCKS-AI-CONTEXT.md`.
 
-| Tool | Description |
-|------|-------------|
-| `search_blocks` | Search the block library with filters (category, tags, source) |
-| `get_block` | Get full block structure by slug |
-| `list_block_nodes` | List deterministic `lib_*` node ids for patching a library block |
-| `patch_block` | Patch one node inside a library block (same fields as `patch_site_node`) |
-| `patch_block_bulk` | Patch many library block nodes in one GET/PUT |
-| `save_block` | Save a new block to the library |
-| `update_block` | Update block metadata or replace full structure |
-| `delete_block` | Remove a block from the library |
+| Tool               | Description                                                              |
+| ------------------ | ------------------------------------------------------------------------ |
+| `search_blocks`    | Search the block library with filters (category, tags, source)           |
+| `get_block`        | Get full block structure by slug                                         |
+| `list_block_nodes` | List deterministic `lib_*` node ids for patching a library block         |
+| `patch_block`      | Patch one node inside a library block (same fields as `patch_site_node`) |
+| `patch_block_bulk` | Patch many library block nodes in one GET/PUT                            |
+| `save_block`       | Save a new block to the library                                          |
+| `update_block`     | Update block metadata or replace full structure                          |
+| `delete_block`     | Remove a block from the library                                          |
 
 ### Portal
 
-| Tool | Description |
-|------|-------------|
-| `set_portal` | Enable a portal on a site |
-| `get_portal` | Get portal configuration |
+| Tool            | Description               |
+| --------------- | ------------------------- |
+| `set_portal`    | Enable a portal on a site |
+| `get_portal`    | Get portal configuration  |
 | `remove_portal` | Disable and remove portal |
 
 ### AI
 
-| Tool | Description |
-|------|-------------|
-| `generate_image` | Generate an image with AI, upload to CDN, and optionally apply to a node |
-| `generate_copy` | Generate or improve copy via the same `/api/ai/agent` path as the editor (`assistantScope: text`), not a separate improve API |
+| Tool             | Description                                                                                                                   |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `generate_image` | Generate an image with AI, upload to CDN, and optionally apply to a node                                                      |
+| `generate_copy`  | Generate or improve copy via the same `/api/ai/agent` path as the editor (`assistantScope: text`), not a separate improve API |
 
 ### Auditing
 
-| Tool | Description |
-|------|-------------|
+| Tool                  | Description                                                                 |
+| --------------------- | --------------------------------------------------------------------------- |
 | `audit_accessibility` | WCAG audit using axe-core (see [Accessibility Audit](#accessibility-audit)) |
-| `audit_seo` | SEO audit — meta tags, heading hierarchy, image alt text, content depth |
+| `audit_seo`           | SEO audit — meta tags, heading hierarchy, image alt text, content depth     |
 
 ## Key Features
 
@@ -188,15 +188,15 @@ Every preset includes input styling tokens (`inputBorderColor`, `inputBorderRadi
 
 Production-ready node structure recipes for layouts that pre-built templates don't cover:
 
-| Pattern | Description |
-|---------|-------------|
-| `bento-gallery` | Asymmetric photo grid (2x2 with one tall image) |
-| `rich-contact` | Hours + address + map + multi-field form |
-| `quote-testimonials` | Star ratings + quote cards in a grid |
-| `offering-list` | Menu/service list with title, description, optional price |
-| `split-feature` | Text left + image right (or reversed), with eyebrow label |
-| `multi-column-footer` | 3-4 column footer with nav links, contact, social |
-| `horizontal-scroller` | Horizontal scroll strip of tags/categories |
+| Pattern               | Description                                               |
+| --------------------- | --------------------------------------------------------- |
+| `bento-gallery`       | Asymmetric photo grid (2x2 with one tall image)           |
+| `rich-contact`        | Hours + address + map + multi-field form                  |
+| `quote-testimonials`  | Star ratings + quote cards in a grid                      |
+| `offering-list`       | Menu/service list with title, description, optional price |
+| `split-feature`       | Text left + image right (or reversed), with eyebrow label |
+| `multi-column-footer` | 3-4 column footer with nav links, contact, social         |
+| `horizontal-scroller` | Horizontal scroll strip of tags/categories                |
 
 Each pattern returns a complete flat node map ready for `add_custom_block`.
 
@@ -214,10 +214,10 @@ File write operations (`update_node`, `delete_node`, `insert_node`) are serializ
 
 WCAG compliance auditing with two engines:
 
-| Engine | When Used | Capabilities |
-|--------|-----------|-------------|
-| **Playwright + axe-core** | When `playwright-core` and `@axe-core/playwright` are installed | Full audit: contrast ratios, CSS evaluation, real browser rendering |
-| **jsdom + axe-core** | Fallback when Playwright unavailable | Structural audit only: heading hierarchy, form labels, ARIA — no contrast/CSS checks |
+| Engine                    | When Used                                                       | Capabilities                                                                         |
+| ------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| **Playwright + axe-core** | When `playwright-core` and `@axe-core/playwright` are installed | Full audit: contrast ratios, CSS evaluation, real browser rendering                  |
+| **jsdom + axe-core**      | Fallback when Playwright unavailable                            | Structural audit only: heading hierarchy, form labels, ARIA — no contrast/CSS checks |
 
 Supports WCAG levels A, AA (default), and AAA. Results are grouped by severity (critical, serious, moderate, minor) with HTML snippets and fix suggestions.
 
@@ -231,12 +231,12 @@ npx playwright install chromium
 
 **Integrations** — analytics and site verification via simple ID fields, rendered as proper `<script>`/`<meta>` tags on published pages.
 
-| Provider | ID Format | What it renders |
-|----------|-----------|-----------------|
-| Google Analytics (GA4) | `G-XXXXXXXXXX` | gtag.js + config script |
-| Google Tag Manager | `GTM-XXXXXXX` | GTM container script |
-| Google Search Console | verification code | `<meta name="google-site-verification">` |
-| Meta Pixel (Facebook) | pixel ID | fbevents.js + init/PageView |
+| Provider               | ID Format         | What it renders                          |
+| ---------------------- | ----------------- | ---------------------------------------- |
+| Google Analytics (GA4) | `G-XXXXXXXXXX`    | gtag.js + config script                  |
+| Google Tag Manager     | `GTM-XXXXXXX`     | GTM container script                     |
+| Google Search Console  | verification code | `<meta name="google-site-verification">` |
+| Meta Pixel (Facebook)  | pixel ID          | fbevents.js + init/PageView              |
 
 **Redirects** — server-side 301/302 redirect rules evaluated before page rendering.
 

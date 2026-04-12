@@ -62,15 +62,15 @@ Patterns provide battle-tested node structures for complex layouts. Always check
 3. patch_site_node / patch_site_bulk               → customize content
 ```
 
-| Pattern | When to use |
-|---------|------------|
-| `bento-gallery` | Photo-heavy sections needing visual variety (not a flat grid) |
-| `rich-contact` | Contact pages with hours, address, map, AND a form |
-| `quote-testimonials` | Customer reviews with star ratings |
-| `offering-list` | Menus, service lists, pricing rows |
-| `split-feature` | Feature sections with text on one side, image on the other |
-| `multi-column-footer` | Rich footers with multiple link columns |
-| `horizontal-scroller` | Tag strips, category filters, horizontal carousels |
+| Pattern               | When to use                                                   |
+| --------------------- | ------------------------------------------------------------- |
+| `bento-gallery`       | Photo-heavy sections needing visual variety (not a flat grid) |
+| `rich-contact`        | Contact pages with hours, address, map, AND a form            |
+| `quote-testimonials`  | Customer reviews with star ratings                            |
+| `offering-list`       | Menus, service lists, pricing rows                            |
+| `split-feature`       | Feature sections with text on one side, image on the other    |
+| `multi-column-footer` | Rich footers with multiple link columns                       |
+| `horizontal-scroller` | Tag strips, category filters, horizontal carousels            |
 
 ---
 
@@ -82,13 +82,13 @@ These rules are **as important as the technical rules**. Violating them produces
 
 Every page needs at least 4 levels of visual type weight. If all your text looks the same size, the page is flat.
 
-| Level | Use | Example Styling |
-|-------|-----|-----------------|
+| Level               | Use                                    | Example Styling                                                         |
+| ------------------- | -------------------------------------- | ----------------------------------------------------------------------- |
 | **Eyebrow / Label** | Section category, badge above headline | text-xs or text-sm, font-bold, tracking-widest, uppercase, accent color |
-| **Headline** | Section title, hero headline | text-4xl to text-6xl, heading font family, font-bold, primary color |
-| **Subhead / Lead** | Supporting paragraph under headline | text-lg to text-xl, body font, normal weight, secondary/muted color |
-| **Body** | Descriptions, card text, paragraphs | text-sm to text-base, body font, normal weight, text color |
-| **Meta / Small** | Dates, attribution, captions | text-xs to text-sm, muted/alternate color |
+| **Headline**        | Section title, hero headline           | text-4xl to text-6xl, heading font family, font-bold, primary color     |
+| **Subhead / Lead**  | Supporting paragraph under headline    | text-lg to text-xl, body font, normal weight, secondary/muted color     |
+| **Body**            | Descriptions, card text, paragraphs    | text-sm to text-base, body font, normal weight, text color              |
+| **Meta / Small**    | Dates, attribution, captions           | text-xs to text-sm, muted/alternate color                               |
 
 **Rule:** Every section should have an eyebrow OR a headline. Sections with just body text look like placeholders.
 
@@ -126,6 +126,7 @@ Split / full-bleed media: include both radius and `overflow-hidden` in className
 Forms are the most commonly broken element. Without explicit styling, they look like unstyled HTML from 1999.
 
 **Buttons (especially submit):**
+
 ```
 className: "bg-primary text-primary-content rounded-box w-full py-3.5 px-6 font-semibold text-sm text-center flex justify-center items-center md:w-fit"
 ```
@@ -135,6 +136,7 @@ className: "bg-primary text-primary-content rounded-box w-full py-3.5 px-6 font-
 **Form elements** get their styling from the theme's `styleGuide` input tokens. These MUST be set in `set_theme` — without them, inputs render as barely-visible browser defaults.
 
 **Required input tokens in styleGuide:**
+
 ```json
 {
   "border": "1px",
@@ -162,6 +164,7 @@ className: "bg-primary text-primary-content rounded-box w-full py-3.5 px-6 font-
 **This is non-negotiable.** Include these classes on every FormElement node. The CSS variables pull values from the styleGuide tokens you set in `set_theme`.
 
 **Form card wrapper:** Always wrap forms in a card container with:
+
 - Background (`bg-base-100`)
 - Padding (`p-8` to `p-10`)
 - Border radius
@@ -182,6 +185,7 @@ Tabular data like hours, pricing rows, or stats need tight, consistent formattin
 PageHub has a built-in icon system with 2000+ Google Material Symbols. **Never use emoji characters** (☕, →, ▸, ★) as content — they render inconsistently across devices and look unprofessional.
 
 **How icons work:**
+
 - Icons are set on Button components via the `icon` prop
 - **Material Symbols render as a font** (ligatures), not SVG. Small `w-5` / `w-6` boxes often look **tiny** next to `btn-md` or uppercase labels — use **`w-7 h-7` or `w-8 h-8`** for typical CTAs and nav icons, **`w-8`–`w-10`** for hero chips / large tiles, **`w-6` minimum** for dense icon-only controls (menu/close), often **`w-7`** in mobile drawers.
 - Format: `icon: { value: "ref-google:icon_name", position: "left", size: "w-7 h-7", gap: "gap-2" }`
@@ -213,6 +217,7 @@ PageHub has a built-in icon system with 2000+ Google Material Symbols. **Never u
 **Icon-only buttons** (no text, just icon): set `icon.only: true`
 
 **Example — button with icon:**
+
 ```json
 {
   "text": "Get Directions",
@@ -229,6 +234,7 @@ PageHub has a built-in icon system with 2000+ Google Material Symbols. **Never u
 **CRITICAL: `ref-google:*` ONLY works on Button `icon.value`.** Putting `ref-google:account_balance` as text content in a Text node renders the literal string, not an icon. For icon-only display, use a Button with `icon.only: true`.
 
 **Where NOT to use icons (use Text instead):**
+
 - Star ratings in testimonials — use `★` characters in a Text node (these are content, not UI icons)
 - Decorative separators — use `·` or `—` in text
 - Arrows in menu lists — these are presentational, a Text node with `→` is acceptable
@@ -238,6 +244,7 @@ PageHub has a built-in icon system with 2000+ Google Material Symbols. **Never u
 To layer a gradient overlay on top of a background image (e.g. dark hero with readable text), use the `backgroundOverlay` prop on any Container. **Do NOT use `root.style` for this — the overlay prop handles it cleanly.**
 
 **Preset strings (easiest):**
+
 ```json
 {
   "backgroundImage": "https://...",
@@ -246,16 +253,17 @@ To layer a gradient overlay on top of a background image (e.g. dark hero with re
 }
 ```
 
-| Preset | Effect |
-|--------|--------|
-| `dark-left` | Dark gradient from left, fading right |
-| `dark-right` | Dark gradient from right, fading left |
-| `dark-bottom` | Dark gradient from bottom, fading up |
-| `dark-top` | Dark gradient from top, fading down |
-| `dark` | Uniform dark overlay |
-| `light` | Uniform light overlay |
+| Preset        | Effect                                |
+| ------------- | ------------------------------------- |
+| `dark-left`   | Dark gradient from left, fading right |
+| `dark-right`  | Dark gradient from right, fading left |
+| `dark-bottom` | Dark gradient from bottom, fading up  |
+| `dark-top`    | Dark gradient from top, fading down   |
+| `dark`        | Uniform dark overlay                  |
+| `light`       | Uniform light overlay                 |
 
 **Custom object (full control):**
+
 ```json
 {
   "backgroundOverlay": {
@@ -278,6 +286,7 @@ The renderer combines the overlay gradient and image into a single CSS `backgrou
 **Automatic URL validation:** `add_custom_block`, `update_node`, and `insert_node` send a HEAD request to every image URL before writing. The timeout is 8 seconds. If any URL fails (non-200 status or timeout), the entire operation is **blocked** — you'll get an error listing each bad URL and its status. Fix the URLs and retry.
 
 **What's validated:**
+
 - `Image` component `content` prop (when `type: "url"` or URL starts with `http`)
 - `backgroundImage` props on any node
 
@@ -293,6 +302,7 @@ The renderer combines the overlay gradient and image into a single CSS `backgrou
 ### 9. Section Rhythm
 
 A well-designed page alternates between:
+
 - **Light section** (default background)
 - **Tinted section** (alternate background)
 - **Dark band** (primary/accent background)
@@ -303,6 +313,7 @@ Never have 4+ consecutive sections with the same background. The page looks like
 ### 10. The "Does This Look Real?" Test
 
 Before finishing, mentally check each section:
+
 - Would a real business pay for this design? If it looks like a Bootstrap demo, rebuild it.
 - Does every section have visual interest — an image, a card grid, a color band, or typographic variety?
 - Are there at least 2 different section background colors used across the page?
@@ -313,36 +324,43 @@ Before finishing, mentally check each section:
 Sites MUST comply with WCAG 2.1 Level AA to avoid lawsuits under California's Unruh Act ($4,000+ per violation) and the EU European Accessibility Act. These are **mandatory**, not optional polish.
 
 #### Images
+
 - **Every `<Image>` MUST have `alt` text.** Decorative images get `alt: ""`. Content images get descriptive alt text.
 - Never use images of text when actual text can achieve the same effect.
 
 #### Headings & Structure
+
 - Use proper heading hierarchy: `h1` → `h2` → `h3`. Never skip levels (e.g., `h1` → `h4`).
 - Only ONE `h1` per page (typically the hero headline).
 - Use semantic container types: `"header"`, `"nav"`, `"section"`, `"footer"`, `"main"`, `"aside"`.
 
 #### Forms (Critical — Most Common Violation)
+
 - **Every form input MUST have a `label` prop.** This renders a visible `<label>` element. Placeholder text is NOT a substitute for a label.
 - Set `autocomplete` on personal data fields: `"name"`, `"email"`, `"tel"`, `"street-address"`, `"postal-code"`, `"organization"`.
 - Mark required fields with `required: true`.
 - Use descriptive `formName` on Form containers (used as `aria-label`).
 
 #### Buttons & Links
+
 - Icon-only buttons MUST have text in the `text` prop (used as `aria-label` when `icon.only` is true).
 - Links to external URLs automatically get `rel="noopener noreferrer"` — no action needed.
 - Link text must be descriptive. Never use "Click here" or "Read more" alone — include context: "Read more about our pricing".
 
 #### Color Contrast
+
 - Text on backgrounds must meet **4.5:1** contrast ratio (normal text) or **3:1** (large text 18px+).
 - Don't convey information by color alone — add icons or text labels alongside color indicators.
 - Use theme palette slots that have been designed for contrast: text on background, primary-text on primary, etc.
 
 #### Navigation
+
 - Every site gets a skip navigation link automatically (built into the renderer).
 - Navigation menus use `<nav>` (Container type `"nav"`) — this happens automatically with the Nav component in navbar blocks.
 - **Header blocks and MCP structures:** Prefer the **`Nav`** component (not a lone `ButtonList`) for editable desktop links + hamburger + slide overlay. It matches templates (`acme` header) and the library seed `navbar` (`scripts/seed/data/blocks/navbar.block.json`): `menu.id` must match the overlay `Container` `id` and hamburger `click.value`; duplicate link buttons inside the panel `ButtonList` for static/preview (omit `source` unless you have stable Craft node ids).
 
 #### Motion & Animation
+
 - The SDK respects `prefers-reduced-motion` automatically. No action needed, but don't rely on animation to convey essential information.
 
 #### Automated Auditing with `audit_accessibility`
@@ -361,6 +379,7 @@ audit_accessibility(url: "...", level: "AAA")        → stricter AAA audit
 Results are grouped by severity (critical → serious → moderate → minor) with HTML snippets and `helpUrl` links to fix guidance. Fix critical and serious violations first.
 
 #### Checklist Before Finalizing
+
 - [ ] All images have `alt` text
 - [ ] Heading hierarchy is sequential (h1 → h2 → h3)
 - [ ] All form inputs have `label` props
@@ -383,7 +402,7 @@ For EVERY block, follow this process:
    - "Kinda close" = NOT a match
 2. Call `list_example_blocks` on decoded examples — similar block in an existing site?
    - YES → `extract_block` → adapt → `add_custom_block`
-4. None of the above? Build from scratch with `add_custom_block` using the component schema
+3. None of the above? Build from scratch with `add_custom_block` using the component schema
 
 ### The Golden Rule
 
@@ -391,14 +410,14 @@ For EVERY block, follow this process:
 
 ### Anti-Patterns — NEVER DO THESE
 
-| Anti-pattern | Why it fails | Do this instead |
-|---|---|---|
-| Using `hero-2` for a split hero with image | hero-2 is centered text only, min-h-screen = huge whitespace | Use `hero-3` or build custom |
-| Using `team-1` for testimonials | Team profiles ≠ review quotes | Use `testimonials-1` or build custom quote cards |
-| Using `optin-1` for contact form | Single email field ≠ multi-field form | Build custom with Form + multiple FormElements |
-| Using `texts-1` for anything complex | It's literally just a centered heading + paragraph | Build custom |
-| Forcing ANY pre-built template when it doesn't match | Generic output, broken proportions | Always build custom when no template fits |
-| Making every block centered text | Page looks like a PowerPoint slide | Use split layouts, left-aligned text, asymmetric compositions |
+| Anti-pattern                                         | Why it fails                                                 | Do this instead                                               |
+| ---------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------- |
+| Using `hero-2` for a split hero with image           | hero-2 is centered text only, min-h-screen = huge whitespace | Use `hero-3` or build custom                                  |
+| Using `team-1` for testimonials                      | Team profiles ≠ review quotes                                | Use `testimonials-1` or build custom quote cards              |
+| Using `optin-1` for contact form                     | Single email field ≠ multi-field form                        | Build custom with Form + multiple FormElements                |
+| Using `texts-1` for anything complex                 | It's literally just a centered heading + paragraph           | Build custom                                                  |
+| Forcing ANY pre-built template when it doesn't match | Generic output, broken proportions                           | Always build custom when no template fits                     |
+| Making every block centered text                     | Page looks like a PowerPoint slide                           | Use split layouts, left-aligned text, asymmetric compositions |
 
 ---
 
@@ -408,13 +427,14 @@ For EVERY block, follow this process:
 
 Components can animate into view when the user scrolls to them. Set `root.animation` to one of these values:
 
-| Animation | Effect | Best For |
-|-----------|--------|----------|
-| `spring` | Fades in + scales from 0 to 1 (once, on scroll into view) | Cards, images, sections appearing on scroll |
-| `hoverGrow` | Scales up on hover, shrinks on tap | Buttons, cards, interactive elements |
-| `tween` | Continuous 360° rotation | Loading spinners, decorative elements |
+| Animation   | Effect                                                    | Best For                                    |
+| ----------- | --------------------------------------------------------- | ------------------------------------------- |
+| `spring`    | Fades in + scales from 0 to 1 (once, on scroll into view) | Cards, images, sections appearing on scroll |
+| `hoverGrow` | Scales up on hover, shrinks on tap                        | Buttons, cards, interactive elements        |
+| `tween`     | Continuous 360° rotation                                  | Loading spinners, decorative elements       |
 
 **Example — cards that fade in on scroll:**
+
 ```json
 {
   "className": "bg-base-200 text-base-content rounded-box border shadow-sm p-6",
@@ -443,6 +463,7 @@ Buttons can show, hide, toggle, or **tab-switch** other elements by DOM ID. The 
 **How to build tabs:**
 
 1. Give each content panel a DOM `id` and a `tabGroup` prop (same group name):
+
 ```json
 {
   "id": "panel-coffee",
@@ -452,6 +473,7 @@ Buttons can show, hide, toggle, or **tab-switch** other elements by DOM ID. The 
 ```
 
 2. Panels that start hidden use `hidden` in className:
+
 ```json
 {
   "id": "panel-food",
@@ -461,6 +483,7 @@ Buttons can show, hide, toggle, or **tab-switch** other elements by DOM ID. The 
 ```
 
 3. Tab buttons use `direction: "tab"` with the `group` matching the `tabGroup`:
+
 ```json
 {
   "text": "Coffee & Drinks",
@@ -469,12 +492,14 @@ Buttons can show, hide, toggle, or **tab-switch** other elements by DOM ID. The 
 ```
 
 **What `tab` does automatically:**
+
 - Hides ALL elements with `data-tab-group="menu-tabs"`
 - Shows the element with `id="panel-coffee"`
 - Dims all sibling `data-tab-button` elements (opacity 0.6)
 - Highlights the clicked button (opacity 1)
 
 **Complete node structure for tabs:**
+
 ```
 Container "Tab Buttons" (ButtonList, flex-row)
   ├── Button "Coffee" → click: { type: "click", direction: "tab", value: "panel-coffee", group: "menu-tabs" }
@@ -490,6 +515,7 @@ Container "Panel Food" (id: "panel-food", tabGroup: "menu-tabs", display: hidden
 ```
 
 **Key props:**
+
 - Container: `id` (DOM id), `tabGroup` (renders as `data-tab-group`)
 - Button: `click.direction: "tab"`, `click.value` (target panel id), `click.group` (must match `tabGroup`)
 
@@ -499,24 +525,25 @@ Text and Button components use the unified `action` prop for all link and intera
 
 **Action types supported on Text and Button:**
 
-| Type | Props | Use for |
-|------|-------|---------|
-| `link-url` | `url`, `target` | External links, absolute URLs |
-| `link-page` | `pageId`, `target` | Internal page navigation |
-| `scroll-to` | `anchor` | Anchor links to sections (nav → section `id`) |
-| `email` | `email`, `subject?`, `body?` | Contact email (renders as `mailto:`) |
-| `phone` | `phone` | Phone numbers (renders as `tel:`) |
-| `copy-to-clipboard` | `text` | Copy text on click |
-| `download-file` | `url`, `filename?` | File download trigger |
+| Type                | Props                        | Use for                                       |
+| ------------------- | ---------------------------- | --------------------------------------------- |
+| `link-url`          | `url`, `target`              | External links, absolute URLs                 |
+| `link-page`         | `pageId`, `target`           | Internal page navigation                      |
+| `scroll-to`         | `anchor`                     | Anchor links to sections (nav → section `id`) |
+| `email`             | `email`, `subject?`, `body?` | Contact email (renders as `mailto:`)          |
+| `phone`             | `phone`                      | Phone numbers (renders as `tel:`)             |
+| `copy-to-clipboard` | `text`                       | Copy text on click                            |
+| `download-file`     | `url`, `filename?`           | File download trigger                         |
 
 **Button-only action types (not on Text):**
 
-| Type | Props | Use for |
-|------|-------|---------|
-| `show-hide` | `target`, `direction`, `method`, `group?` | Mobile menus, dropdowns, tabs |
-| `open-modal` | `anchor` | Open a modal by ID |
+| Type         | Props                                     | Use for                       |
+| ------------ | ----------------------------------------- | ----------------------------- |
+| `show-hide`  | `target`, `direction`, `method`, `group?` | Mobile menus, dropdowns, tabs |
+| `open-modal` | `anchor`                                  | Open a modal by ID            |
 
 **Examples:**
+
 ```json
 // External link on a Text heading
 { "text": "PageHub", "tagName": "h3", "action": { "type": "link-url", "url": "https://pagehub.dev", "target": "_blank" } }
@@ -532,6 +559,7 @@ Text and Button components use the unified `action` prop for all link and intera
 ```
 
 **Rules:**
+
 - Nav links to page sections: use `scroll-to`, not `link-url` with `#anchor`
 - Contact email/phone: use `email`/`phone` types, not `link-url` with `mailto:`/`tel:`
 - Mobile nav overlays: `show-hide` with `method: "style"` (container needs `root.style: "display: none;"`)
@@ -554,6 +582,7 @@ Exception: `bg-transparent`, opacity modifiers (`bg-white/10`).
 Match text to background: `bg-primary` → `text-primary-content`.
 
 **Common mistakes:**
+
 - **`text-neutral-content`** is ONLY valid on `bg-neutral`. On other surfaces use `text-base-content/70` for muted text.
 - **`btn-primary` on dark themes:** if Primary ≈ Base 100 (both dark), the button is invisible. Use explicit `bg-* text-* px-* py-*` instead.
 - **`max-w-content`** is Tailwind's native `max-width: max-content` (shrinks to content). NEVER use for layout containers. Use `max-w-page` (maps to `--content-width`, default 80rem).
@@ -601,6 +630,7 @@ ROOT → NO gap/padding/margin
 ### Responsive — Mobile First (className)
 
 Every node uses a single `props.className` string with all Tailwind utilities. Mobile-first:
+
 - Unprefixed classes = base styles (all sizes)
 - `md:` prefix = 768px+ (desktop overrides)
 - `lg:` prefix = 1024px+ (use for dense grids, split layouts that would be squeezed on tablet)
@@ -619,26 +649,29 @@ A Text node is for **one piece of content** — a heading, a paragraph, a captio
 
 **The Rule: If you need a `<br/>` to separate DIFFERENT types of content, you need SEPARATE NODES instead.**
 
-| Wrong (one Text node) | Right (separate nodes) |
-|---|---|
-| `"123 Main St<br/>Los Angeles<br/>(555) 123-4567"` | 3 Text nodes: street, city, phone — each with own styling |
-| `"© 2026 Acme · <a href='/privacy'>Privacy</a> · <a href='/terms'>Terms</a>"` | 1 Text node for copyright + ButtonList with link buttons |
-| `"Company Name<br/>Tagline<br/>Address"` | Container with 3 child Text nodes |
+| Wrong (one Text node)                                                         | Right (separate nodes)                                    |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `"123 Main St<br/>Los Angeles<br/>(555) 123-4567"`                            | 3 Text nodes: street, city, phone — each with own styling |
+| `"© 2026 Acme · <a href='/privacy'>Privacy</a> · <a href='/terms'>Terms</a>"` | 1 Text node for copyright + ButtonList with link buttons  |
+| `"Company Name<br/>Tagline<br/>Address"`                                      | Container with 3 child Text nodes                         |
 
 **Why:** Each Text node can have its own `tagName`, `fontSize`, `fontWeight`, `color`. When you cram everything into one node, you lose all typographic control. The footer example above — copyright, address, and nav links all in one `<p>` — means you can't style the nav links differently from the address, can't change font sizes, can't adjust spacing between lines.
 
 **Allowed inline formatting** (within a SINGLE text purpose):
+
 - `<strong>`, `<em>` — bold/italic emphasis within a sentence
 - `<span style="...">` — inline color/style within a sentence
 - `<br/>` — ONLY for line breaks within the SAME content block (e.g. a multi-line address)
 
 **NEVER in text values:**
+
 - `<p>`, `<div>`, `<h1>`-`<h6>` — use `tagName` prop instead
 - `<a>` tags for navigation links — use Button components instead (they get proper hover states, click tracking, and accessibility)
 - Multiple `<br/>` to create spacing — use separate nodes with margin/padding
 - Complex HTML with classes — this bypasses the design system
 
 **Footer example — right way:**
+
 ```
 ftr_inner (Container, flex-col, gap-space-md, items-center)
   ├── ftr_brand (Text, "{{company.name}}", h3, font-bold, text-lg)
@@ -654,6 +687,7 @@ ftr_inner (Container, flex-col, gap-space-md, items-center)
 ```
 
 **Footer conventions:**
+
 - **Nav links:** use `link link-hover` classes (DaisyUI), not raw `bg-transparent border-0` button styles — gives underline-on-hover for free
 - **Social icons:** use `btn btn-ghost` for hover/focus states
 - **Dividers:** any `border-t` separator needs `pt-space-sm` for breathing room above the rule
@@ -666,66 +700,66 @@ ftr_inner (Container, flex-col, gap-space-md, items-center)
 
 Never use unicode escapes (`\u00a9`) or raw special characters in text content — they can fail to render across different contexts. Always use HTML entities:
 
-| Character | Entity | Use |
-|-----------|--------|-----|
-| © | `&copy;` | Copyright |
-| — | `&mdash;` | Em dash |
-| – | `&ndash;` | En dash |
-| · | `&middot;` | Middle dot separator |
-| → | `&rarr;` | Arrow (in text, not icons) |
-| " " | `&ldquo;` `&rdquo;` | Smart quotes |
-| ' ' | `&lsquo;` `&rsquo;` | Smart apostrophes |
-| & | `&amp;` | Ampersand (when literal) |
-| ™ | `&trade;` | Trademark |
-| ® | `&reg;` | Registered |
+| Character | Entity              | Use                        |
+| --------- | ------------------- | -------------------------- |
+| ©         | `&copy;`            | Copyright                  |
+| —         | `&mdash;`           | Em dash                    |
+| –         | `&ndash;`           | En dash                    |
+| ·         | `&middot;`          | Middle dot separator       |
+| →         | `&rarr;`            | Arrow (in text, not icons) |
+| " "       | `&ldquo;` `&rdquo;` | Smart quotes               |
+| ' '       | `&lsquo;` `&rsquo;` | Smart apostrophes          |
+| &         | `&amp;`             | Ampersand (when literal)   |
+| ™         | `&trade;`           | Trademark                  |
+| ®         | `&reg;`             | Registered                 |
 
 ### Template Variables — Never Hardcode Business Info
 
-| Variable | Use |
-|----------|-----|
-| `{{company.name}}` | Business name |
-| `{{company.tagline}}` | Tagline |
-| `{{company.location}}` | City, State |
-| `{{company.address}}` | Street address |
-| `{{company.phone}}` | Phone |
-| `{{company.email}}` | Email |
-| `{{year}}` | Current year |
+| Variable               | Use            |
+| ---------------------- | -------------- |
+| `{{company.name}}`     | Business name  |
+| `{{company.tagline}}`  | Tagline        |
+| `{{company.location}}` | City, State    |
+| `{{company.address}}`  | Street address |
+| `{{company.phone}}`    | Phone          |
+| `{{company.email}}`    | Email          |
+| `{{year}}`             | Current year   |
 
 ### className Utilities Reference
 
 All styling goes in a single `props.className` string. Common utilities:
 
-| Category | Examples |
-|----------|---------|
-| Display | `flex`, `grid`, `block`, `hidden` |
-| Flex | `flex-row`, `flex-col`, `items-center`, `justify-between` |
-| Grid | `grid-cols-1` to `grid-cols-12` |
-| Gap | `gap-4`, `gap-container` |
-| Width | `w-full`, `w-1/2`, `w-[75%]` |
-| Max width | `max-w-page`, `max-w-3xl` |
-| Height | `h-auto`, `h-[400px]`, `min-h-screen` |
-| Padding | `py-20`, `px-6`, `p-8` |
-| Margin | `mx-auto`, `mt-4` |
-| Position | `relative`, `absolute`, `z-10` |
-| Overflow | `overflow-hidden`, `overflow-auto` |
-| Background | `bg-primary`, `bg-base-200`, `bg-transparent` |
-| Text color | `text-base-content`, `text-primary-content` |
-| Border | `border`, `border-(--card)`, `border-2` |
-| Radius | `rounded-box`, `rounded-box` |
-| Shadow | `shadow-sm`, `shadow-md`, `shadow-lg` |
-| Typography | `text-4xl`, `font-bold`, `leading-relaxed` |
+| Category   | Examples                                                  |
+| ---------- | --------------------------------------------------------- |
+| Display    | `flex`, `grid`, `block`, `hidden`                         |
+| Flex       | `flex-row`, `flex-col`, `items-center`, `justify-between` |
+| Grid       | `grid-cols-1` to `grid-cols-12`                           |
+| Gap        | `gap-4`, `gap-container`                                  |
+| Width      | `w-full`, `w-1/2`, `w-[75%]`                              |
+| Max width  | `max-w-page`, `max-w-3xl`                                 |
+| Height     | `h-auto`, `h-[400px]`, `min-h-screen`                     |
+| Padding    | `py-20`, `px-6`, `p-8`                                    |
+| Margin     | `mx-auto`, `mt-4`                                         |
+| Position   | `relative`, `absolute`, `z-10`                            |
+| Overflow   | `overflow-hidden`, `overflow-auto`                        |
+| Background | `bg-primary`, `bg-base-200`, `bg-transparent`             |
+| Text color | `text-base-content`, `text-primary-content`               |
+| Border     | `border`, `border-(--card)`, `border-2`                   |
+| Radius     | `rounded-box`, `rounded-box`                              |
+| Shadow     | `shadow-sm`, `shadow-md`, `shadow-lg`                     |
+| Typography | `text-4xl`, `font-bold`, `leading-relaxed`                |
 
 Desktop overrides use `md:` prefix: `md:flex-row md:gap-8 md:py-24`
 
 ### Node Structure (for add_custom_block)
-
 
 ```json
 {
   "type": { "resolvedName": "Container" },
   "isCanvas": true,
   "props": {
-    "canDelete": true, "canEditName": true,
+    "canDelete": true,
+    "canEditName": true,
     "type": "section",
     "className": "flex flex-col w-full py-16 px-6 bg-base-100 text-base-content md:py-24",
     "custom": { "displayName": "Section Name" }
@@ -750,33 +784,37 @@ Study the reference and extract **specific, reusable techniques** — not generi
 **Extract these categories:**
 
 #### Micro-design elements (the details that separate "designed" from "wireframe")
-| Element | What to look for | Example extraction |
-|---------|-----------------|-------------------|
-| **Eyebrow badges** | Pill shape? Colored dot prefix? Background fill? Border? | "Rounded-full pill, bg-gray-100, text-xs tracking-widest, gold dot before text" |
-| **Buttons** | Shape, fill, icon, hover effect | "Dark pill buttons with arrow_forward icon right, text-swap on hover" |
-| **Dividers** | Vertical between stats? Accent underlines? Border widths? | "1px vertical divider between stat blocks, border-neutral/30 opacity" |
-| **Stat numbers** | Oversized with suffix? Colored? Font contrast? | "Giant 72px heading-font number + smaller 24px 'Y+' suffix inline" |
-| **Section labels** | Just text? In a badge? With icon/dot? | "Pill badge with colored dot + uppercase text, not plain uppercase" |
+
+| Element            | What to look for                                          | Example extraction                                                              |
+| ------------------ | --------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| **Eyebrow badges** | Pill shape? Colored dot prefix? Background fill? Border?  | "Rounded-full pill, bg-gray-100, text-xs tracking-widest, gold dot before text" |
+| **Buttons**        | Shape, fill, icon, hover effect                           | "Dark pill buttons with arrow_forward icon right, text-swap on hover"           |
+| **Dividers**       | Vertical between stats? Accent underlines? Border widths? | "1px vertical divider between stat blocks, border-neutral/30 opacity"           |
+| **Stat numbers**   | Oversized with suffix? Colored? Font contrast?            | "Giant 72px heading-font number + smaller 24px 'Y+' suffix inline"              |
+| **Section labels** | Just text? In a badge? With icon/dot?                     | "Pill badge with colored dot + uppercase text, not plain uppercase"             |
 
 #### Typography tricks
-| Trick | What to look for |
-|-------|-----------------|
-| **Fading text** | Last line of a paragraph in muted/lighter color — draws reader in then trails off |
-| **Size contrast** | Massive stat numbers vs tiny labels. Large serif heading vs small sans body |
-| **Mixed families** | Serif headings + sans body creates instant sophistication |
-| **Weight play** | Thin body text (300) vs black headings (900) within same family |
+
+| Trick              | What to look for                                                                  |
+| ------------------ | --------------------------------------------------------------------------------- |
+| **Fading text**    | Last line of a paragraph in muted/lighter color — draws reader in then trails off |
+| **Size contrast**  | Massive stat numbers vs tiny labels. Large serif heading vs small sans body       |
+| **Mixed families** | Serif headings + sans body creates instant sophistication                         |
+| **Weight play**    | Thin body text (300) vs black headings (900) within same family                   |
 
 #### Layout structures (copy these 1:1 — they're patterns, not identity)
-| Pattern | What to look for |
-|---------|-----------------|
-| **Nav** | Logo position, separator line, link arrangement, right-side CTA button styling |
-| **Hero** | Full-bleed image + overlay? Split layout? Centered text-only? What's the gradient? |
-| **Split sections** | Column ratio, vertical alignment, what goes on each side |
-| **Card grids** | Column count, card styling (border vs shadow vs bg), internal layout |
-| **Form cards** | Shadow, border-radius, header text, subtitle, response-time note, input styling |
-| **Footer** | Column count, link grouping, dark/light, social icon placement |
+
+| Pattern            | What to look for                                                                   |
+| ------------------ | ---------------------------------------------------------------------------------- |
+| **Nav**            | Logo position, separator line, link arrangement, right-side CTA button styling     |
+| **Hero**           | Full-bleed image + overlay? Split layout? Centered text-only? What's the gradient? |
+| **Split sections** | Column ratio, vertical alignment, what goes on each side                           |
+| **Card grids**     | Column count, card styling (border vs shadow vs bg), internal layout               |
+| **Form cards**     | Shadow, border-radius, header text, subtitle, response-time note, input styling    |
+| **Footer**         | Column count, link grouping, dark/light, social icon placement                     |
 
 #### Visual depth (what creates the "wow moment")
+
 - Background images with gradient overlays — extract the gradient direction and opacity; implement with **`backgroundOverlay`** on Container (not `root.style`) for blocks/kit JSON
 - Section background alternation rhythm — map the exact sequence (white → tinted → white → dark)
 - **Styling model:** layout, surface, and typography use **`props.className`** only. **`props.root`** carries allowlisted non-class fields (**`ROOT_KEPT`** in `scripts/TemplateBuilder.js`): animations, patterns, presets, layout metadata, and optional **`root.style`** for CSS effects Tailwind cannot express (`backdrop-filter`, complex shadows). Do **not** use **`root.style`** for gradients over images — use **`backgroundOverlay`** or utilities in **`className`**. New **library / MCP** blocks avoid **`root.style`** unless unavoidable; prefer tokens in **`className`**.
@@ -792,6 +830,7 @@ If the answer is "none" → you're building from muscle memory. Stop and re-read
 ```
 
 **What transfers 1:1 (structural patterns):**
+
 - Nav layout (logo | separator | links ... CTA)
 - Form card structure (title, subtitle, inputs, CTA, response note)
 - Badge/pill styling
@@ -800,6 +839,7 @@ If the answer is "none" → you're building from muscle memory. Stop and re-read
 - Section background rhythm
 
 **What gets replaced (brand identity):**
+
 - Color palette → new palette for new niche
 - Copy/text → new copy for new niche
 - Imagery → new images for new niche
@@ -809,17 +849,20 @@ If the answer is "none" → you're building from muscle memory. Stop and re-read
 ### Step 3: Palette & Typography
 
 Identify the reference's **color relationships** (not just the colors):
+
 - What's the accent usage pattern? (CTAs only? Badges + CTAs? Large bands?)
 - What creates contrast between sections? (bg alternation? border? shadow?)
 - Map to 12 palette slots, or use `list_presets(mood)` and override.
 
 Match **typographic weight contrast**, not specific fonts:
+
 - If reference uses heavy serif headings + light sans body, pick fonts with similar weight range
 - Verify Google Font weight availability before committing
 
 ### Step 4: Build Section by Section
 
 Build one section at a time. After each, screenshot and verify the techniques are visible:
+
 - Does the eyebrow have the pill/badge treatment from the reference? Or is it plain text?
 - Does the hero have the gradient overlay / image treatment? Or is it flat?
 - Do the buttons have the right shape/icon/style? Or are they generic rectangles?
@@ -829,7 +872,7 @@ If a section doesn't show evidence of transferred techniques, fix it before movi
 
 ### Step 5: The "Could You Tell?" Test
 
-Compare your output to the reference. A viewer should see the family resemblance in *technique* — similar rhythm, similar polish, similar structural patterns — but NOT mistake it for the same site. Different niche, different palette, different imagery, different copy. Same level of craft.
+Compare your output to the reference. A viewer should see the family resemblance in _technique_ — similar rhythm, similar polish, similar structural patterns — but NOT mistake it for the same site. Different niche, different palette, different imagery, different copy. Same level of craft.
 
 ---
 
@@ -852,4 +895,4 @@ Compare your output to the reference. A viewer should see the family resemblance
 
 ## pagehub.dev monorepo (when you edit the repo, not only MCP over HTTP)
 
-The main **pagehub.dev** codebase is a **pnpm** workspace: **`pnpm install`** and **`pnpm run build`** from the **repository root**; lockfile **`pnpm-lock.yaml`**. SDK source is **`packages/sdk`** (`@pagehub/sdk`). Authoritative rules for coding agents: repo root **`README.md`**, **`.cursorrules`**, **`CLAUDE.md`**, and **`packages/mcp/README.md`** (section *Working in the pagehub.dev monorepo*).
+The main **pagehub.dev** codebase is a **pnpm** workspace: **`pnpm install`** and **`pnpm run build`** from the **repository root**; lockfile **`pnpm-lock.yaml`**. SDK source is **`packages/sdk`** (`@pagehub/sdk`). Authoritative rules for coding agents: repo root **`README.md`**, **`.cursorrules`**, **`CLAUDE.md`**, and **`packages/mcp/README.md`** (section _Working in the pagehub.dev monorepo_).

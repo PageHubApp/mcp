@@ -1,5 +1,5 @@
-const { normalizeBaseUrl, config, delegateHandlers } = require('../config');
-const coreHandlers = require('@pagehub/mcp-core/src/handlers/remote');
+const { normalizeBaseUrl, config, delegateHandlers } = require("../config");
+const coreHandlers = require("@pagehub/mcp-core/src/handlers/remote");
 
 // Delegate most handlers to mcp-core
 const delegated = delegateHandlers(coreHandlers);
@@ -9,33 +9,40 @@ module.exports = {
 
   async register(args) {
     const envBase = normalizeBaseUrl(process.env.PAGEHUB_API_BASE_URL);
-    const baseUrl = envBase || normalizeBaseUrl(config.apiBaseUrl) || 'https://pagehub.dev';
+    const baseUrl = envBase || normalizeBaseUrl(config.apiBaseUrl) || "https://pagehub.dev";
     const url = `${baseUrl}/api/v1/register`;
     const resp = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: args.email, name: args.name }),
     });
     const text = await resp.text();
     let data;
-    try { data = JSON.parse(text); }
-    catch { throw new Error(`Register endpoint returned non-JSON. URL: ${url} (status ${resp.status}). Is PAGEHUB_API_BASE_URL set? Current: ${config.apiBaseUrl}`); }
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error(
+        `Register endpoint returned non-JSON. URL: ${url} (status ${resp.status}). Is PAGEHUB_API_BASE_URL set? Current: ${config.apiBaseUrl}`
+      );
+    }
     if (!resp.ok) throw new Error(data.error || `Registration failed: ${resp.status}`);
     return {
-      content: [{
-        type: 'text',
-        text: [
-          `Registration successful!`,
-          `  Email: ${data.email}`,
-          `  Name: ${data.name}`,
-          `  API Key: ${data.apiKey}`,
-          ``,
-          `To complete setup, add the API key to the MCP server config as an environment variable:`,
-          `  "env": { "PAGEHUB_API_KEY": "${data.apiKey}" }`,
-          ``,
-          `Then restart the MCP server.`,
-        ].join('\n'),
-      }],
+      content: [
+        {
+          type: "text",
+          text: [
+            `Registration successful!`,
+            `  Email: ${data.email}`,
+            `  Name: ${data.name}`,
+            `  API Key: ${data.apiKey}`,
+            ``,
+            `To complete setup, add the API key to the MCP server config as an environment variable:`,
+            `  "env": { "PAGEHUB_API_KEY": "${data.apiKey}" }`,
+            ``,
+            `Then restart the MCP server.`,
+          ].join("\n"),
+        },
+      ],
     };
   },
 
@@ -50,7 +57,7 @@ module.exports = {
   async select_template(args) {
     const result = await delegated.select_template(args);
     // Persist activeTemplate to outer config so it survives across tool calls
-    config.activeTemplate = { slug: args.slug, title: result.content?.[0]?.text || '' };
+    config.activeTemplate = { slug: args.slug, title: result.content?.[0]?.text || "" };
     config.activeSite = null;
     return result;
   },
