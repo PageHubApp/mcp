@@ -12,6 +12,28 @@ Before building anything, call these discovery tools:
 4. **`list_presets`** — curated theme presets by mood
 5. **`search_blocks`** — find proven block patterns in the library; use with `apply_kit_block`. Two scopes: `blockType: "section"` (full page sections, default) and `blockType: "component"` (reusable patterns like dropdowns, cards, accordions that go inside sections)
 
+## Live Editing Guardrails (Non-Negotiable)
+
+Default to remote, surgical MCP edits. Do not rebuild full site JSON locally for routine work.
+
+1. Use `apply_kit_block`, `patch_site_node`, `patch_site_bulk`, `add_nodes`, `delete_node`, `update_node`.
+2. Prefer `patch_site_bulk` for multi-node edits (single atomic write, fewer race issues).
+3. Treat `save_site` as exception-only (imports/migrations or explicit full rebuild requests).
+4. Keep one writer per site/template at a time. Avoid concurrent structural writes.
+5. Cap block discovery loops: run 1-2 targeted `search_blocks` calls, choose closest block, then patch.
+
+### `add_nodes` Contract
+
+1. `parentId` must be an existing node already present in the current site/template.
+2. `rootNodeId` must exist in `nodes` and be the single top-level root of that payload.
+3. If you need multiple roots, split into multiple `add_nodes` calls.
+
+### Structural Error Escalation
+
+1. Retry with corrected IDs from `pull_site`/`list_example_blocks` and apply the smallest possible patch.
+2. If the target is a standard layout (nav, hero, pricing, testimonials), switch to `search_blocks` + `apply_kit_block`.
+3. If still blocked, report the exact MCP error and stop. Do not do a full-JSON reset as recovery.
+
 ### Editing blocks in the **library** (not on a site)
 
 The live block catalog is API-backed. **Do not edit repo seed JSON** to change what users get from `search_blocks` / `apply_kit_block`.

@@ -30,10 +30,16 @@ const delegatedNodes = delegateHandlers(coreNodes);
  */
 async function fetchForTarget(args) {
   const target = getActiveTarget(args);
+  if (!config.targetRevisions || typeof config.targetRevisions !== "object") {
+    config.targetRevisions = {};
+  }
   if (target.type === "template") {
     const data = await apiFetch(`/api/v1/templates/${encodeURIComponent(target.id)}`);
     if (!data.content || typeof data.content !== "object") {
       throw new Error("Template has no decoded content (empty or corrupt).");
+    }
+    if (Number.isFinite(Number(data.version))) {
+      config.targetRevisions[`template:${target.id}`] = { expectedVersion: Number(data.version) };
     }
     return {
       targetId: target.id,
@@ -45,6 +51,9 @@ async function fetchForTarget(args) {
   const data = await apiFetch(`/api/v1/sites/${encodeURIComponent(target.id)}`);
   if (!data.content || typeof data.content !== "object") {
     throw new Error("Site has no decoded content (empty or corrupt).");
+  }
+  if (data.updatedAt) {
+    config.targetRevisions[`site:${target.id}`] = { expectedUpdatedAt: String(data.updatedAt) };
   }
   return {
     targetId: target.id,
@@ -58,19 +67,28 @@ async function fetchForTarget(args) {
  * Helper: save content for the active target (site or template).
  */
 async function saveForTarget(targetId, targetType, flat, extra = {}) {
+  if (!config.targetRevisions || typeof config.targetRevisions !== "object") {
+    config.targetRevisions = {};
+  }
+  const revision = config.targetRevisions[`${targetType}:${targetId}`] || {};
+  const body = { content: flat, ...revision, ...extra };
   if (targetType === "template") {
-    const body = { content: flat, ...extra };
     const put = await apiFetch(`/api/v1/templates/${encodeURIComponent(targetId)}`, {
       method: "PUT",
       body,
     });
+    if (Number.isFinite(Number(put.version))) {
+      config.targetRevisions[`template:${targetId}`] = { expectedVersion: Number(put.version) };
+    }
     return { id: put.slug || targetId, url: null, type: "template" };
   }
-  const body = { content: flat, ...extra };
   const put = await apiFetch(`/api/v1/sites/${encodeURIComponent(targetId)}`, {
     method: "PUT",
     body,
   });
+  if (put.updatedAt) {
+    config.targetRevisions[`site:${targetId}`] = { expectedUpdatedAt: String(put.updatedAt) };
+  }
   return { id: put.id, url: getEditorUrl(put.id), type: "site" };
 }
 
