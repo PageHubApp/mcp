@@ -3,6 +3,7 @@ const { getProjectDir, config, apiFetch, getActiveTarget, getEditorUrl, delegate
 const { parseMaybeJson, applyNodePatches, validateImageUrls, collectAllImageUrls, extractImageUrls } = require('../helpers');
 const { stampRootSource } = require('@pagehub/mcp-core/src/structure-ingest');
 const { normalizeDesignTags, truncateDesignNotes } = require('@pagehub/mcp-core/src/root-design-intent');
+const { validateNodes, formatValidationReport } = require('@pagehub/mcp-core/src/node-validation');
 
 // Node-level tools delegated to mcp-core
 const coreNodes = require('@pagehub/mcp-core/src/handlers/nodes');
@@ -182,6 +183,16 @@ module.exports = {
     const { targetId, targetType, tb } = await tbFromTarget(args);
     const nodeMap = parseMaybeJson(nodes);
     if (!nodeMap || typeof nodeMap !== 'object') throw new Error('nodes must be an object map');
+
+    // Validate & auto-fix nodes before image validation and save
+    const validation = validateNodes(nodeMap, { autoFix: true, warnColors: true });
+    const validationReport = formatValidationReport(validation);
+    if (validation.errors.length > 0) {
+      throw new Error(
+        `Cannot add block — ${validation.errors.length} structural error(s):\n${validation.errors.join('\n')}\n\nFix these before saving.`
+      );
+    }
+
     const allImgUrls = collectAllImageUrls(nodeMap);
     if (allImgUrls.length > 0) {
       const failures = await validateImageUrls(allImgUrls.map(u => u.url));
@@ -195,7 +206,8 @@ module.exports = {
     }
     tb.addCustomSection(sectionRootId, nodeMap, { parentNodeId, position });
     const result = await saveForTarget(targetId, targetType, tb.nodes);
-    return { content: [{ type: 'text', text: `Custom section ${sectionRootId} added. (${allImgUrls.length} image URLs validated)\n${resultLabel(result)}` }] };
+    const reportSuffix = validationReport ? `\n\n---\n${validationReport}` : '';
+    return { content: [{ type: 'text', text: `Custom section ${sectionRootId} added. (${allImgUrls.length} image URLs validated)\n${resultLabel(result)}${reportSuffix}` }] };
   },
 
   // Node-level tools — delegated to mcp-core
