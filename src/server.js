@@ -1,6 +1,11 @@
 const { Server } = require('@modelcontextprotocol/sdk/server/index.js');
 const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
-const { CallToolRequestSchema, ListToolsRequestSchema } = require('@modelcontextprotocol/sdk/types.js');
+const {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+  ListResourcesRequestSchema,
+  ListResourceTemplatesRequestSchema,
+} = require('@modelcontextprotocol/sdk/types.js');
 const { allTools } = require('./tools');
 
 // Handler modules — each exports { toolName: async (args) => result }
@@ -32,11 +37,19 @@ const handlers = {
 
 const server = new Server(
   { name: 'pagehub', version: '0.1.0' },
-  { capabilities: { tools: {} } }
+  { capabilities: { tools: {}, resources: {} } }
 );
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: allTools(),
+}));
+
+server.setRequestHandler(ListResourcesRequestSchema, async () => ({
+  resources: [],
+}));
+
+server.setRequestHandler(ListResourceTemplatesRequestSchema, async () => ({
+  resourceTemplates: [],
 }));
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
