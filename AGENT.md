@@ -616,6 +616,22 @@ Match text to background: `bg-primary` → `text-primary-content`.
 - **Heading defaults:** Text nodes with tagName h1-h6 auto-receive `font-heading` + size + weight if className has no text-size class. Override by providing your own typography classes.
 - **Font hierarchy: set once, use tokens.** Set `headingFontFamily`, `bodyFontFamily`, and optionally `accentFontFamily` in `styleGuide` (via `set_theme`). Then use `font-heading` / `font-body` / `font-accent` on nodes — these resolve via CSS vars and `extractGoogleFontsUrl` correctly pairs weight classes (e.g. `font-heading font-bold` → loads heading family at wght 700). Any `*FontFamily` key in styleGuide auto-generates a CSS var (e.g. `displayFontFamily` → `--display-font-family`); use `font-(--display-font-family)` on nodes. **NEVER scatter `font-['Name']` across nodes.** NEVER put font-family in `root.style`. NEVER add Google Fonts `<link>` in `ROOT.props.header` — the system loads fonts automatically.
 
+### Text Node Rules
+- **One job per node.** Each Text node = one semantic block. Don't cram multiple paragraphs or headings into one node.
+- **NEVER use `<a>` tags in text** — use the `action` prop on a Button instead.
+- **NEVER use `<p>`, `<div>`, `<h1>`-`<h6>` in text values** — use the `tagName` prop instead.
+- **Valid tagNames:** h1, h2, h3, h4, h5, h6, p, span, div.
+- **Heading hierarchy:** h1 → h2 → h3, never skip levels, only ONE h1 per page.
+- **Styling parts of text (split-color logos, highlighted words):** Use inline `style` with CSS variables: `<span style="color: var(--primary)">White</span><span style="color: var(--accent)">fall</span>`. NEVER use Tailwind classes inside text HTML (`<span class="text-primary">`) — the FOUC compiler does not scan `props.text`, only `props.className`.
+
+### Auto-Validation (applied on save)
+The system auto-fixes common issues when nodes are saved:
+- **Missing tagName** on Text → inferred from className (large bold = h1, medium = h2, etc.)
+- **Bare heading tags** (h1-h6 with no text-size class) → auto-receives `font-heading` + size + weight defaults
+- **Bare text** not wrapped in HTML → auto-wrapped in `<p>` tags
+- **Image `content` prop** → auto-migrated to `src` (legacy field)
+- **Image missing `type`** → set `type: "url"` for external URLs, default `"cdn"` expects media library reference
+
 ### Palette Tokens (DaisyUI 5)
 
 ```
