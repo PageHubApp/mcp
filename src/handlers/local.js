@@ -287,6 +287,8 @@ module.exports = {
   update_node: delegatedNodes.update_node,
   delete_node: delegatedNodes.delete_node,
   insert_node: delegatedNodes.insert_node,
+  list_site_nodes: delegatedNodes.list_site_nodes,
+  search_site_nodes: delegatedNodes.search_site_nodes,
   set_integrations: delegatedNodes.set_integrations,
   set_redirects: delegatedNodes.set_redirects,
 };

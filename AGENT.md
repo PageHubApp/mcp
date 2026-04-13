@@ -30,7 +30,7 @@ Default to remote, surgical MCP edits. Do not rebuild full site JSON locally for
 
 ### Structural Error Escalation
 
-1. Retry with corrected IDs from `pull_site`/`list_example_blocks` and apply the smallest possible patch.
+1. Retry with corrected IDs from `list_site_nodes` (lightweight tree, ~2KB) or `search_site_nodes(q, type)` and apply the smallest possible patch. Avoid `pull_site` (100KB+).
 2. If the target is a standard layout (nav, hero, pricing, testimonials), switch to `search_blocks` + `apply_kit_block`.
 3. If still blocked, report the exact MCP error and stop. Do not do a full-JSON reset as recovery.
 
