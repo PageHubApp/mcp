@@ -445,15 +445,18 @@ For EVERY block, follow this process:
 
 ## Interactive Features
 
-### Animations (Scroll-Triggered)
+### Animations (Preset System — No One-Offs)
 
-Components can animate into view when the user scrolls to them. Set `root.animation` to one of these values:
+All animations use the CSS Animation Preset system via `root.animation`. Users can customize duration, delay, and easing in the toolbar.
 
-| Animation   | Effect                                                    | Best For                                    |
-| ----------- | --------------------------------------------------------- | ------------------------------------------- |
-| `spring`    | Fades in + scales from 0 to 1 (once, on scroll into view) | Cards, images, sections appearing on scroll |
-| `hoverGrow` | Scales up on hover, shrinks on tap                        | Buttons, cards, interactive elements        |
-| `tween`     | Continuous 360° rotation                                  | Loading spinners, decorative elements       |
+**Preset keys:**
+
+| Category | Keys | Best For |
+| --- | --- | --- |
+| Entrance (scroll) | `cssFadeIn`, `cssFadeUp`, `cssFadeDown`, `cssFadeLeft`, `cssFadeRight`, `cssScaleUp`, `cssBlurIn`, `cssSlideUp`, `cssFlipIn`, `cssSpring`, `cssBounceIn` | Cards, images, sections appearing on scroll |
+| Hover | `cssHoverGrow`, `cssHoverLift`, `cssHoverGlow`, `cssHoverPress` | Buttons, cards, interactive elements |
+| Continuous | `cssSpin`, `cssPulse`, `cssWiggle`, `cssMarquee`, `cssMarqueeSlow` | Spinners, tickers, decorative |
+| Spotlight | `cssChainSpotlight1/2/3`, `cssGridSpotlight1/2/3/4` | Sequential card/tile highlights |
 
 **Example — cards that fade in on scroll:**
 
@@ -461,14 +464,16 @@ Components can animate into view when the user scrolls to them. Set `root.animat
 {
   "className": "bg-base-200 text-base-content rounded-box border shadow-sm p-6",
   "root": {
-    "animation": "spring"
+    "animation": "cssFadeUp"
   }
 }
 ```
 
-**Usage:** Apply `spring` to cards, gallery images, testimonial cards, or any element you want to reveal on scroll. Don't apply to every element — use it for visual interest on 2-4 key sections. Overusing animations makes the page feel gimmicky.
+**Usage:** Apply to 2-4 key sections for visual interest. Overusing animations makes the page feel gimmicky.
 
 **DO NOT animate:** Headers, footers, hero sections (above the fold — already visible), or text-only blocks.
+
+**NEVER** add custom `@keyframes`, `--animate-*` CSS vars, or `animate-*` classes in `className`. All animations must go through `root.animation` with a preset key. If a new animation pattern is needed, it must be added as a preset in `packages/sdk/src/utils/animations/animations.ts`.
 
 ### Tabs / Show-Hide Content Switching
 
