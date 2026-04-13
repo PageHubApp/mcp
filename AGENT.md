@@ -613,7 +613,8 @@ Match text to background: `bg-primary` → `text-primary-content`.
 - **`text-neutral-content`** is ONLY valid on `bg-neutral`. On other surfaces use `text-base-content/70` for muted text.
 - **`btn-primary` on dark themes:** if Primary ≈ Base 100 (both dark), the button is invisible. Use explicit `bg-* text-* px-* py-*` instead.
 - **`max-w-content`** is Tailwind's native `max-width: max-content` (shrinks to content). NEVER use for layout containers. Use `max-w-page` (maps to `--content-width`, default 80rem).
-- **Font family** goes in className only: `font-heading`, `font-body`, or `font-['Font_Name']`. NEVER put font-family in `root.style`. NEVER add Google Fonts `<link>` in `ROOT.props.header` — the system loads fonts automatically.
+- **Heading defaults:** Text nodes with tagName h1-h6 auto-receive `font-heading` + size + weight if className has no text-size class. Override by providing your own typography classes.
+- **Font hierarchy: set once, use tokens.** Set `headingFontFamily`, `bodyFontFamily`, and optionally `accentFontFamily` in `styleGuide` (via `set_theme`). Then use `font-heading` / `font-body` / `font-accent` on nodes — these resolve via CSS vars and `extractGoogleFontsUrl` correctly pairs weight classes (e.g. `font-heading font-bold` → loads heading family at wght 700). Any `*FontFamily` key in styleGuide auto-generates a CSS var (e.g. `displayFontFamily` → `--display-font-family`); use `font-(--display-font-family)` on nodes. **NEVER scatter `font-['Name']` across nodes.** NEVER put font-family in `root.style`. NEVER add Google Fonts `<link>` in `ROOT.props.header` — the system loads fonts automatically.
 
 ### Palette Tokens (DaisyUI 5)
 

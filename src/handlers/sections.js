@@ -60,9 +60,9 @@ function extractContentMap(nodes, rootId) {
         if (node.props?.url != null) entry.url = node.props.url;
         if (node.props?.icon) entry.icon = node.props.icon;
       } else if (resolvedName === "Image") {
-        if (node.props?.content != null) entry.content = node.props.content;
+        entry.src = node.props?.src ?? node.props?.content ?? null;
+        if (entry.src == null) delete entry.src;
         if (node.props?.alt != null) entry.alt = node.props.alt;
-        if (node.props?.src != null) entry.src = node.props.src;
       } else if (resolvedName === "Form") {
         if (node.props?.formName != null) entry.formName = node.props.formName;
       }
