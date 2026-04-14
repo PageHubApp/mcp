@@ -566,7 +566,7 @@ Text and Button components use the unified `action` prop for all link and intera
 
 | Type         | Props                                     | Use for                       |
 | ------------ | ----------------------------------------- | ----------------------------- |
-| `show-hide`  | `target`, `direction`, `method`, `group?` | Mobile menus, dropdowns, tabs |
+| `show-hide`  | `target`, `direction`, `method`, `group?` | Mobile menus, dropdowns, tabs, cookie consent dismiss |
 | `open-modal` | `anchor`                                  | Open a modal by ID            |
 
 **Examples:**
@@ -619,7 +619,8 @@ Match text to background: `bg-primary` → `text-primary-content`.
 ### Text Node Rules
 - **One job per node.** Each Text node = one semantic block. Don't cram multiple paragraphs or headings into one node.
 - **NEVER use `<a>` tags in text** — use the `action` prop on a Button instead.
-- **NEVER use `<p>`, `<div>`, `<h1>`-`<h6>` in text values** — use the `tagName` prop instead.
+- **richTextMode** (`full` | `inline`, default `full`): `full` = normal TipTap (blocks, lists, images). `inline` = inline-only editor — **saved `text` has no wrapping `<p>`**; use for one-line copy (cookie consent, labels). **Not tied to `tagName`** — set `inline` explicitly when you want that shape. See `lib/schemas/Text.json`.
+- **NEVER use `<p>`, `<div>`, `<h1>`-`<h6>` in text values for document semantics** — use the `tagName` prop instead. (`full` TipTap may still store one outer `<p>…</p>`; for `tagName: "p"` one-liners prefer `richTextMode: "inline"` or plain/inline-only `text`.)
 - **Valid tagNames:** h1, h2, h3, h4, h5, h6, p, span, div.
 - **Heading hierarchy:** h1 → h2 → h3, never skip levels, only ONE h1 per page.
 - **Styling parts of text (split-color logos, highlighted words):** Use inline `style` with CSS variables: `<span style="color: var(--primary)">White</span><span style="color: var(--accent)">fall</span>`. NEVER use Tailwind classes inside text HTML (`<span class="text-primary">`) — the FOUC compiler does not scan `props.text`, only `props.className`.
@@ -709,7 +710,7 @@ A Text node is for **one piece of content** — a heading, a paragraph, a captio
 
 **NEVER in text values:**
 
-- `<p>`, `<div>`, `<h1>`-`<h6>` — use `tagName` prop instead
+- `<p>`, `<div>`, `<h1>`-`<h6>` for **semantics** — use `tagName` instead; use `richTextMode: "inline"` or inline-only HTML when you must avoid a redundant outer `<p>` in `text` while `tagName` is `p`
 - `<a>` tags for navigation links — use Button components instead (they get proper hover states, click tracking, and accessibility)
 - Multiple `<br/>` to create spacing — use separate nodes with margin/padding
 - Complex HTML with classes — this bypasses the design system
