@@ -20,6 +20,10 @@ const {
   truncateDesignNotes,
 } = require("@pagehub/mcp-core/src/root-design-intent");
 const { validateNodes, formatValidationReport } = require("@pagehub/mcp-core/src/node-validation");
+const {
+  compressJsonToBase64Lz,
+  decodeContentOrThrow,
+} = require("@pagehub/mcp-core/src/helpers");
 
 // Node-level tools delegated to mcp-core
 const coreNodes = require("@pagehub/mcp-core/src/handlers/nodes");
@@ -35,16 +39,14 @@ async function fetchForTarget(args) {
   }
   if (target.type === "template") {
     const data = await apiFetch(`/api/v1/templates/${encodeURIComponent(target.id)}`);
-    if (!data.content || typeof data.content !== "object") {
-      throw new Error("Template has no decoded content (empty or corrupt).");
-    }
+    const decodedContent = decodeContentOrThrow(data.content, "Template content");
     if (Number.isFinite(Number(data.version))) {
       config.targetRevisions[`template:${target.id}`] = { expectedVersion: Number(data.version) };
     }
     return {
       targetId: target.id,
       targetType: "template",
-      flat: JSON.parse(JSON.stringify(data.content)),
+      flat: JSON.parse(JSON.stringify(decodedContent)),
       data,
     };
   }
@@ -71,7 +73,10 @@ async function saveForTarget(targetId, targetType, flat, extra = {}) {
     config.targetRevisions = {};
   }
   const revision = config.targetRevisions[`${targetType}:${targetId}`] || {};
-  const body = { content: flat, ...revision, ...extra };
+  const body =
+    targetType === "template"
+      ? { content: compressJsonToBase64Lz(flat), ...revision, ...extra }
+      : { content: flat, ...revision, ...extra };
   if (targetType === "template") {
     const put = await apiFetch(`/api/v1/templates/${encodeURIComponent(targetId)}`, {
       method: "PUT",
@@ -115,7 +120,10 @@ async function loadTemplateIndex() {
     // Fetch full structure (list view excludes it)
     const full = await apiFetch(`/api/v1/components/${encodeURIComponent(comp.slug)}`);
     if (full.component?.structure) {
-      idx[comp.slug] = full.component.structure;
+      idx[comp.slug] = decodeContentOrThrow(
+        full.component.structure,
+        `Component "${comp.slug}" structure`
+      );
     }
   }
   return idx;
@@ -287,6 +295,7 @@ module.exports = {
   update_node: delegatedNodes.update_node,
   delete_node: delegatedNodes.delete_node,
   insert_node: delegatedNodes.insert_node,
+  move_node: delegatedNodes.move_node,
   list_site_nodes: delegatedNodes.list_site_nodes,
   search_site_nodes: delegatedNodes.search_site_nodes,
   set_integrations: delegatedNodes.set_integrations,

@@ -1,6 +1,10 @@
 const path = require("path");
 const { getProjectDir, apiFetch, getActiveTarget, getEditorUrl } = require("../config");
 const { parseMaybeJson } = require("../helpers");
+const {
+  compressJsonToBase64Lz,
+  decodeContentOrThrow,
+} = require("@pagehub/mcp-core/src/helpers");
 
 function getTemplateBuilder() {
   return require(path.join(getProjectDir(), "scripts/TemplateBuilder.js"));
@@ -14,6 +18,16 @@ function slugify(s) {
       .replace(/^_|_$/g, "")
       .slice(0, 48) || "node"
   );
+}
+
+function decodeTargetContent(target, data) {
+  if (target.type === "template") {
+    return decodeContentOrThrow(data.content, `Template "${target.id}" content`);
+  }
+  if (!data.content || typeof data.content !== "object") {
+    throw new Error("Site has no decoded content (empty or corrupt).");
+  }
+  return data.content;
 }
 
 /**
@@ -83,9 +97,7 @@ module.exports = {
         ? `/api/v1/templates/${encodeURIComponent(target.id)}`
         : `/api/v1/sites/${encodeURIComponent(target.id)}`;
     const data = await apiFetch(fetchUrl);
-    if (!data.content)
-      throw new Error(`${target.type === "template" ? "Template" : "Site"} has no content.`);
-    const nodes = data.content;
+    const nodes = decodeTargetContent(target, data);
     const sections = TemplateBuilder.listSections(nodes, args.pageId);
     if (sections.length === 0) {
       return {
@@ -116,9 +128,7 @@ module.exports = {
         ? `/api/v1/templates/${encodeURIComponent(target.id)}`
         : `/api/v1/sites/${encodeURIComponent(target.id)}`;
     const data = await apiFetch(fetchUrl);
-    if (!data.content)
-      throw new Error(`${target.type === "template" ? "Template" : "Site"} has no content.`);
-    const nodes = data.content;
+    const nodes = decodeTargetContent(target, data);
     const structure = TemplateBuilder.extractSection(nodes, sectionRootId, {
       templatize: templatize === true,
     });
@@ -143,9 +153,7 @@ module.exports = {
         ? `/api/v1/templates/${encodeURIComponent(target.id)}`
         : `/api/v1/sites/${encodeURIComponent(target.id)}`;
     const data = await apiFetch(fetchUrl);
-    if (!data.content)
-      throw new Error(`${target.type === "template" ? "Template" : "Site"} has no content.`);
-    const nodes = JSON.parse(JSON.stringify(data.content));
+    const nodes = JSON.parse(JSON.stringify(decodeTargetContent(target, data)));
 
     const sectionNode = nodes[sectionRootId];
     if (!sectionNode) throw new Error(`Section "${sectionRootId}" not found.`);
@@ -215,7 +223,9 @@ module.exports = {
     const compData = await apiFetch(`/api/v1/components/${encodeURIComponent(chosenId)}`);
     if (!compData.component?.structure)
       throw new Error(`Component "${chosenId}" has no structure.`);
-    tb.setTemplateIndex({ [chosenId]: compData.component.structure });
+    tb.setTemplateIndex({
+      [chosenId]: decodeContentOrThrow(compData.component.structure, `Component "${chosenId}" structure`),
+    });
     tb.addSection(chosenId, { contentOverrides, position, pageId: parentId });
 
     // Save
@@ -223,7 +233,7 @@ module.exports = {
     if (target.type === "template") {
       await apiFetch(`/api/v1/templates/${encodeURIComponent(target.id)}`, {
         method: "PUT",
-        body: { content: tb.nodes },
+        body: { content: compressJsonToBase64Lz(tb.nodes) },
       });
       resultText = `Template "${target.id}" updated.`;
     } else {
@@ -267,7 +277,7 @@ module.exports = {
         category: category || "uncategorized",
         visual: visual || "",
         tags: parseMaybeJson(tags) || tags || [],
-        structure: resolvedStructure,
+        structure: compressJsonToBase64Lz(resolvedStructure),
         isPublic: true,
       },
     });

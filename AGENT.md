@@ -568,6 +568,9 @@ Text and Button components use the unified `action` prop for all link and intera
 | ------------ | ----------------------------------------- | ----------------------------- |
 | `show-hide`  | `target`, `direction`, `method`, `group?` | Mobile menus, dropdowns, tabs, cookie consent dismiss |
 | `open-modal` | `anchor`                                  | Open a modal by ID            |
+| `add-to-cart` | `quantity?` (default 1)                  | Add current data-bound item to cart (inside Stripe dataSource Container only) |
+| `toggle-cart` | —                                         | Open/close the CartDrawer (on CartBadge or nav buttons) |
+| `cart-checkout` | —                                       | Redirect to Stripe Checkout with cart contents |
 
 **Examples:**
 
@@ -591,6 +594,50 @@ Text and Button components use the unified `action` prop for all link and intera
 - Contact email/phone: use `email`/`phone` types, not `link-url` with `mailto:`/`tel:`
 - Mobile nav overlays: `show-hide` with `method: "style"` (container needs `root.style: "display: none;"`)
 - External links: always `target: "_blank"` (gets `rel="noopener noreferrer"` automatically)
+
+---
+
+## E-commerce — Stripe Cart System
+
+PageHub supports live Stripe data display and shopping cart checkout. Users connect their Stripe account in Site Settings → Connectors.
+
+### Components
+
+| Component | Where to place | Purpose |
+|-----------|---------------|---------|
+| `CartDrawer` | Site root (once) | Slide-out shopping cart. Children: header + footer. Cart items auto-render. |
+| `CartBadge` | Navbar/header | Cart icon with live item count. Auto-fires toggle-cart on click. |
+| `CheckoutBanner` | Site root (once) | Post-checkout notification. Auto-shows after Stripe redirect. |
+
+### Data-bound Containers (Stripe collections)
+
+Set `dataSource: { provider: "stripe", collection: "<name>" }` on a Container. Children repeat per item.
+
+Available collections: `products`, `prices`, `customers`, `orders`, `subscriptions`, `invoices`, `coupons`
+
+Use `{{item.title}}`, `{{item.price.formatted}}`, `{{item.image}}`, etc. in child Text/Image/Button nodes.
+
+### Storefront setup flow
+
+1. User connects Stripe in Site Settings → Connectors (enters secret key)
+2. Drop a storefront-navbar block (has CartBadge)
+3. Drop a connector-product-grid block (data-bound to Stripe products)
+4. Drop a cart-drawer block (CartDrawer with checkout button)
+5. Drop a checkout-banner block (success/cancel feedback)
+6. Stripe credentials are stored encrypted — NOT in `set_integrations` or ROOT.props
+
+### Stripe blocks (category: "stripe")
+
+Products: `connector-product-grid`, `connector-product-list`, `connector-product-hero`, `connector-product-strip`
+Prices: `connector-pricing-cards`
+Customers: `connector-customer-list`
+Orders: `connector-order-table`
+Subscriptions: `connector-subscription-cards`
+Invoices: `connector-invoice-table`
+Coupons: `connector-coupon-grid`
+Cart: `cart-drawer`, `cart-mini-bar`
+Checkout: `checkout-banner`, `checkout-success`
+Navigation: `storefront-navbar`
 
 ---
 
