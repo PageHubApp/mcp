@@ -451,12 +451,12 @@ All animations use the CSS Animation Preset system via `root.animation`. Users c
 
 **Preset keys:**
 
-| Category | Keys | Best For |
-| --- | --- | --- |
+| Category          | Keys                                                                                                                                                     | Best For                                    |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
 | Entrance (scroll) | `cssFadeIn`, `cssFadeUp`, `cssFadeDown`, `cssFadeLeft`, `cssFadeRight`, `cssScaleUp`, `cssBlurIn`, `cssSlideUp`, `cssFlipIn`, `cssSpring`, `cssBounceIn` | Cards, images, sections appearing on scroll |
-| Hover | `cssHoverGrow`, `cssHoverLift`, `cssHoverGlow`, `cssHoverPress` | Buttons, cards, interactive elements |
-| Continuous | `cssSpin`, `cssPulse`, `cssWiggle`, `cssMarquee`, `cssMarqueeSlow` | Spinners, tickers, decorative |
-| Spotlight | `cssChainSpotlight1/2/3`, `cssGridSpotlight1/2/3/4` | Sequential card/tile highlights |
+| Hover             | `cssHoverGrow`, `cssHoverLift`, `cssHoverGlow`, `cssHoverPress`                                                                                          | Buttons, cards, interactive elements        |
+| Continuous        | `cssSpin`, `cssPulse`, `cssWiggle`, `cssMarquee`, `cssMarqueeSlow`                                                                                       | Spinners, tickers, decorative               |
+| Spotlight         | `cssChainSpotlight1/2/3`, `cssGridSpotlight1/2/3/4`                                                                                                      | Sequential card/tile highlights             |
 
 **Example — cards that fade in on scroll:**
 
@@ -564,13 +564,13 @@ Text and Button components use the unified `action` prop for all link and intera
 
 **Button-only action types (not on Text):**
 
-| Type         | Props                                     | Use for                       |
-| ------------ | ----------------------------------------- | ----------------------------- |
-| `show-hide`  | `target`, `direction`, `method`, `group?` | Mobile menus, dropdowns, tabs, cookie consent dismiss |
-| `open-modal` | `anchor`                                  | Open a modal by ID            |
-| `add-to-cart` | `quantity?` (default 1)                  | Add current data-bound item to cart (inside Stripe dataSource Container only) |
-| `toggle-cart` | —                                         | Open/close the CartDrawer (on CartBadge or nav buttons) |
-| `cart-checkout` | —                                       | Redirect to Stripe Checkout with cart contents |
+| Type            | Props                                     | Use for                                                                       |
+| --------------- | ----------------------------------------- | ----------------------------------------------------------------------------- |
+| `show-hide`     | `target`, `direction`, `method`, `group?` | Mobile menus, dropdowns, tabs, cookie consent dismiss                         |
+| `open-modal`    | `anchor`                                  | Open a modal by ID                                                            |
+| `add-to-cart`   | `quantity?` (default 1)                   | Add current data-bound item to cart (inside Stripe dataSource Container only) |
+| `toggle-cart`   | —                                         | Open/close the CartDrawer (on CartBadge or nav buttons)                       |
+| `cart-checkout` | —                                         | Redirect to Stripe Checkout with cart contents                                |
 
 **Examples:**
 
@@ -603,19 +603,49 @@ PageHub supports live Stripe data display and shopping cart checkout. Users conn
 
 ### Components
 
-| Component | Where to place | Purpose |
-|-----------|---------------|---------|
-| `CartDrawer` | Site root (once) | Slide-out shopping cart. Children: header + footer. Cart items auto-render. |
-| `CartBadge` | Navbar/header | Cart icon with live item count. Auto-fires toggle-cart on click. |
-| `CheckoutBanner` | Site root (once) | Post-checkout notification. Auto-shows after Stripe redirect. |
+| Component        | Where to place   | Purpose                                                                     |
+| ---------------- | ---------------- | --------------------------------------------------------------------------- |
+| `CartDrawer`     | Site root (once) | Slide-out shopping cart. Children: header + footer. Cart items auto-render. |
+| `CartBadge`      | Navbar/header    | Cart icon with live item count. Auto-fires toggle-cart on click.            |
+| `CheckoutBanner` | Site root (once) | Post-checkout notification. Auto-shows after Stripe redirect.               |
 
-### Data-bound Containers (Stripe collections)
+### Data-bound Containers (Stripe collections — server-side)
 
 Set `dataSource: { provider: "stripe", collection: "<name>" }` on a Container. Children repeat per item.
 
 Available collections: `products`, `prices`, `customers`, `orders`, `subscriptions`, `invoices`, `coupons`
 
-Use `{{item.title}}`, `{{item.price.formatted}}`, `{{item.image}}`, etc. in child Text/Image/Button nodes.
+Use `{{item.title}}`, `{{item.price.formatted}}`, `{{item.image}}`, etc. in child Text/Image/Button nodes. Variables also work in Button action URLs (e.g. `{{item.url}}`).
+
+**Fallback syntax:** `{{item.description || "No description"}}` — shows fallback when field is empty/null. Works in Text, Button text, Image src, and Button action URLs.
+
+### Data-bound Containers (customer data — client-side)
+
+Set `dataSource: { provider: "customer", collection: "<name>" }` on a Container. Data is fetched client-side using the `ph-customer` cookie (magic link auth).
+
+Available collections: `orders`, `me`
+
+Customer orders use the same `{{item.title}}`, `{{item.price.formatted}}`, `{{item.metadata.created}}`, `{{item.description}}` variables as Stripe orders.
+
+### Site customer auth system
+
+Site visitors (not PageHub users) authenticate via magic link email. Separate from NextAuth.
+
+- **Login**: Form block with `submissionType: "custom"`, action `/api/customer/magic-link`. Collects email, sends magic link. Site resolved from Host header.
+- **Token detection**: `useCustomerToken` hook on all rendering routes. Detects `?token=` in URL, verifies via `/api/customer/verify`, sets `ph-customer` cookie, strips token from URL.
+- **Customer data**: Blocks use `dataSource: { provider: "customer", collection: "orders" }` — fetched client-side with cookie auth.
+- **Plan gating**: Free plan cannot use site customers. Pro: 500, Business: 10k, Agency: 100k max customers.
+
+### Page access control
+
+Pages (and any node) can use the `auth` condition type to show/hide based on login state.
+
+- **Condition type**: `auth` — values: `logged-in` or `logged-out`. Available in the condition builder on any node or in Page Settings → Access tab.
+- **Page Settings → Access tab**: Set conditions on a page + choose what happens when access is denied:
+  - "Hide page content" (default)
+  - "Redirect to URL" (e.g. `/login`)
+  - "Show another page" (pick from site's pages)
+- **Works on any node**: The `auth` condition works on containers, text, buttons — not just pages. Use it to show "Welcome back" content to logged-in customers or hide pricing from logged-out visitors.
 
 ### Storefront setup flow
 
@@ -628,7 +658,7 @@ Use `{{item.title}}`, `{{item.price.formatted}}`, `{{item.image}}`, etc. in chil
 
 ### Stripe blocks (category: "stripe")
 
-Products: `connector-product-grid`, `connector-product-list`, `connector-product-hero`, `connector-product-strip`
+Products: `connector-product-grid`, `connector-product-list`, `connector-product-hero`, `connector-product-strip`, `product-detail`
 Prices: `connector-pricing-cards`
 Customers: `connector-customer-list`
 Orders: `connector-order-table`
@@ -638,6 +668,7 @@ Coupons: `connector-coupon-grid`
 Cart: `cart-drawer`, `cart-mini-bar`
 Checkout: `checkout-banner`, `checkout-success`
 Navigation: `storefront-navbar`
+Site Customer Auth: `customer-login`, `customer-profile`, `customer-orders`
 
 ---
 
@@ -664,6 +695,7 @@ Match text to background: `bg-primary` → `text-primary-content`.
 - **Font hierarchy: set once, use tokens.** Set `headingFontFamily`, `bodyFontFamily`, and optionally `accentFontFamily` in `styleGuide` (via `set_theme`). Then use `font-heading` / `font-body` / `font-accent` on nodes — these resolve via CSS vars and `extractGoogleFontsUrl` correctly pairs weight classes (e.g. `font-heading font-bold` → loads heading family at wght 700). Any `*FontFamily` key in styleGuide auto-generates a CSS var (e.g. `displayFontFamily` → `--display-font-family`); use `font-(--display-font-family)` on nodes. **NEVER scatter `font-['Name']` across nodes.** NEVER put font-family in `root.style`. NEVER add Google Fonts `<link>` in `ROOT.props.header` — the system loads fonts automatically.
 
 ### Text Node Rules
+
 - **One job per node.** Each Text node = one semantic block. Don't cram multiple paragraphs or headings into one node.
 - **NEVER use `<a>` tags in text** — use the `action` prop on a Button instead.
 - **richTextMode** (`full` | `inline`, default `full`): `full` = normal TipTap (blocks, lists, images). `inline` = inline-only editor — **saved `text` has no wrapping `<p>`**; use for one-line copy (cookie consent, labels). **Not tied to `tagName`** — set `inline` explicitly when you want that shape. See `lib/schemas/Text.json`.
@@ -673,7 +705,9 @@ Match text to background: `bg-primary` → `text-primary-content`.
 - **Styling parts of text (split-color logos, highlighted words):** Use inline `style` with CSS variables: `<span style="color: var(--primary)">White</span><span style="color: var(--accent)">fall</span>`. NEVER use Tailwind classes inside text HTML (`<span class="text-primary">`) — the FOUC compiler does not scan `props.text`, only `props.className`.
 
 ### Auto-Validation (applied on save)
+
 The system auto-fixes common issues when nodes are saved:
+
 - **Missing tagName** on Text → inferred from className (large bold = h1, medium = h2, etc.)
 - **Bare heading tags** (h1-h6 with no text-size class) → auto-receives `font-heading` + size + weight defaults
 - **Bare text** not wrapped in HTML → auto-wrapped in `<p>` tags

@@ -1,10 +1,7 @@
 const path = require("path");
 const { getProjectDir, apiFetch, getActiveTarget, getEditorUrl } = require("../config");
 const { parseMaybeJson } = require("../helpers");
-const {
-  compressJsonToBase64Lz,
-  decodeContentOrThrow,
-} = require("@pagehub/mcp-core/src/helpers");
+const { compressJsonToBase64Lz, decodeContentOrThrow } = require("@pagehub/mcp-core/src/helpers");
 
 function getTemplateBuilder() {
   return require(path.join(getProjectDir(), "scripts/TemplateBuilder.js"));
@@ -224,7 +221,10 @@ module.exports = {
     if (!compData.component?.structure)
       throw new Error(`Component "${chosenId}" has no structure.`);
     tb.setTemplateIndex({
-      [chosenId]: decodeContentOrThrow(compData.component.structure, `Component "${chosenId}" structure`),
+      [chosenId]: decodeContentOrThrow(
+        compData.component.structure,
+        `Component "${chosenId}" structure`
+      ),
     });
     tb.addSection(chosenId, { contentOverrides, position, pageId: parentId });
 

@@ -20,10 +20,7 @@ const {
   truncateDesignNotes,
 } = require("@pagehub/mcp-core/src/root-design-intent");
 const { validateNodes, formatValidationReport } = require("@pagehub/mcp-core/src/node-validation");
-const {
-  compressJsonToBase64Lz,
-  decodeContentOrThrow,
-} = require("@pagehub/mcp-core/src/helpers");
+const { compressJsonToBase64Lz, decodeContentOrThrow } = require("@pagehub/mcp-core/src/helpers");
 
 // Node-level tools delegated to mcp-core
 const coreNodes = require("@pagehub/mcp-core/src/handlers/nodes");
@@ -255,7 +252,7 @@ module.exports = {
     if (!nodeMap || typeof nodeMap !== "object") throw new Error("nodes must be an object map");
 
     // Validate & auto-fix nodes before image validation and save
-    const validation = validateNodes(nodeMap, { autoFix: true, warnColors: true });
+    const validation = validateNodes(nodeMap, { autoFix: true, warnColors: true, sectionRootId });
     const validationReport = formatValidationReport(validation);
     if (validation.errors.length > 0) {
       throw new Error(

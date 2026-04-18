@@ -91,6 +91,8 @@ module.exports = {
   publish_site_as_template: delegated.publish_site_as_template,
   update_template: delegated.update_template,
   list_sites: delegated.list_sites,
+  publish_site: delegated.publish_site,
+  unpublish_site: delegated.unpublish_site,
   pull_site: delegated.pull_site,
   upload_image: delegated.upload_image,
   patch_site_node: delegated.patch_site_node,
