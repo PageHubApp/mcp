@@ -601,6 +601,8 @@ Text and Button components use the unified `action` prop for all link and intera
 
 PageHub supports live Stripe data display and shopping cart checkout. Users connect their Stripe account in Site Settings → Connectors.
 
+**Human-readable reference (architecture, collections, bindings, variables, code map):** [`docs/stripe/README.md`](../../docs/stripe/README.md)
+
 ### Components
 
 | Component        | Where to place   | Purpose                                                                     |
