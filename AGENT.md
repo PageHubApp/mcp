@@ -1008,6 +1008,8 @@ Compare your output to the reference. A viewer should see the family resemblance
 - `list_blocks()` — available block templates with visual descriptions
 - `list_presets(mood?)` — theme presets (18 curated, filterable by mood)
 - `get_component_schema(component?)` — component prop reference
+
+**Container overflow vs scroll effects:** `overflowDragScroll`, `overflowAutoHideScrollbar`, `overflowWheelScrollsHorizontal`, and `overflowScrollbarHideDelay` control **CSS horizontal overflow** (drag-to-scroll and auto-hide scrollbar on strips using `overflow-x-auto` in `className`). They are unrelated to **`scrollEffect`** (`horizontal-scroll` / `scroll-timeline`), which are **GSAP pin/transform** section effects. Do not use both GSAP horizontal-scroll and the overflow props on the same container.
 - `get_style_reference()` — full prop key and variable list
 - `list_example_blocks(slug)` — blocks in decoded examples
 - `extract_block(slug, sectionRootId)` — extract for reuse
