@@ -619,6 +619,8 @@ Use `{{item.title}}`, `{{item.price.formatted}}`, `{{item.image}}`, etc. in chil
 
 **Fallback syntax:** `{{item.description || "No description"}}` — shows fallback when field is empty/null. Works in Text, Button text, Image src, and Button action URLs.
 
+**Connector data shape (bindings):** Server and editor store Stripe (etc.) results per provider under `bindings[bindingId]` (not a single flat `products` key). Prefer `{{item.*}}` inside the bound Container. For global interpolation (e.g. SEO) without repeater context, paths are `connector.<provider>.bindings.<bindingId>.<index>.<field>`. The editor variable picker lists real binding ids. Optional `dataSource.bindingKey` on the Container keeps ids stable and readable when multiple sections share the same collection. Legacy `connector.<provider>.<collection>.0.*` paths are not supported.
+
 ### Data-bound Containers (customer data — client-side)
 
 Set `dataSource: { provider: "customer", collection: "<name>" }` on a Container. Data is fetched client-side using the `ph-customer` cookie (magic link auth).
