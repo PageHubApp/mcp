@@ -365,7 +365,9 @@ Sites MUST comply with WCAG 2.1 Level AA to avoid lawsuits under California's Un
 
 #### Buttons & Links
 
-- Icon-only buttons MUST have text in the `text` prop (used as `aria-label` when `icon.only` is true).
+- **`Button`** = filled / outlined / icon CTA (anything with `btn` chrome or visible button styling). Supports the full action surface (link-*, scroll-to, show-hide, open-modal, cart, toggle-theme, etc.).
+- **`Link`** = plain text hyperlink. Always renders `<a>`, defaults to `link link-hover` (no button chrome). Use for inline "read more" / nav links / footer links / email + phone links. Action types limited to navigational: `link-url`, `link-page`, `scroll-to`, `email`, `phone`. For interactive behavior (show-hide, modal, cart) use `Button`.
+- Icon-only buttons MUST have text in the `text` prop (used as `aria-label` when `icon.only` is true). Same rule for `Link`.
 - Links to external URLs automatically get `rel="noopener noreferrer"` — no action needed.
 - Link text must be descriptive. Never use "Click here" or "Read more" alone — include context: "Read more about our pricing".
 

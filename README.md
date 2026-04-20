@@ -8,25 +8,19 @@ Works with Claude Desktop, Cursor, VS Code, and any MCP-compatible client.
 
 ### Remote (Recommended)
 
-Zero install. Add the URL to your MCP client config — authentication is handled automatically via OAuth:
+Zero install. Add the URL to your MCP client config — authentication is handled via OAuth:
 
 ```json
 {
   "mcpServers": {
     "PageHub": {
-      "url": "https://pagehub.dev/api/mcp",
-      "env": {
-        "PAGEHUB_API_BASE_URL": "https://pagehub.dev",
-        "PAGEHUB_API_KEY": "ph_your_key_here"
-      }
+      "url": "https://pagehub.dev/api/mcp"
     }
   }
 }
 ```
 
-Replace `ph_your_key_here` with your key from [pagehub.dev/dashboard](https://pagehub.dev/dashboard). Use `http://localhost:3000` for `PAGEHUB_API_BASE_URL` when developing against a local PageHub app.
-
-If your MCP client supports OAuth, you can omit the `env` block and sign in via the browser instead.
+If your MCP client does not support OAuth, provide `Authorization: Bearer ph_...` manually.
 
 ### Local (stdio)
 
@@ -45,7 +39,9 @@ If your MCP client supports OAuth, you can omit the `env` block and sign in via 
 }
 ```
 
-Get your API key from [pagehub.dev/dashboard](https://pagehub.dev/dashboard), or let the AI register for you automatically — the `register` tool creates a free account and returns a key. Override `PAGEHUB_API_BASE_URL` for a local dev server when needed.
+`stdio` is API-first by default (same remote-backed tool behavior as `/api/mcp`), so it works outside this repository.
+
+Get your API key from [pagehub.dev/dashboard](https://pagehub.dev/dashboard). Override `PAGEHUB_API_BASE_URL` for a local dev server when needed.
 
 ### From Source
 
@@ -66,7 +62,6 @@ npm start
 | ---------------------- | -------- | ------------------------------------------------------------------- |
 | `PAGEHUB_API_KEY`      | Yes      | API key from [pagehub.dev/dashboard](https://pagehub.dev/dashboard) |
 | `PAGEHUB_API_BASE_URL` | No       | API base URL (default: `https://pagehub.dev`)                       |
-| `PAGEHUB_PROJECT_DIR`  | No       | Path to pagehub.dev repo root (for local template building)         |
 
 All configuration is passed via environment variables in the `env` block of your MCP client config. No config files are written to your project.
 
@@ -81,33 +76,26 @@ All configuration is passed via environment variables in the `env` block of your
 | `get_style_reference`  | Palette CSS variables, styleGuide tokens, layout prop keys, responsive patterns          |
 | `list_presets`         | Curated theme presets by mood (see [Theme Presets](#theme-presets))                      |
 
-### Template Building
+### Site Building
 
 | Tool               | Description                                                                                         |
 | ------------------ | --------------------------------------------------------------------------------------------------- |
-| `create_template`  | Scaffold a new template from the acme base                                                          |
 | `set_theme`        | Configure palette, fonts, spacing, JSON-LD — supports loading a preset as base                      |
-| `add_block`        | Add a pre-built block with content/prop overrides                                                   |
-| `add_custom_block` | Add a hand-crafted CraftJS node map (validates image URLs)                                          |
 | `insert_node`      | Add a new node to an existing parent (validates image URLs)                                         |
 | `delete_node`      | Remove a node and descendants (protects structural nodes)                                           |
 | `set_integrations` | Configure analytics/tracking (GA4, GTM, Search Console, Meta Pixel) — just pass the ID              |
 | `set_redirects`    | Configure 301/302 redirect rules for SEO (old path → new path)                                      |
+| `apply_kit_block`  | Add a library section block by slug to a page/header/footer                                          |
+| `add_nodes`        | Merge new nodes into a site efficiently                                                              |
 
 ### Block Library
 
-| Tool                     | Description                                                                |
-| ------------------------ | -------------------------------------------------------------------------- |
-| `list_example_blocks`    | List blocks in an existing site by page                                    |
-| `extract_block`          | Convert a block to reusable template format (with optional templatize)     |
-| `shuffle_block`          | Swap a block for another template in the same category, preserving content |
-| `save_as_block_template` | Save extracted block as a new reusable template with metadata              |
+Use `search_blocks` + `apply_kit_block` for block composition, and `list_block_nodes` + `patch_block` / `patch_block_bulk` for block-level edits.
 
 ### Remote API
 
 | Tool                                      | Description                                                                                   |
 | ----------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `register`                                | Create a free account — returns an API key automatically                                      |
 | `list_templates` / `pull_template`        | Browse and download stock templates from the API                                              |
 | `list_sites` / `select_site`              | List tenant's sites and set active site context                                               |
 | `pull_site` / `save_site` / `delete_site` | Site CRUD                                                                                     |
@@ -203,11 +191,11 @@ Production-ready node structure recipes for layouts that pre-built templates don
 | `multi-column-footer` | 3-4 column footer with nav links, contact, social         |
 | `horizontal-scroller` | Horizontal scroll strip of tags/categories                |
 
-Each pattern returns a complete flat node map ready for `add_custom_block`.
+Each pattern returns a complete flat node map ready for `add_nodes`.
 
 ### Image Validation
 
-`add_custom_block` and `insert_node` validate all image URLs before writing. A HEAD request is sent with an 8-second timeout. If any URL returns a non-200 status or times out, the operation is blocked with a detailed error listing each failed URL and its status.
+`insert_node` validates image URLs before writing. A HEAD request is sent with an 8-second timeout. If any URL returns a non-200 status or times out, the operation is blocked with a detailed error listing each failed URL and its status.
 
 This prevents broken images from being saved into templates.
 
@@ -256,7 +244,7 @@ set_redirects(redirects: [
 
 **Remote** — OAuth 2.1. Your MCP client opens a browser, you sign in or register, token is stored automatically. Zero configuration.
 
-**Local (stdio)** — Set `PAGEHUB_API_KEY` in the `env` block of your MCP client config. Get your key from [pagehub.dev/dashboard](https://pagehub.dev/dashboard), or use the `register` tool to create a free account automatically.
+**Local (stdio)** — Set `PAGEHUB_API_KEY` in the `env` block of your MCP client config. Get your key from [pagehub.dev/dashboard](https://pagehub.dev/dashboard).
 
 No config files are written to your project.
 
@@ -281,16 +269,13 @@ src/
   tools.js            Tool schema loading from mcp-core
   handlers/
     discovery.js      Schema, style reference, design patterns, presets
-    local.js          Template building (create, theme, blocks, nav, footer, nodes)
-    sections.js       Block library (list, extract, shuffle, save)
-    remote.js         API tools (register, sites, templates, upload)
+    remote.js         API tools (sites, templates, upload)
     pages.js          Page CRUD (list, add, update, delete)
     components.js     Block library (search, get, list nodes, patch, save, update, delete)
     portal.js         Portal configuration
     ai.js             AI image generation and copy writing
     accessibility.js  WCAG audit (Playwright + jsdom fallback)
     seo.js            SEO audit (meta, headings, images, content)
-    patterns.js       Design pattern node maps
 ```
 
 ## License

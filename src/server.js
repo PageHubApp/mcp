@@ -6,12 +6,10 @@ const {
   ListResourcesRequestSchema,
   ListResourceTemplatesRequestSchema,
 } = require("@modelcontextprotocol/sdk/types.js");
-const { allTools } = require("./tools");
+const { getServerTools, isToolEnabled } = require("./tools");
 
 // Handler modules — each exports { toolName: async (args) => result }
 const discoveryHandlers = require("./handlers/discovery");
-const localHandlers = require("./handlers/local");
-const sectionHandlers = require("./handlers/sections");
 const remoteHandlers = require("./handlers/remote");
 const kitHandlers = require("./handlers/kit");
 const accessibilityHandlers = require("./handlers/accessibility");
@@ -22,10 +20,8 @@ const aiHandlers = require("./handlers/ai");
 const seoHandlers = require("./handlers/seo");
 const stockImageHandlers = require("./handlers/stock-images");
 
-const handlers = {
+const baseHandlers = {
   ...discoveryHandlers,
-  ...localHandlers,
-  ...sectionHandlers,
   ...remoteHandlers,
   ...kitHandlers,
   ...portalHandlers,
@@ -37,13 +33,15 @@ const handlers = {
   ...stockImageHandlers,
 };
 
+const handlers = baseHandlers;
+
 const server = new Server(
   { name: "pagehub", version: "0.1.0" },
   { capabilities: { tools: {}, resources: {} } }
 );
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: allTools(),
+  tools: getServerTools(handlers),
 }));
 
 server.setRequestHandler(ListResourcesRequestSchema, async () => ({
@@ -58,8 +56,10 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
   try {
     const name = request.params.name;
     const args = request.params.arguments || {};
+    if (!isToolEnabled(name, handlers)) {
+      throw new Error(`Tool "${name}" is not available in this server mode.`);
+    }
     const handler = handlers[name];
-    if (!handler) throw new Error(`Unknown tool: ${name}`);
     return await handler(args);
   } catch (error) {
     return { isError: true, content: [{ type: "text", text: error.message }] };
@@ -69,7 +69,7 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
 async function run() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("PageHub MCP Template Server v2 Connected.");
+  console.error("PageHub MCP Server Connected (api-first mode).");
 }
 
 module.exports = { server, run };

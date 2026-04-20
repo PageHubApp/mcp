@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "@pagehub/mcp-core": "workspace:*",
+    "@pagehub/mcp-core": "^0.1.0",
     "axe-core": "^4.11.3",
     "jsdom": "^29.0.2"
   },

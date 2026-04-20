@@ -1,6 +1,3 @@
-const fs = require("fs");
-const path = require("path");
-
 // ── Re-export shared context & HTTP utilities from mcp-core ──
 const {
   runWithContext,
@@ -14,29 +11,6 @@ const {
 // Re-export getContext as-is for handlers, but internally we need
 // to distinguish "real context" from the {} fallback for the Proxy.
 const getContext = _getContext;
-
-/* ── Project directory detection (MCP-only, needs filesystem) ── */
-
-let _projectDirCache;
-
-function getProjectDir() {
-  if (_projectDirCache) return _projectDirCache;
-  const env = process.env.PAGEHUB_PROJECT_DIR;
-  if (env) {
-    _projectDirCache = path.resolve(env);
-    return _projectDirCache;
-  }
-  // packages/mcp lives two levels below the monorepo root
-  const monorepoRoot = path.resolve(__dirname, "../../..");
-  if (fs.existsSync(path.join(monorepoRoot, "scripts/TemplateBuilder.js"))) {
-    _projectDirCache = monorepoRoot;
-    return _projectDirCache;
-  }
-  throw new Error(
-    "PAGEHUB_PROJECT_DIR is not set. Set it to your pagehub.dev repository root (folder containing scripts/TemplateBuilder.js), " +
-      "or clone github.com/gcphost/pagehub.dev alongside this package."
-  );
-}
 
 /* ── Config from environment (no file writes) ── */
 
@@ -135,7 +109,6 @@ function delegateHandlers(coreHandlers) {
 }
 
 module.exports = {
-  getProjectDir,
   normalizeBaseUrl,
   config,
   apiFetch,

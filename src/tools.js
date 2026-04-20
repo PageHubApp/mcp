@@ -3,9 +3,19 @@
  * Single source of truth: packages/mcp-core/src/tools.json
  */
 const allToolsList = require("@pagehub/mcp-core/src/tools.json");
+const { AGENT_ALLOWED } = require("@pagehub/mcp-core");
 
 function allTools() {
   return allToolsList;
 }
 
-module.exports = { allTools };
+function isToolEnabled(name, handlers) {
+  if (!handlers || !handlers[name]) return false;
+  return AGENT_ALLOWED.has(name);
+}
+
+function getServerTools(handlers) {
+  return allToolsList.filter(tool => isToolEnabled(tool.name, handlers));
+}
+
+module.exports = { allTools, getServerTools, isToolEnabled };
