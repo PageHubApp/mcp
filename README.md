@@ -89,7 +89,6 @@ All configuration is passed via environment variables in the `env` block of your
 | `set_theme`        | Configure palette, fonts, spacing, JSON-LD — supports loading a preset as base                      |
 | `add_block`        | Add a pre-built block with content/prop overrides                                                   |
 | `add_custom_block` | Add a hand-crafted CraftJS node map (validates image URLs)                                          |
-| `update_node`      | Patch a single node's props (`className`, allowlisted `root`, content fields; validates image URLs) |
 | `insert_node`      | Add a new node to an existing parent (validates image URLs)                                         |
 | `delete_node`      | Remove a node and descendants (protects structural nodes)                                           |
 | `set_integrations` | Configure analytics/tracking (GA4, GTM, Search Console, Meta Pixel) — just pass the ID              |
@@ -208,13 +207,13 @@ Each pattern returns a complete flat node map ready for `add_custom_block`.
 
 ### Image Validation
 
-`add_custom_block`, `update_node`, and `insert_node` validate all image URLs before writing. A HEAD request is sent with an 8-second timeout. If any URL returns a non-200 status or times out, the operation is blocked with a detailed error listing each failed URL and its status.
+`add_custom_block` and `insert_node` validate all image URLs before writing. A HEAD request is sent with an 8-second timeout. If any URL returns a non-200 status or times out, the operation is blocked with a detailed error listing each failed URL and its status.
 
 This prevents broken images from being saved into templates.
 
 ### Concurrency Safety
 
-File write operations (`update_node`, `delete_node`, `insert_node`) are serialized through a mutex to prevent concurrent writes from corrupting template JSON files. `patch_site_bulk` uses atomic GET/PATCH/PUT to prevent race conditions on live sites.
+File write operations (`delete_node`, `insert_node`) are serialized through a mutex to prevent concurrent writes from corrupting template JSON files. `patch_site_bulk` uses atomic GET/PATCH/PUT to prevent race conditions on live sites.
 
 ### Accessibility Audit
 

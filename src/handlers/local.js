@@ -289,7 +289,6 @@ module.exports = {
   },
 
   // Node-level tools — delegated to mcp-core
-  update_node: delegatedNodes.update_node,
   delete_node: delegatedNodes.delete_node,
   insert_node: delegatedNodes.insert_node,
   move_node: delegatedNodes.move_node,

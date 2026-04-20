@@ -16,7 +16,7 @@ Before building anything, call these discovery tools:
 
 Default to remote, surgical MCP edits. Do not rebuild full site JSON locally for routine work.
 
-1. Use `apply_kit_block`, `patch_site_node`, `patch_site_bulk`, `add_nodes`, `delete_node`, `update_node`.
+1. Use `apply_kit_block`, `patch_site_node`, `patch_site_bulk`, `add_nodes`, `delete_node`.
 2. Prefer `patch_site_bulk` for multi-node edits (single atomic write, fewer race issues).
 3. Treat `save_site` as exception-only (imports/migrations or explicit full rebuild requests).
 4. Keep one writer per site/template at a time. Avoid concurrent structural writes.
@@ -54,7 +54,7 @@ Full policy, layering rules, and icons: **`BLOCKS-AI-CONTEXT.md`** in the repo r
 5. apply_kit_block(slug, target:"footer")         → footer from block library
 6. set_integrations(...)                          → GA4, GTM, Search Console, Meta Pixel
 7. set_redirects(...)                             → 301/302 redirect rules
-8. update_node(slug, nodeId, ...)                 → surgical tweaks
+8. patch_site_node(slug, nodeId, ...)             → surgical tweaks
 9. audit_accessibility(url/html)                  → check WCAG compliance
 10. encode_all_templates()                        → finalize
 ```
@@ -305,7 +305,7 @@ The renderer combines the overlay gradient and image into a single CSS `backgrou
 - **Alt text is required** on every image. It should describe what's in the image, not be generic ("image 1").
 - **Image type:** Use `"type": "url"` for external URLs. Only use `"type": "cdn"` for uploaded media IDs.
 
-**Automatic URL validation:** `add_custom_block`, `update_node`, and `insert_node` send a HEAD request to every image URL before writing. The timeout is 8 seconds. If any URL fails (non-200 status or timeout), the entire operation is **blocked** — you'll get an error listing each bad URL and its status. Fix the URLs and retry.
+**Automatic URL validation:** `add_custom_block` and `insert_node` send a HEAD request to every image URL before writing. The timeout is 8 seconds. If any URL fails (non-200 status or timeout), the entire operation is **blocked** — you'll get an error listing each bad URL and its status. Fix the URLs and retry.
 
 **What's validated:**
 
@@ -1022,7 +1022,7 @@ Compare your output to the reference. A viewer should see the family resemblance
 
 ### Concurrency Notes
 
-- `update_node`, `delete_node`, and `insert_node` are serialized through a mutex — safe to call rapidly without race conditions on the template file.
+- `delete_node` and `insert_node` are serialized through a mutex — safe to call rapidly without race conditions on the template file.
 - `patch_site_bulk` is atomic on the API side — fetches, patches, and saves in one operation. Prefer it over multiple `patch_site_node` calls when editing several nodes at once.
 
 ## pagehub.dev monorepo (when you edit the repo, not only MCP over HTTP)
