@@ -572,7 +572,7 @@ Text and Button components use the unified `action` prop for all link and intera
 | --------------- | ----------------------------------------- | ----------------------------------------------------------------------------- |
 | `show-hide`     | `target`, `direction`, `method`, `group?` | Mobile menus, dropdowns, tabs, cookie consent dismiss                         |
 | `open-modal`    | `anchor`                                  | Open a modal by ID                                                            |
-| `add-to-cart`   | `quantity?` (default 1)                   | Add current data-bound item to cart (inside Stripe dataSource Container only) |
+| `add-to-cart`   | `quantity?` (default 1)                   | Add current data-bound item to cart (inside Stripe dataSource `Data` node only) |
 | `toggle-cart`   | —                                         | Open/close the CartDrawer (on CartBadge or nav buttons)                       |
 | `cart-checkout` | —                                         | Redirect to Stripe Checkout with cart contents                                |
 
@@ -615,9 +615,13 @@ PageHub supports live Stripe data display and shopping cart checkout. Users conn
 | `CartBadge`      | Navbar/header    | Cart icon with live item count. Auto-fires toggle-cart on click.            |
 | `CheckoutBanner` | Site root (once) | Post-checkout notification. Auto-shows after Stripe redirect.               |
 
-### Data-bound Containers (Stripe collections — server-side)
+### Data-bound sections — use `Data`, not `Container`
 
-Set `dataSource: { provider: "stripe", collection: "<name>" }` on a Container. Children repeat per item.
+`dataSource` lives on the **`Data`** component, not `Container`. `Data` is an extension of `Container` — same DOM output (one element, no extra wrapper), same layout/scroll/action behavior — but owns the repeater: connector resolution, scope/splitBy nesting, URL refetch, and per-item rendering. Use `Container` for plain layout; switch to `Data` the moment a section binds to a connector or repeats off a parent item (`scope`). When converting an existing node, `typePatch: "Data"` on `patch_site_node` / `patch_site_bulk` flips the component in place.
+
+### Data-bound sections (Stripe collections — server-side)
+
+Set `dataSource: { provider: "stripe", collection: "<name>" }` on a `Data` node. Children repeat per item.
 
 Available collections: `products`, `prices`, `customers`, `orders`, `subscriptions`, `invoices`, `coupons`
 
@@ -627,11 +631,11 @@ Use `{{item.title}}`, `{{item.price.formatted}}`, `{{item.image}}`, etc. in chil
 
 **Array indexing:** the resolver splits paths on `.` only. Use dot-digit, not JS brackets: `{{item.images.1}}` works, `{{item.images[1]}}` does NOT (it fails silently and falls through to the `||` fallback). Same rule applies to `item` conditions — `key: "images.1"` with operator `exists` is the supported way to gate a node on "has a second image".
 
-**Connector data shape (bindings):** Server and editor store Stripe (etc.) results per provider under `bindings[bindingId]` (not a single flat `products` key). Prefer `{{item.*}}` inside the bound Container. For global interpolation (e.g. SEO) without repeater context, paths are `connector.<provider>.bindings.<bindingId>.<index>.<field>`. The editor variable picker lists real binding ids. Optional `dataSource.bindingKey` on the Container keeps ids stable and readable when multiple sections share the same collection. Legacy `connector.<provider>.<collection>.0.*` paths are not supported.
+**Connector data shape (bindings):** Server and editor store Stripe (etc.) results per provider under `bindings[bindingId]` (not a single flat `products` key). Prefer `{{item.*}}` inside the bound `Data` node. For global interpolation (e.g. SEO) without repeater context, paths are `connector.<provider>.bindings.<bindingId>.<index>.<field>`. The editor variable picker lists real binding ids. Optional `dataSource.bindingKey` on the `Data` node keeps ids stable and readable when multiple sections share the same collection. Legacy `connector.<provider>.<collection>.0.*` paths are not supported.
 
-### Data-bound Containers (customer data — client-side)
+### Data-bound sections (customer data — client-side)
 
-Set `dataSource: { provider: "customer", collection: "<name>" }` on a Container. Data is fetched client-side using the `ph-customer` cookie (magic link auth).
+Set `dataSource: { provider: "customer", collection: "<name>" }` on a `Data` node. Data is fetched client-side using the `ph-customer` cookie (magic link auth).
 
 Available collections: `orders`, `me`
 
@@ -643,7 +647,7 @@ Site visitors (not PageHub users) authenticate via magic link email. Separate fr
 
 - **Login**: Form block with `submissionType: "custom"`, action `/api/customer/magic-link`. Collects email, sends magic link. Site resolved from Host header.
 - **Token detection**: `useCustomerToken` hook on all rendering routes. Detects `?token=` in URL, verifies via `/api/customer/verify`, sets `ph-customer` cookie, strips token from URL.
-- **Customer data**: Blocks use `dataSource: { provider: "customer", collection: "orders" }` — fetched client-side with cookie auth.
+- **Customer data**: Blocks use `Data` nodes with `dataSource: { provider: "customer", collection: "orders" }` — fetched client-side with cookie auth.
 - **Plan gating**: Free plan cannot use site customers. Pro: 500, Business: 10k, Agency: 100k max customers.
 
 ### Page access control

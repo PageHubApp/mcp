@@ -11,6 +11,7 @@ const { getServerTools, isToolEnabled } = require("./tools");
 // Handler modules — each exports { toolName: async (args) => result }
 const discoveryHandlers = require("./handlers/discovery");
 const remoteHandlers = require("./handlers/remote");
+const nodeHandlers = require("./handlers/nodes");
 const kitHandlers = require("./handlers/kit");
 const accessibilityHandlers = require("./handlers/accessibility");
 const portalHandlers = require("./handlers/portal");
@@ -23,6 +24,7 @@ const stockImageHandlers = require("./handlers/stock-images");
 const baseHandlers = {
   ...discoveryHandlers,
   ...remoteHandlers,
+  ...nodeHandlers,
   ...kitHandlers,
   ...portalHandlers,
   ...accessibilityHandlers,
