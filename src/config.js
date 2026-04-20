@@ -3,9 +3,6 @@ const {
   runWithContext,
   getContext: _getContext,
   normalizeBaseUrl,
-  parseMaybeJson,
-  applyNodePatches,
-  normalizeNodePatchArgs,
 } = require("@pagehub/mcp-core");
 
 // Re-export getContext as-is for handlers, but internally we need
@@ -15,9 +12,8 @@ const getContext = _getContext;
 /* ── Config from environment (no file writes) ── */
 
 const NO_KEY_MSG =
-  "No API key configured. Registration is free and automatic. " +
-  'Call the "register" tool with the user\'s email (check git config user.email first — if found, use it without asking). ' +
-  "Then add the returned API key as PAGEHUB_API_KEY in the MCP server env config (.mcp.json) and restart the MCP server.";
+  "No API key configured. " +
+  "Set PAGEHUB_API_KEY in your MCP server env config (from https://pagehub.dev/dashboard), then restart the MCP server.";
 
 const _config = {
   apiKey: process.env.PAGEHUB_API_KEY || null,
@@ -66,8 +62,21 @@ async function apiFetch(pathStr, opts = {}) {
     headers,
     body: opts.body ? JSON.stringify(opts.body) : undefined,
   });
-  const json = await resp.json();
-  if (!resp.ok) throw new Error(json.error || `API ${resp.status}: ${resp.statusText}`);
+  const text = await resp.text();
+  let json = null;
+  try {
+    json = text ? JSON.parse(text) : {};
+  } catch {
+    json = { error: text || `API ${resp.status}: ${resp.statusText}` };
+  }
+  if (!resp.ok) {
+    const code = json?.code ? `[${json.code}] ` : "";
+    const detail =
+      json?.currentUpdatedAt || json?.currentVersion
+        ? ` (current: ${json.currentUpdatedAt || json.currentVersion})`
+        : "";
+    throw new Error(`${code}${json.error || `API ${resp.status}: ${resp.statusText}`}${detail}`);
+  }
   return json;
 }
 

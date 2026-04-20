@@ -1,51 +1,10 @@
-const { normalizeBaseUrl, config, delegateHandlers } = require("../config");
+const { config, delegateHandlers } = require("../config");
 const coreHandlers = require("@pagehub/mcp-core/src/handlers/remote");
 
 // Delegate most handlers to mcp-core
 const delegated = delegateHandlers(coreHandlers);
 
 module.exports = {
-  // ── Stateless registration: returns key, AI client persists it ──
-
-  async register(args) {
-    const envBase = normalizeBaseUrl(process.env.PAGEHUB_API_BASE_URL);
-    const baseUrl = envBase || normalizeBaseUrl(config.apiBaseUrl) || "https://pagehub.dev";
-    const url = `${baseUrl}/api/v1/register`;
-    const resp = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: args.email, name: args.name }),
-    });
-    const text = await resp.text();
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      throw new Error(
-        `Register endpoint returned non-JSON. URL: ${url} (status ${resp.status}). Is PAGEHUB_API_BASE_URL set? Current: ${config.apiBaseUrl}`
-      );
-    }
-    if (!resp.ok) throw new Error(data.error || `Registration failed: ${resp.status}`);
-    return {
-      content: [
-        {
-          type: "text",
-          text: [
-            `Registration successful!`,
-            `  Email: ${data.email}`,
-            `  Name: ${data.name}`,
-            `  API Key: ${data.apiKey}`,
-            ``,
-            `To complete setup, add the API key to the MCP server config as an environment variable:`,
-            `  "env": { "PAGEHUB_API_KEY": "${data.apiKey}" }`,
-            ``,
-            `Then restart the MCP server.`,
-          ].join("\n"),
-        },
-      ],
-    };
-  },
-
   // ── MCP overrides: delegate then persist active target in memory ──
 
   async select_site(args) {
@@ -59,11 +18,6 @@ module.exports = {
     // Persist activeTemplate to outer config so it survives across tool calls
     config.activeTemplate = { slug: args.slug, title: result.content?.[0]?.text || "" };
     config.activeSite = null;
-    return result;
-  },
-
-  async save_site(args) {
-    const result = await delegated.save_site(args);
     return result;
   },
 

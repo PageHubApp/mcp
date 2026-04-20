@@ -90,7 +90,7 @@ All configuration is passed via environment variables in the `env` block of your
 
 ### Block Library
 
-Use `search_blocks` + `apply_kit_block` for block composition, and `list_block_nodes` + `patch_block` / `patch_block_bulk` for block-level edits.
+Use `search_blocks` + `apply_kit_block` for block composition. (Advanced block-library mutation tools are available on the full remote API surface.)
 
 ### Remote API
 
@@ -98,7 +98,7 @@ Use `search_blocks` + `apply_kit_block` for block composition, and `list_block_n
 | ----------------------------------------- | --------------------------------------------------------------------------------------------- |
 | `list_templates` / `pull_template`        | Browse and download stock templates from the API                                              |
 | `list_sites` / `select_site`              | List tenant's sites and set active site context                                               |
-| `pull_site` / `save_site` / `delete_site` | Site CRUD                                                                                     |
+| `delete_site`                             | Delete a site                                                                                  |
 | `upload_image`                            | Upload to tenant CDN (validates MIME type)                                                    |
 | `patch_site_node`                         | Edit a single node on a live site                                                             |
 | `patch_site_bulk`                         | Apply multiple node patches atomically (race-condition safe — GET/PATCH/PUT in one operation) |
@@ -122,18 +122,11 @@ Use `search_blocks` + `apply_kit_block` for block composition, and `list_block_n
 
 ### Blocks
 
-**Editing existing library blocks:** prefer `list_block_nodes` then `patch_block` / `patch_block_bulk` (same patch fields as `patch_site_node`). Use `update_block` for metadata or a full `structure` replace. See repo root `BLOCKS-AI-CONTEXT.md`.
-
 | Tool               | Description                                                              |
 | ------------------ | ------------------------------------------------------------------------ |
 | `search_blocks`    | Search the block library with filters (category, tags, source)           |
 | `get_block`        | Get full block structure by slug                                         |
 | `list_block_nodes` | List deterministic `lib_*` node ids for patching a library block         |
-| `patch_block`      | Patch one node inside a library block (same fields as `patch_site_node`) |
-| `patch_block_bulk` | Patch many library block nodes in one GET/PUT                            |
-| `save_block`       | Save a new block to the library                                          |
-| `update_block`     | Update block metadata or replace full structure                          |
-| `delete_block`     | Remove a block from the library                                          |
 
 ### Portal
 
