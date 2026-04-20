@@ -269,7 +269,7 @@ To layer a gradient overlay on top of a background image (e.g. dark hero with re
 
 ```json
 {
-  "backgroundImage": "https://...",
+  "background": { "image": "https://..." },
   "backgroundOverlay": "dark-left",
   "className": "bg-cover bg-center bg-no-repeat"
 }
@@ -310,7 +310,7 @@ The renderer combines the overlay gradient and image into a single CSS `backgrou
 **What's validated:**
 
 - `Image` component `content` prop (when `type: "url"` or URL starts with `http`)
-- `backgroundImage` props on any node
+- `background.image` props on any node
 
 **Not validated:** `add_block` does NOT validate image URLs passed via `contentOverrides`. If you need guaranteed validation, use `add_custom_block` instead.
 
@@ -712,8 +712,8 @@ Match text to background: `bg-primary` → `text-primary-content`.
 
 - **One job per node.** Each Text node = one semantic block. Don't cram multiple paragraphs or headings into one node.
 - **NEVER use `<a>` tags in text** — use the `action` prop on a Button instead.
-- **richTextMode** (`full` | `inline`, default `full`): `full` = normal TipTap (blocks, lists, images). `inline` = inline-only editor — **saved `text` has no wrapping `<p>`**; use for one-line copy (cookie consent, labels). **Not tied to `tagName`** — set `inline` explicitly when you want that shape. See `lib/schemas/Text.json`.
-- **NEVER use `<p>`, `<div>`, `<h1>`-`<h6>` in text values for document semantics** — use the `tagName` prop instead. (`full` TipTap may still store one outer `<p>…</p>`; for `tagName: "p"` one-liners prefer `richTextMode: "inline"` or plain/inline-only `text`.)
+- **richText.mode** (`full` | `inline`, default `full`): `full` = normal TipTap (blocks, lists, images). `inline` = inline-only editor — **saved `text` has no wrapping `<p>`**; use for one-line copy (cookie consent, labels). **Not tied to `tagName`** — set `inline` explicitly when you want that shape. Shape: `"richText": { "mode": "inline" }`. See `lib/schemas/Text.json`.
+- **NEVER use `<p>`, `<div>`, `<h1>`-`<h6>` in text values for document semantics** — use the `tagName` prop instead. (`full` TipTap may still store one outer `<p>…</p>`; for `tagName: "p"` one-liners prefer `richText.mode: "inline"` or plain/inline-only `text`.)
 - **Valid tagNames:** h1, h2, h3, h4, h5, h6, p, span, div.
 - **Heading hierarchy:** h1 → h2 → h3, never skip levels, only ONE h1 per page.
 - **Styling parts of text (split-color logos, highlighted words):** Use inline `style` with CSS variables: `<span style="color: var(--primary)">White</span><span style="color: var(--accent)">fall</span>`. NEVER use Tailwind classes inside text HTML (`<span class="text-primary">`) — the FOUC compiler does not scan `props.text`, only `props.className`.
@@ -805,7 +805,7 @@ A Text node is for **one piece of content** — a heading, a paragraph, a captio
 
 **NEVER in text values:**
 
-- `<p>`, `<div>`, `<h1>`-`<h6>` for **semantics** — use `tagName` instead; use `richTextMode: "inline"` or inline-only HTML when you must avoid a redundant outer `<p>` in `text` while `tagName` is `p`
+- `<p>`, `<div>`, `<h1>`-`<h6>` for **semantics** — use `tagName` instead; use `richText.mode: "inline"` or inline-only HTML when you must avoid a redundant outer `<p>` in `text` while `tagName` is `p`
 - `<a>` tags for navigation links — use Button components instead (they get proper hover states, click tracking, and accessibility)
 - Multiple `<br/>` to create spacing — use separate nodes with margin/padding
 - Complex HTML with classes — this bypasses the design system
@@ -1023,7 +1023,7 @@ Compare your output to the reference. A viewer should see the family resemblance
 - `list_presets(mood?)` — theme presets (18 curated, filterable by mood)
 - `get_component_schema(component?)` — component prop reference
 
-**Container overflow vs scroll effects:** `overflowDragScroll`, `overflowAutoHideScrollbar`, `overflowWheelScrollsHorizontal`, and `overflowScrollbarHideDelay` control **CSS horizontal overflow** (drag-to-scroll and auto-hide scrollbar on strips using `overflow-x-auto` in `className`). They are unrelated to **`scrollEffect`** (`horizontal-scroll` / `scroll-timeline`), which are **GSAP pin/transform** section effects. Do not use both GSAP horizontal-scroll and the overflow props on the same container.
+**Container overflow vs scroll effects:** `overflow.dragScroll`, `overflow.autoHide`, `overflow.wheelHorizontal`, and `overflow.hideDelay` control **CSS horizontal overflow** (drag-to-scroll and auto-hide scrollbar on strips using `overflow-x-auto` in `className`). They are unrelated to **`scrollEffect`** (`horizontal-scroll` / `scroll-timeline`), which are **GSAP pin/transform** section effects. Do not use both GSAP horizontal-scroll and the overflow props on the same container.
 - `get_style_reference()` — full prop key and variable list
 - `list_example_blocks(slug)` — blocks in decoded examples
 - `extract_block(slug, sectionRootId)` — extract for reuse
