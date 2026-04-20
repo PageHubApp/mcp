@@ -619,7 +619,9 @@ Available collections: `products`, `prices`, `customers`, `orders`, `subscriptio
 
 Use `{{item.title}}`, `{{item.price.formatted}}`, `{{item.image}}`, etc. in child Text/Image/Button nodes. Variables also work in Button action URLs (e.g. `{{item.url}}`).
 
-**Fallback syntax:** `{{item.description || "No description"}}` — shows fallback when field is empty/null. Works in Text, Button text, Image src, and Button action URLs.
+**Fallback syntax:** `{{item.description || "No description"}}` — shows fallback when field is empty/null. Works in Text, Button text, Image src, and Button action URLs. **Only one `||` is supported, and the fallback is a literal string — not a resolved variable.** `{{a || b || c}}` resolves to `a` or the literal text `"b || c"`. To fall back to another variable, use an `item` condition on the node (hide when the source field is missing) instead of chaining `||`.
+
+**Array indexing:** the resolver splits paths on `.` only. Use dot-digit, not JS brackets: `{{item.images.1}}` works, `{{item.images[1]}}` does NOT (it fails silently and falls through to the `||` fallback). Same rule applies to `item` conditions — `key: "images.1"` with operator `exists` is the supported way to gate a node on "has a second image".
 
 **Connector data shape (bindings):** Server and editor store Stripe (etc.) results per provider under `bindings[bindingId]` (not a single flat `products` key). Prefer `{{item.*}}` inside the bound Container. For global interpolation (e.g. SEO) without repeater context, paths are `connector.<provider>.bindings.<bindingId>.<index>.<field>`. The editor variable picker lists real binding ids. Optional `dataSource.bindingKey` on the Container keeps ids stable and readable when multiple sections share the same collection. Legacy `connector.<provider>.<collection>.0.*` paths are not supported.
 
