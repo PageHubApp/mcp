@@ -1,11 +1,14 @@
 {
   "name": "@pagehub/mcp",
   "version": "0.1.0",
-  "description": "MCP server for building, theming, and deploying PageHub websites with AI",
+  "description": "MCP server for building, theming, and deploying PageHub websites",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/PageHubJS/mcp.git"
+    "url": "https://github.com/PageHubApp/mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PageHubApp/mcp/issues"
   },
   "homepage": "https://pagehub.dev",
   "bin": {

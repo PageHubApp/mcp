@@ -46,7 +46,7 @@ Get your API key from [pagehub.dev/dashboard](https://pagehub.dev/dashboard). Ov
 ### From Source
 
 ```bash
-git clone https://github.com/PageHubJS/mcp.git
+git clone https://github.com/PageHubApp/mcp.git
 cd mcp
 npm install
 npm start
