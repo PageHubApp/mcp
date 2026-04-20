@@ -112,11 +112,13 @@ Use `search_blocks` + `apply_kit_block` for block composition. (Advanced block-l
 | `update_page` | Update page name, home/404/hidden flags, SEO metadata, per-page head code / body class |
 | `delete_page` | Remove a page and descendants (auto-promotes new home page) |
 
-**Custom code (raw HTML / scripts / styles):** PageHub supports script/style injection at three scopes — no dedicated tool, use what already exists:
-- **Site-wide** — `patch_site_node({ nodeId: "ROOT", propsPatch: { header: "<script>…</script>", footer: "<script>…</script>" } })`. `header` goes into every page's `<head>`; `footer` renders before `</body>`. Use for chat widgets, custom CSS, verification tags, third-party scripts.
-- **Per page** — `update_page({ pageId, headCode, bodyClass })`. `headCode` is raw HTML scoped to that page's `<head>`; `bodyClass` adds class(es) to `<body>` on that page only.
-- **Inline embed** — `apply_kit_block` / `add_nodes` with an `Embed` component whose `service: "custom"` and `code: "<iframe…>"` renders raw HTML at the component's position.
-- **Analytics / pixels:** prefer `set_integrations` (GA4, GTM, Meta Pixel, Search Console) over raw tags — it handles consent and de-dup.
+**Custom code (raw HTML / scripts / styles):** four scopes — pick the one whose reach matches what you're adding.
+
+- **Analytics / pixels (GA4, GTM, Meta Pixel, Search Console):** use `set_integrations`. Always. Handles consent, de-dup, and load point.
+- **Site-wide widget (every page — Intercom, Crisp, HubSpot, site-wide custom CSS):** `patch_site_node({ nodeId: "ROOT", propsPatch: { header: "<script>…</script>", footer: "<script>…</script>" } })`. `header` parses into `<head>` during SSR; `footer` emits inline before `</body>`. Script tags execute at HTML-parse time.
+- **Reusable block with its own widget (Cal.com popup, per-section Calendly):** add an `Embed` with `headCode` / `footCode`. Parsed and emitted the same way as `ROOT.props.header`, but scoped to the block and deduped across blocks by content hash — the block ships its own init, no site-level setup. `runInEditor` defaults off so widget popups/boots don't fire during editing. Pair with a `Button` using `props.handlers.onClick` to invoke the loaded widget's API.
+- **Per-page script (one landing page's A/B test, one product's schema.org JSON-LD):** `update_page({ pageId, headCode, bodyClass })`.
+- **Inline iframe / Stripe Buy Button / static HTML at a spot:** `Embed` with `service: "custom"` and `code: "<iframe…>"`. ⚠️ Scripts inside `code` silently do not execute — put scripts in `headCode` / `footCode` instead.
 
 **Custom 404 (`is404Page`):** Paid plans can mark one page as the site’s not-found canvas; unknown URLs render that page (with HTTP 404 on subdomains, `noindex` on ISR static). Free accounts cannot persist `is404Page` — the editor hides the toggle, `/api/save` strips the flag from compressed content, and `PUT /api/v1/sites/:id` strips it from decoded JSON before save.
 
@@ -135,13 +137,6 @@ Use `search_blocks` + `apply_kit_block` for block composition. (Advanced block-l
 | `set_portal`    | Enable a portal on a site |
 | `get_portal`    | Get portal configuration  |
 | `remove_portal` | Disable and remove portal |
-
-### AI
-
-| Tool             | Description                                                                                                                   |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `generate_image` | Generate an image with AI, upload to CDN, and optionally apply to a node                                                      |
-| `generate_copy`  | Generate or improve copy via the same `/api/ai/agent` path as the editor (`assistantScope: text`), not a separate improve API |
 
 ### Auditing
 
