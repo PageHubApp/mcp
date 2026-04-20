@@ -202,41 +202,41 @@ Tabular data like hours, pricing rows, or stats need tight, consistent formattin
 - **Separator lines:** Use `border-b` + `border-(--card)` between rows for visual structure if needed — but don't overdo it. The reference site uses clean rows without heavy dividers.
 - **Tabular alignment:** Times/prices should align right on mobile, left with min-width on desktop.
 
-### 7. Icons — Use Google Material Symbols, NOT Emojis
+### 7. Icons — Use react-icons refs, NOT Emojis
 
-PageHub has a built-in icon system with 2000+ Google Material Symbols. **Never use emoji characters** (☕, →, ▸, ★) as content — they render inconsistently across devices and look unprofessional.
+PageHub ships every `react-icons` set as inline SVG. **Never use emoji characters** (☕, →, ▸, ★) as content — they render inconsistently across devices and look unprofessional.
 
 **How icons work:**
 
-- Icons are set on Button components via the `icon` prop
-- **Material Symbols render as a font** (ligatures), not SVG. Small `w-5` / `w-6` boxes often look **tiny** next to `btn-md` or uppercase labels — use **`w-7 h-7` or `w-8 h-8`** for typical CTAs and nav icons, **`w-8`–`w-10`** for hero chips / large tiles, **`w-6` minimum** for dense icon-only controls (menu/close), often **`w-7`** in mobile drawers.
-- Format: `icon: { value: "ref-google:icon_name", position: "left", size: "w-7 h-7", gap: "gap-2" }`
-- The renderer auto-generates an optimized Google Fonts URL for only the icons used
+- Icons are set on Button components via the `icon` prop.
+- Every ref is inlined as SVG at SSR — no font, no FOUC, no client-side loader.
+- Format: `icon: { value: "ref-icon:<set>/<ExportName>", position: "left", size: "w-7 h-7", gap: "gap-2" }`.
+- `<set>` is any react-icons sub-package (`tb`, `fa6`, `fi`, `md`, `io5`, `hi2`, `lu`, `pi`, `si`, `ri`, `bi`, …).
+- `<ExportName>` is the exact named export (case-sensitive, e.g. `TbMenu2`, `FaFacebook`, `SiSpotify`).
+- **Prefer Tabler (`tb/*`)** for general UI icons. Use `fa6/*` or `si/*` for brand logos. Pick other sets only when a glyph is genuinely better.
 
-**Common icon names:**
-| Icon | Name | Use for |
-|------|------|---------|
-| menu | `ref-google:menu` | Hamburger menu |
-| close | `ref-google:close` | Close button |
-| phone | `ref-google:phone` | Phone links |
-| mail | `ref-google:mail` | Email links |
-| location_on | `ref-google:location_on` | Address/maps |
-| star | `ref-google:star` | Ratings |
-| arrow_forward | `ref-google:arrow_forward` | Navigation arrows |
-| coffee | `ref-google:coffee` | Cafe/drinks |
-| restaurant | `ref-google:restaurant` | Food/dining |
-| schedule | `ref-google:schedule` | Hours/time |
-| storefront | `ref-google:storefront` | Business/shop |
-| music_note | `ref-google:music_note` | Music/audio |
-| photo_camera | `ref-google:photo_camera` | Photography |
-| facebook | `ref-google:facebook` | Social media |
-| check_circle | `ref-google:check_circle` | Checkmarks/success |
-| expand_more | `ref-google:expand_more` | Dropdowns |
-| open_in_new | `ref-google:open_in_new` | External links |
+**Common Tabler icons:**
+| Name | Ref | Use for |
+|------|-----|---------|
+| menu | `ref-icon:tb/TbMenu2` | Hamburger menu |
+| close | `ref-icon:tb/TbX` | Close button |
+| phone | `ref-icon:tb/TbPhone` | Phone links |
+| mail | `ref-icon:tb/TbMail` | Email links |
+| map pin | `ref-icon:tb/TbMapPin` | Address / maps |
+| star | `ref-icon:tb/TbStar` | Ratings |
+| arrow right | `ref-icon:tb/TbArrowRight` | Navigation arrows |
+| coffee | `ref-icon:tb/TbCoffee` | Cafe / drinks |
+| clock | `ref-icon:tb/TbClock` | Hours / time |
+| cart | `ref-icon:tb/TbShoppingCart` | Commerce |
+| check | `ref-icon:tb/TbCircleCheck` | Checkmarks / success |
+| chevron down | `ref-icon:tb/TbChevronDown` | Dropdowns |
+| external link | `ref-icon:tb/TbExternalLink` | External links |
 
-**Full list:** Browse all icons at https://fonts.google.com/icons (filter by "Material Symbols Outlined")
+**Brand logos (fa6/*):** `FaFacebook`, `FaInstagram`, `FaGithub`, `FaYoutube`, `FaTiktok`, `FaDiscord`, `FaSpotify`, `FaApple`, `FaGoogle`, `FaStripe`, `FaAmazon`, `FaPaypal`.
 
-**Icon-only buttons** (no text, just icon): set `icon.only: true`
+**Full catalogue:** Browse every exported name in the editor icon picker, or in the public react-icons gallery (https://react-icons.github.io/react-icons/).
+
+**Icon-only buttons** (no text, just icon): set `icon.only: true`.
 
 **Example — button with icon:**
 
@@ -245,7 +245,7 @@ PageHub has a built-in icon system with 2000+ Google Material Symbols. **Never u
   "text": "Get Directions",
   "url": "#visit",
   "icon": {
-    "value": "ref-google:location_on",
+    "value": "ref-icon:tb/TbMapPin",
     "position": "left",
     "size": "w-7 h-7",
     "gap": "gap-2"
@@ -253,7 +253,7 @@ PageHub has a built-in icon system with 2000+ Google Material Symbols. **Never u
 }
 ```
 
-**CRITICAL: `ref-google:*` ONLY works on Button `icon.value`.** Putting `ref-google:account_balance` as text content in a Text node renders the literal string, not an icon. For icon-only display, use a Button with `icon.only: true`.
+**CRITICAL: `ref-icon:*` ONLY works on Button `icon.value`.** Putting `ref-icon:tb/TbMapPin` as text content in a Text node renders the literal string, not an icon. For icon-only display, use a Button with `icon.only: true`.
 
 **Where NOT to use icons (use Text instead):**
 
@@ -585,7 +585,7 @@ Text and Button components use the unified `action` prop for all link and intera
 { "text": "hello@example.com", "action": { "type": "email", "email": "hello@example.com" } }
 
 // Mobile menu toggle (Button only — must use method: "style")
-{ "text": "", "icon": { "value": "ref-google:menu" }, "action": { "type": "show-hide", "target": "mobile-nav", "direction": "toggle", "method": "style" } }
+{ "text": "", "icon": { "value": "ref-icon:tb/TbMenu2" }, "action": { "type": "show-hide", "target": "mobile-nav", "direction": "toggle", "method": "style" } }
 ```
 
 **Rules:**
