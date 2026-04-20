@@ -122,8 +122,14 @@ All configuration is passed via environment variables in the `env` block of your
 | ------------- | ----------------------------------------------------------- |
 | `list_pages`  | List all pages in a site with flags (home, 404, hidden)     |
 | `add_page`    | Create a new page with SEO props and auto-positioning       |
-| `update_page` | Update page name, home/404/hidden flags, and SEO metadata   |
+| `update_page` | Update page name, home/404/hidden flags, SEO metadata, per-page head code / body class |
 | `delete_page` | Remove a page and descendants (auto-promotes new home page) |
+
+**Custom code (raw HTML / scripts / styles):** PageHub supports script/style injection at three scopes — no dedicated tool, use what already exists:
+- **Site-wide** — `patch_site_node({ nodeId: "ROOT", propsPatch: { header: "<script>…</script>", footer: "<script>…</script>" } })`. `header` goes into every page's `<head>`; `footer` renders before `</body>`. Use for chat widgets, custom CSS, verification tags, third-party scripts.
+- **Per page** — `update_page({ pageId, headCode, bodyClass })`. `headCode` is raw HTML scoped to that page's `<head>`; `bodyClass` adds class(es) to `<body>` on that page only.
+- **Inline embed** — `apply_kit_block` / `add_nodes` with an `Embed` component whose `service: "custom"` and `code: "<iframe…>"` renders raw HTML at the component's position.
+- **Analytics / pixels:** prefer `set_integrations` (GA4, GTM, Meta Pixel, Search Console) over raw tags — it handles consent and de-dup.
 
 **Custom 404 (`is404Page`):** Paid plans can mark one page as the site’s not-found canvas; unknown URLs render that page (with HTTP 404 on subdomains, `noindex` on ISR static). Free accounts cannot persist `is404Page` — the editor hides the toggle, `/api/save` strips the flag from compressed content, and `PUT /api/v1/sites/:id` strips it from decoded JSON before save.
 
