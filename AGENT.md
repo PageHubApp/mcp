@@ -607,6 +607,8 @@ PageHub supports live Stripe data display and shopping cart checkout. Users conn
 
 **Human-readable reference (architecture, collections, bindings, variables, code map):** [`docs/stripe/README.md`](../../docs/stripe/README.md)
 
+> **Shopify → Stripe product migration** is a separate dashboard feature (not MCP-callable). Site owners connect a Shopify Admin API token in `/dashboard/sites/[id]` → "Migrate from Shopify"; a Vercel-cron-driven background queue creates Stripe products + prices + maps Shopify metadata. See [`docs/stripe/SHOPIFY-IMPORT.md`](../../docs/stripe/SHOPIFY-IMPORT.md). Do not attempt to build / drive this from MCP — there are no tools for it, and direct Stripe writes would bypass the idempotency map.
+
 ### Components
 
 | Component        | Where to place   | Purpose                                                                     |
