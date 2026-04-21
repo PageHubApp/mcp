@@ -84,6 +84,10 @@ Patterns provide battle-tested node structures for complex layouts. Always check
 3. patch_site_node / patch_site_bulk               → customize content
 ```
 
+**Do NOT pass `style` or `preset` to `search_blocks`.** The server auto-injects the site's `buildStyle` (set by `set_theme`) as a hard filter so results stay visually cohesive with the rest of the page. If nothing matches, the server widens automatically to universal blocks — you'll see a `(Style widened: …)` note in the response. Trust it; don't re-query without the filter.
+
+Style identity = template identity (one unique style per template, e.g. `archival`, `worksite`). Full architecture: repo path `.claude/known-issues/template-style-system.md`.
+
 | Pattern               | When to use                                                   |
 | --------------------- | ------------------------------------------------------------- |
 | `bento-gallery`       | Photo-heavy sections needing visual variety (not a flat grid) |
