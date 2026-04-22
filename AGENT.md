@@ -618,7 +618,7 @@ PageHub supports live Stripe data display and shopping cart checkout. Users conn
 | Component        | Where to place   | Purpose                                                                     |
 | ---------------- | ---------------- | --------------------------------------------------------------------------- |
 | `CartDrawer`     | Site root (once) | Slide-out shopping cart. Children: header + footer. Cart items auto-render. |
-| `CartBadge`      | Navbar/header    | Cart icon with live item count. Auto-fires toggle-cart on click.            |
+| `CartBadge`      | Navbar/header    | Cart icon wrapper with live item count. Use a child Button action `toggle-cart` (default preset includes it). |
 | `CheckoutBanner` | Site root (once) | Post-checkout notification. Auto-shows after Stripe redirect.               |
 
 ### Data-bound sections — use `Data`, not `Container`
