@@ -39,6 +39,12 @@ module.exports = {
 
   // ── Pure delegation ──
 
+  async create_site(args) {
+    const result = await delegated.create_site(args);
+    config.activeTemplate = null;
+    return result;
+  },
+
   list_templates: delegated.list_templates,
   pull_template: delegated.pull_template,
   save_template: delegated.save_template,
