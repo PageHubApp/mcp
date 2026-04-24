@@ -603,6 +603,19 @@ Text and Button components use the unified `action` prop for all link and intera
 - Mobile nav overlays: `show-hide` with `method: "style"` (container needs `root.style: "display: none;"`)
 - External links: always `target: "_blank"` (gets `rel="noopener noreferrer"` automatically)
 
+### Known gotchas — patterns that need `ROOT.props.inject` workarounds
+
+A few interactive patterns look like "just add a prop" but hit real SDK bugs or missing features. For marketing sites that depend on them (modals, mega menus, scroll-styled navs, text tickers), drop the documented inject payload into `ROOT.props.inject.head` + `inject.footer` rather than reinventing. Assemble **all needed workarounds into one inject payload** in a single `patch_site_node` call — splitting across patches loses whichever half gets overwritten.
+
+| Pattern | Bug / gap | Workaround doc |
+|---|---|---|
+| Modal w/ `show-hide` action | Action always sets inline `display: block` (ignores `method: "class"`); Container's `action` doesn't emit `data-action` so backdrop-click-to-close silently fails | [.claude/known-issues/modal-show-hide-gotchas.md](../../.claude/known-issues/modal-show-hide-gotchas.md) |
+| Mega menu / dropdown hover gap | `group-hover` breaks when panel is `fixed` far from trigger; cursor leaves `.group` element crossing the void | [.claude/known-issues/dropdown-hover-gap-and-positioning.md](../../.claude/known-issues/dropdown-hover-gap-and-positioning.md) |
+| Transparent fixed nav + scroll-to-glass | No `scrollTrigger` primitive for toggling nav bg state or shrinking the logo on scroll | [.claude/known-issues/transparent-fixed-nav-pattern.md](../../.claude/known-issues/transparent-fixed-nav-pattern.md) |
+| Text marquee seamless loop | `cssMarquee` preset + `gap-X` utility = half-gap boundary mismatch on wrap (visible jump). Image marquees work via `ImageList mode:"infinite"` — text tickers don't have an equivalent block | [.claude/known-issues/marquee-seamless-loop.md](../../.claude/known-issues/marquee-seamless-loop.md) |
+
+Each doc includes copy-paste-ready inject CSS/JS, the required `className` / `attrs` tags on the affected nodes, and the "SDK TODO" note for the proper fix. Use these as reference when building contractor / services / marketing sites that need a real modal + mega menu + transparent-fixed nav combo.
+
 ---
 
 ## E-commerce — Stripe Cart System
