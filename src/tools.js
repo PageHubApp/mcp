@@ -1,9 +1,11 @@
 /**
- * All MCP tool definitions — loaded from the shared mcp-core tools.json.
- * Single source of truth: packages/mcp-core/src/tools.json
+ * All MCP tool definitions — loaded from mcp-core's resolved tool list.
+ * Single source of truth: packages/mcp-core/src/tools.json (raw schemas) +
+ * packages/mcp-core/src/vibes.js (vibe enum, substituted into "$VIBES" sentinels
+ * by mcp-core's getAllTools()).
  */
-const allToolsList = require("@pagehub/mcp-core/src/tools.json");
-const { AGENT_ALLOWED } = require("@pagehub/mcp-core");
+const { getAllTools, AGENT_ALLOWED } = require("@pagehub/mcp-core");
+const allToolsList = getAllTools();
 
 function allTools() {
   return allToolsList;
