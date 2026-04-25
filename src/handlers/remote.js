@@ -60,4 +60,5 @@ module.exports = {
   patch_site_bulk: delegated.patch_site_bulk,
   add_nodes: delegated.add_nodes,
   suggest_palettes: delegated.suggest_palettes,
+  suggest_font_pairings: delegated.suggest_font_pairings,
 };
