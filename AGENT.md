@@ -369,8 +369,8 @@ Sites MUST comply with WCAG 2.1 Level AA to avoid lawsuits under California's Un
 
 #### Buttons, Links, Icons
 
-- **`Button`** = filled / outlined / icon CTA (anything with `btn` chrome or visible button styling). Supports the full action surface (link-*, scroll-to, show-hide, open-modal, cart, toggle-theme, etc.).
-- **`Link`** = plain text hyperlink. Always renders `<a>`, defaults to `link link-hover` (no button chrome). Use for inline "read more" / nav links / footer links / email + phone links. Action types limited to navigational: `link-url`, `link-page`, `scroll-to`, `email`, `phone`. For interactive behavior (show-hide, modal, cart) use `Button`.
+- **`Button`** = filled / outlined / icon CTA (anything with `btn` chrome or visible button styling). Supports the full action surface (`link`, show-hide, open-modal, cart, toggle-theme, etc.).
+- **`Link`** = plain text hyperlink. Always renders `<a>`, defaults to `link link-hover` (no button chrome). Use for inline "read more" / nav links / footer links / email + phone links. Only the navigational `link` action is allowed (any href: URL, `ref:<pageId>`, `#anchor`, `mailto:`, `tel:`). For interactive behavior (show-hide, modal, cart) use `Button`.
 - **`Icon`** = standalone decorative or semantic icon. Renders `<span>` with inline SVG. No action, no text. Use for feature-tile icons, check bullets, hero badges. For an icon paired with text in a CTA or link, use the `icon` prop on `Button` / `Link` — do NOT place an `Icon` node next to a `Text` node when they form a single visual unit.
 - Icon-only buttons MUST have text in the `text` prop (used as `aria-label` when `icon.only` is true). Same rule for `Link`.
 - Standalone `Icon` nodes are decorative by default (`aria-hidden`). Pass `aria-label` only when the icon carries meaning on its own (status, warning, standalone indicator).
@@ -560,15 +560,13 @@ Text and Button components use the unified `action` prop for all link and intera
 
 **Action types supported on Text and Button:**
 
-| Type                | Props                        | Use for                                       |
-| ------------------- | ---------------------------- | --------------------------------------------- |
-| `link-url`          | `url`, `target`              | External links, absolute URLs                 |
-| `link-page`         | `pageId`, `target`           | Internal page navigation                      |
-| `scroll-to`         | `anchor`                     | Anchor links to sections (nav → section `id`) |
-| `email`             | `email`, `subject?`, `body?` | Contact email (renders as `mailto:`)          |
-| `phone`             | `phone`                      | Phone numbers (renders as `tel:`)             |
-| `copy-to-clipboard` | `text`                       | Copy text on click                            |
-| `download-file`     | `url`, `filename?`           | File download trigger                         |
+`link` collapses the 5 legacy navigation types — one `href` string encodes destination HTML-style.
+
+| Type                | Props              | Use for                                                                                                  |
+| ------------------- | ------------------ | -------------------------------------------------------------------------------------------------------- |
+| `link`              | `href`, `target?`  | All navigation. `href` examples: `https://...` / `/relative` / `ref:<pageId>[/path]` / `#anchor` / `mailto:addr?subject=…&body=…` / `tel:+15551234`. `target` only honored for url/page hrefs. |
+| `copy-to-clipboard` | `text`             | Copy text on click                                                                                       |
+| `download-file`     | `url`, `filename?` | File download trigger                                                                                    |
 
 **Button-only action types (not on Text):**
 
@@ -584,13 +582,22 @@ Text and Button components use the unified `action` prop for all link and intera
 
 ```json
 // External link on a Text heading
-{ "text": "PageHub", "tagName": "h3", "action": { "type": "link-url", "url": "https://pagehub.dev", "target": "_blank" } }
+{ "text": "PageHub", "tagName": "h3", "action": { "type": "link", "href": "https://pagehub.dev", "target": "_blank" } }
+
+// Internal page link
+{ "text": "About", "action": { "type": "link", "href": "ref:page_about" } }
+
+// Internal page with dynamic path (storefront PDP from a repeater item)
+{ "text": "View product", "action": { "type": "link", "href": "ref:page_product/{{item.slug}}" } }
 
 // Nav button scrolling to a section
-{ "text": "Contact", "action": { "type": "scroll-to", "anchor": "contact" } }
+{ "text": "Contact", "action": { "type": "link", "href": "#contact" } }
 
 // Email button
-{ "text": "hello@example.com", "action": { "type": "email", "email": "hello@example.com" } }
+{ "text": "hello@example.com", "action": { "type": "link", "href": "mailto:hello@example.com" } }
+
+// Phone button
+{ "text": "Call us", "action": { "type": "link", "href": "tel:+15551234567" } }
 
 // Mobile menu toggle (Button only — must use method: "style")
 { "text": "", "icon": { "value": "ref-icon:tb/TbMenu2" }, "action": { "type": "show-hide", "target": "mobile-nav", "direction": "toggle", "method": "style" } }
@@ -598,10 +605,10 @@ Text and Button components use the unified `action` prop for all link and intera
 
 **Rules:**
 
-- Nav links to page sections: use `scroll-to`, not `link-url` with `#anchor`
-- Contact email/phone: use `email`/`phone` types, not `link-url` with `mailto:`/`tel:`
-- Mobile nav overlays: `show-hide` with `method: "style"` (container needs `root.style: "display: none;"`)
-- External links: always `target: "_blank"` (gets `rel="noopener noreferrer"` automatically)
+- Always use `type: "link"` for navigation. Pick the right `href` shape — the prefix tells the browser/renderer everything.
+- Mobile nav overlays: `show-hide` with `method: "style"` (container needs `root.style: "display: none;"`).
+- External links: set `target: "_blank"` (gets `rel="noopener noreferrer"` automatically).
+- Legacy `link-url`, `link-page`, `scroll-to`, `email`, `phone` types still render correctly via a runtime shim, but DO NOT emit them in new content.
 
 ### Known gotchas — patterns that need `ROOT.props.inject` workarounds
 
