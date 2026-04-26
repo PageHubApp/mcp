@@ -27,6 +27,7 @@ Default to remote, surgical MCP edits. Do not rebuild full site JSON locally for
 1. `parentId` must be an existing node already present in the current site/template.
 2. `rootNodeId` must exist in `nodes` and be the single top-level root of that payload.
 3. If you need multiple roots, split into multiple `add_nodes` calls.
+4. **Ignore "Parent ... does not exist in node map" warnings** when the parent IS an existing live node. The validator runs against the new-nodes map only, so it can't see the existing parent — the node still gets added correctly. Verify with `search_site_nodes` afterward if you need to confirm the attach.
 
 ### Structural Error Escalation
 
@@ -217,7 +218,8 @@ PageHub ships every `react-icons` set as inline SVG. **Never use emoji character
 - Format: `icon: { value: "ref-icon:<set>/<ExportName>", position: "left", size: "w-7 h-7", gap: "gap-2" }`.
 - `<set>` is any react-icons sub-package (`tb`, `fa6`, `fi`, `md`, `io5`, `hi2`, `lu`, `pi`, `si`, `ri`, `bi`, …).
 - `<ExportName>` is the exact named export (case-sensitive, e.g. `TbMenu2`, `FaFacebook`, `SiSpotify`).
-- **Prefer Tabler (`tb/*`)** for general UI icons. Use `fa6/*` or `si/*` for brand logos. Pick other sets only when a glyph is genuinely better.
+- **Prefer Tabler (`tb/*`)** for general UI icons. Use `fa`/`fa6`/`si`/`bi`/`bs`/`im`/`lia` for brand logos — **Tabler is NOT a complete brand registry**, so brands like Yelp / Airbnb / TikTok have no `TbBrand*` entry and render empty silently.
+- **When unsure, call `find_icon`** — searches every set, returns ranked `ref-icon:<set>/<Name>` strings ready to paste. `find_icon({ q: "yelp" })` surfaces FaYelp/SiYelp/etc and tells you Tabler doesn't have it. `find_icon({ q: "phone" })` lands TbPhone first. Skips a round trip vs guessing.
 
 **Common Tabler icons:**
 | Name | Ref | Use for |
@@ -236,7 +238,7 @@ PageHub ships every `react-icons` set as inline SVG. **Never use emoji character
 | chevron down | `ref-icon:tb/TbChevronDown` | Dropdowns |
 | external link | `ref-icon:tb/TbExternalLink` | External links |
 
-**Brand logos (fa6/*):** `FaFacebook`, `FaInstagram`, `FaGithub`, `FaYoutube`, `FaTiktok`, `FaDiscord`, `FaSpotify`, `FaApple`, `FaGoogle`, `FaStripe`, `FaAmazon`, `FaPaypal`.
+**Brand logos:** call `find_icon({ q: "<brand>", kind: "brand" })` — checks all 7 brand-heavy sets at once. Common pairings: `fa6/FaFacebook`, `fa6/FaInstagram`, `fa6/FaGithub`, `fa6/FaYoutube`, `fa6/FaTiktok`, `fa6/FaDiscord`, `fa6/FaSpotify`, `fa6/FaApple`, `fa6/FaGoogle`, `fa6/FaStripe`, `fa/FaYelp`, `si/SiAirbnb`, `bi/BiLogoSnapchat`. Tabler `TbBrand*` exists for some brands (Google, GitHub, X, Facebook, Instagram, LinkedIn, YouTube, WhatsApp) but **NOT** Yelp, Airbnb, TikTok — grep `tb.json` first or just call `find_icon`.
 
 **Full catalogue:** Browse every exported name in the editor icon picker, or in the public react-icons gallery (https://react-icons.github.io/react-icons/).
 
@@ -599,14 +601,14 @@ Text and Button components use the unified `action` prop for all link and intera
 // Phone button
 { "text": "Call us", "action": { "type": "link", "href": "tel:+15551234567" } }
 
-// Mobile menu toggle (Button only — must use method: "style")
-{ "text": "", "icon": { "value": "ref-icon:tb/TbMenu2" }, "action": { "type": "show-hide", "target": "mobile-nav", "direction": "toggle", "method": "style" } }
+// Mobile menu toggle (default method: "class" — overlay starts with `hidden` class)
+{ "text": "", "icon": { "value": "ref-icon:tb/TbMenu2" }, "action": { "type": "show-hide", "target": "mobile-nav", "direction": "toggle" } }
 ```
 
 **Rules:**
 
 - Always use `type: "link"` for navigation. Pick the right `href` shape — the prefix tells the browser/renderer everything.
-- Mobile nav overlays: `show-hide` with `method: "style"` (container needs `root.style: "display: none;"`).
+- Mobile nav / modal overlays: `show-hide` with default `method: "class"`. Overlay Container starts with `hidden` in className (NOT `root.style: "display: none"`). The SDK's `showHideStore` keeps the toggle stable across React rerenders. ESC closes most-recently-shown overlay automatically.
 - External links: set `target: "_blank"` (gets `rel="noopener noreferrer"` automatically).
 - Legacy `link-url`, `link-page`, `scroll-to`, `email`, `phone` types still render correctly via a runtime shim, but DO NOT emit them in new content.
 
@@ -616,10 +618,11 @@ A few interactive patterns look like "just add a prop" but hit real SDK bugs or 
 
 | Pattern | Bug / gap | Workaround doc |
 |---|---|---|
-| Modal w/ `show-hide` action | Action always sets inline `display: block` (ignores `method: "class"`); Container's `action` doesn't emit `data-action` so backdrop-click-to-close silently fails | [.claude/known-issues/modal-show-hide-gotchas.md](../../.claude/known-issues/modal-show-hide-gotchas.md) |
+| Modal & drawer flex layout | twMerge collapses `hidden` + `flex` (same display group). The visible-state layout (centered modal, column drawer) has to live in `:not(.hidden)` CSS. ESC + backdrop close are SDK-native — no JS inject needed | [.claude/known-issues/modal-show-hide-gotchas.md](../../.claude/known-issues/modal-show-hide-gotchas.md) |
 | Mega menu / dropdown hover gap | `group-hover` breaks when panel is `fixed` far from trigger; cursor leaves `.group` element crossing the void | [.claude/known-issues/dropdown-hover-gap-and-positioning.md](../../.claude/known-issues/dropdown-hover-gap-and-positioning.md) |
 | Transparent fixed nav + scroll-to-glass | No `scrollTrigger` primitive for toggling nav bg state or shrinking the logo on scroll | [.claude/known-issues/transparent-fixed-nav-pattern.md](../../.claude/known-issues/transparent-fixed-nav-pattern.md) |
 | Text marquee seamless loop | `cssMarquee` preset + `gap-X` utility = half-gap boundary mismatch on wrap (visible jump). Image marquees work via `ImageList mode:"infinite"` — text tickers don't have an equivalent block | [.claude/known-issues/marquee-seamless-loop.md](../../.claude/known-issues/marquee-seamless-loop.md) |
+| Body / html styling needs (sticky-CTA padding, body bg, html selectors) | `<body>` and `<html>` aren't Craft nodes — no `className` reaches them. Per-page: `update_page({ bodyClass })` (client-side only, fine for non-critical paint). Site-wide / first-paint: inline `<style>body{...}</style>` in `ROOT.props.inject.head` | [.claude/known-issues/body-and-html-styling.md](../../.claude/known-issues/body-and-html-styling.md) |
 
 Each doc includes copy-paste-ready inject CSS/JS, the required `className` / `attrs` tags on the affected nodes, and the "SDK TODO" note for the proper fix. Use these as reference when building contractor / services / marketing sites that need a real modal + mega menu + transparent-fixed nav combo.
 
