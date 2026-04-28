@@ -389,7 +389,7 @@ Sites MUST comply with WCAG 2.1 Level AA to avoid lawsuits under California's Un
 
 - Every site gets a skip navigation link automatically (built into the renderer).
 - Navigation menus use `<nav>` (Container type `"nav"`) — this is provided by the Container navbar presets.
-- **Header blocks and MCP structures:** Prefer the **Container navbar presets** (not a lone `ButtonList`) for editable desktop links + hamburger + slide overlay. Match templates (`acme` header) and the library seed `navbar` (`scripts/seed/data/blocks/navbar.block.json`): `menu.id` must match the overlay `Container` `id` and hamburger `click.value`; duplicate link buttons inside the panel `ButtonList` for static/view routes (omit `source` unless you have stable Craft node ids).
+- **Header blocks and MCP structures:** Prefer the **Container navbar presets** (not a lone Container of Buttons) for editable desktop links + hamburger + slide overlay. Match templates (`acme` header) and the library seed `navbar` (`scripts/seed/data/blocks/navbar.block.json`): `menu.id` must match the overlay `Container` `id` and hamburger `click.value`; duplicate link buttons inside the panel Container for static/view routes (omit `source` unless you have stable Craft node ids).
 
 #### Motion & Animation
 
@@ -538,7 +538,7 @@ Buttons can show, hide, toggle, or **tab-switch** other elements by DOM ID. The 
 **Complete node structure for tabs:**
 
 ```
-Container "Tab Buttons" (ButtonList, flex-row)
+Container "Tab Buttons" (flex-row)
   ├── Button "Coffee" → click: { type: "click", direction: "tab", value: "panel-coffee", group: "menu-tabs" }
   │   (active by default — full opacity, filled background)
   └── Button "Food" → click: { type: "click", direction: "tab", value: "panel-food", group: "menu-tabs" }
@@ -821,7 +821,7 @@ A Text node is for **one piece of content** — a heading, a paragraph, a captio
 | Wrong (one Text node)                                                         | Right (separate nodes)                                    |
 | ----------------------------------------------------------------------------- | --------------------------------------------------------- |
 | `"123 Main St<br/>Los Angeles<br/>(555) 123-4567"`                            | 3 Text nodes: street, city, phone — each with own styling |
-| `"© 2026 Acme · <a href='/privacy'>Privacy</a> · <a href='/terms'>Terms</a>"` | 1 Text node for copyright + ButtonList with link buttons  |
+| `"© 2026 Acme · <a href='/privacy'>Privacy</a> · <a href='/terms'>Terms</a>"` | 1 Text node for copyright + Container of link Buttons  |
 | `"Company Name<br/>Tagline<br/>Address"`                                      | Container with 3 child Text nodes                         |
 
 **Why:** Each Text node can have its own `tagName`, `fontSize`, `fontWeight`, `color`. When you cram everything into one node, you lose all typographic control. The footer example above — copyright, address, and nav links all in one `<p>` — means you can't style the nav links differently from the address, can't change font sizes, can't adjust spacing between lines.
@@ -845,12 +845,12 @@ A Text node is for **one piece of content** — a heading, a paragraph, a captio
 ftr_inner (Container, flex-col, gap-space-md, items-center)
   ├── ftr_brand (Text, "{{company.name}}", h3, font-bold, text-lg)
   ├── ftr_address (Text, "{{company.address}} · {{company.location}}", p, text-sm, muted)
-  ├── ftr_links (ButtonList, flex-row, gap-4)
+  ├── ftr_links (Container, flex-row, gap-4)
   │     ├── Button "Privacy" → /privacy (link link-hover, text-sm)
   │     ├── Button "Terms" → /terms (link link-hover, text-sm)
   │     └── Button "{{company.phone}}" → tel:{{company.phone}} (link link-hover, text-sm)
   ├── ftr_divider (Container with border-t border-base-300 pt-space-sm)
-  ├── ftr_social (ButtonList, flex-row, gap-space-xs)
+  ├── ftr_social (Container, flex-row, gap-space-xs)
   │     └── Button icons (btn btn-ghost, icon-only)
   └── ftr_copyright (Text, "© {{year}} {{company.name}}", p, text-xs, muted)
 ```
