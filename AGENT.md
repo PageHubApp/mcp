@@ -388,8 +388,8 @@ Sites MUST comply with WCAG 2.1 Level AA to avoid lawsuits under California's Un
 #### Navigation
 
 - Every site gets a skip navigation link automatically (built into the renderer).
-- Navigation menus use `<nav>` (Container type `"nav"`) — this happens automatically with the Nav component in navbar blocks.
-- **Header blocks and MCP structures:** Prefer the **`Nav`** component (not a lone `ButtonList`) for editable desktop links + hamburger + slide overlay. It matches templates (`acme` header) and the library seed `navbar` (`scripts/seed/data/blocks/navbar.block.json`): `menu.id` must match the overlay `Container` `id` and hamburger `click.value`; duplicate link buttons inside the panel `ButtonList` for static/view routes (omit `source` unless you have stable Craft node ids).
+- Navigation menus use `<nav>` (Container type `"nav"`) — this is provided by the Container navbar presets.
+- **Header blocks and MCP structures:** Prefer the **Container navbar presets** (not a lone `ButtonList`) for editable desktop links + hamburger + slide overlay. Match templates (`acme` header) and the library seed `navbar` (`scripts/seed/data/blocks/navbar.block.json`): `menu.id` must match the overlay `Container` `id` and hamburger `click.value`; duplicate link buttons inside the panel `ButtonList` for static/view routes (omit `source` unless you have stable Craft node ids).
 
 #### Motion & Animation
 
@@ -849,7 +849,7 @@ ftr_inner (Container, flex-col, gap-space-md, items-center)
   │     ├── Button "Privacy" → /privacy (link link-hover, text-sm)
   │     ├── Button "Terms" → /terms (link link-hover, text-sm)
   │     └── Button "{{company.phone}}" → tel:{{company.phone}} (link link-hover, text-sm)
-  ├── ftr_divider (Divider or Container with border-t border-base-300 pt-space-sm)
+  ├── ftr_divider (Container with border-t border-base-300 pt-space-sm)
   ├── ftr_social (ButtonList, flex-row, gap-space-xs)
   │     └── Button icons (btn btn-ghost, icon-only)
   └── ftr_copyright (Text, "© {{year}} {{company.name}}", p, text-xs, muted)
