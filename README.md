@@ -78,15 +78,15 @@ All configuration is passed via environment variables in the `env` block of your
 
 ### Site Building
 
-| Tool               | Description                                                                                         |
-| ------------------ | --------------------------------------------------------------------------------------------------- |
-| `set_theme`        | Configure palette, fonts, spacing, JSON-LD — supports loading a preset as base                      |
-| `insert_node`      | Add a new node to an existing parent (validates image URLs)                                         |
-| `delete_node`      | Remove a node and descendants (protects structural nodes)                                           |
-| `set_integrations` | Configure analytics/tracking (GA4, GTM, Search Console, Meta Pixel) — just pass the ID              |
-| `set_redirects`    | Configure 301/302 redirect rules for SEO (old path → new path)                                      |
-| `apply_kit_block`  | Add a library section block by slug to a page/header/footer                                          |
-| `add_nodes`        | Merge new nodes into a site efficiently                                                              |
+| Tool               | Description                                                                            |
+| ------------------ | -------------------------------------------------------------------------------------- |
+| `set_theme`        | Configure palette, fonts, spacing, JSON-LD — supports loading a preset as base         |
+| `insert_node`      | Add a new node to an existing parent (validates image URLs)                            |
+| `delete_node`      | Remove a node and descendants (protects structural nodes)                              |
+| `set_integrations` | Configure analytics/tracking (GA4, GTM, Search Console, Meta Pixel) — just pass the ID |
+| `set_redirects`    | Configure 301/302 redirect rules for SEO (old path → new path)                         |
+| `apply_kit_block`  | Add a library section block by slug to a page/header/footer                            |
+| `add_nodes`        | Merge new nodes into a site efficiently                                                |
 
 ### Block Library
 
@@ -94,23 +94,23 @@ Use `search_blocks` + `apply_kit_block` for block composition. (Advanced block-l
 
 ### Remote API
 
-| Tool                                      | Description                                                                                   |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `list_templates` / `pull_template`        | Browse and download stock templates from the API                                              |
-| `list_sites` / `select_site`              | List tenant's sites and set active site context                                               |
-| `delete_site`                             | Delete a site                                                                                  |
-| `upload_image`                            | Upload to tenant CDN (validates MIME type)                                                    |
-| `patch_site_node`                         | Edit a single node on a live site                                                             |
-| `patch_site_bulk`                         | Apply multiple node patches atomically (race-condition safe — GET/PATCH/PUT in one operation) |
+| Tool                               | Description                                                                                   |
+| ---------------------------------- | --------------------------------------------------------------------------------------------- |
+| `list_templates` / `pull_template` | Browse and download stock templates from the API                                              |
+| `list_sites` / `select_site`       | List tenant's sites and set active site context                                               |
+| `delete_site`                      | Delete a site                                                                                 |
+| `upload_image`                     | Upload to tenant CDN (validates MIME type)                                                    |
+| `patch_site_node`                  | Edit a single node on a live site                                                             |
+| `patch_site_bulk`                  | Apply multiple node patches atomically (race-condition safe — GET/PATCH/PUT in one operation) |
 
 ### Pages
 
-| Tool          | Description                                                 |
-| ------------- | ----------------------------------------------------------- |
-| `list_pages`  | List all pages in a site with flags (home, 404, hidden)     |
-| `add_page`    | Create a new page with SEO props and auto-positioning       |
+| Tool          | Description                                                                            |
+| ------------- | -------------------------------------------------------------------------------------- |
+| `list_pages`  | List all pages in a site with flags (home, 404, hidden)                                |
+| `add_page`    | Create a new page with SEO props and auto-positioning                                  |
 | `update_page` | Update page name, home/404/hidden flags, SEO metadata, per-page head code / body class |
-| `delete_page` | Remove a page and descendants (auto-promotes new home page) |
+| `delete_page` | Remove a page and descendants (auto-promotes new home page)                            |
 
 **Custom code (raw HTML / scripts / styles):** four scopes — pick the one whose reach matches what you're adding.
 
@@ -124,11 +124,11 @@ Use `search_blocks` + `apply_kit_block` for block composition. (Advanced block-l
 
 ### Blocks
 
-| Tool               | Description                                                              |
-| ------------------ | ------------------------------------------------------------------------ |
-| `search_blocks`    | Search the block library with filters (category, tags, source)           |
-| `get_block`        | Get full block structure by slug                                         |
-| `list_block_nodes` | List deterministic `lib_*` node ids for patching a library block         |
+| Tool               | Description                                                      |
+| ------------------ | ---------------------------------------------------------------- |
+| `search_blocks`    | Search the block library with filters (category, tags, source)   |
+| `get_block`        | Get full block structure by slug                                 |
+| `list_block_nodes` | List deterministic `lib_*` node ids for patching a library block |
 
 ### Portal
 

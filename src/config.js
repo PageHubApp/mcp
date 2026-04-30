@@ -1,9 +1,5 @@
 // ── Re-export shared context & HTTP utilities from mcp-core ──
-const {
-  runWithContext,
-  getContext: _getContext,
-  normalizeBaseUrl,
-} = require("@pagehub/mcp-core");
+const { runWithContext, getContext: _getContext, normalizeBaseUrl } = require("@pagehub/mcp-core");
 
 // Re-export getContext as-is for handlers, but internally we need
 // to distinguish "real context" from the {} fallback for the Proxy.

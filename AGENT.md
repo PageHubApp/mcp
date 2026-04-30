@@ -564,21 +564,21 @@ Text and Button components use the unified `action` prop for all link and intera
 
 `link` collapses the 5 legacy navigation types — one `href` string encodes destination HTML-style.
 
-| Type                | Props              | Use for                                                                                                  |
-| ------------------- | ------------------ | -------------------------------------------------------------------------------------------------------- |
+| Type                | Props              | Use for                                                                                                                                                                                        |
+| ------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `link`              | `href`, `target?`  | All navigation. `href` examples: `https://...` / `/relative` / `ref:<pageId>[/path]` / `#anchor` / `mailto:addr?subject=…&body=…` / `tel:+15551234`. `target` only honored for url/page hrefs. |
-| `copy-to-clipboard` | `text`             | Copy text on click                                                                                       |
-| `download-file`     | `url`, `filename?` | File download trigger                                                                                    |
+| `copy-to-clipboard` | `text`             | Copy text on click                                                                                                                                                                             |
+| `download-file`     | `url`, `filename?` | File download trigger                                                                                                                                                                          |
 
 **Button-only action types (not on Text):**
 
-| Type            | Props                                     | Use for                                                                       |
-| --------------- | ----------------------------------------- | ----------------------------------------------------------------------------- |
-| `show-hide`     | `target`, `direction`, `method`, `group?` | Mobile menus, dropdowns, tabs, cookie consent dismiss                         |
-| `open-modal`    | `anchor`                                  | Open a modal by ID                                                            |
+| Type            | Props                                     | Use for                                                                         |
+| --------------- | ----------------------------------------- | ------------------------------------------------------------------------------- |
+| `show-hide`     | `target`, `direction`, `method`, `group?` | Mobile menus, dropdowns, tabs, cookie consent dismiss                           |
+| `open-modal`    | `anchor`                                  | Open a modal by ID                                                              |
 | `add-to-cart`   | `quantity?` (default 1)                   | Add current data-bound item to cart (inside Stripe dataSource `Data` node only) |
-| `toggle-cart`   | —                                         | Open/close the CartDrawer (on CartBadge or nav buttons)                       |
-| `cart-checkout` | —                                         | Redirect to Stripe Checkout with cart contents                                |
+| `toggle-cart`   | —                                         | Open/close the CartDrawer (on CartBadge or nav buttons)                         |
+| `cart-checkout` | —                                         | Redirect to Stripe Checkout with cart contents                                  |
 
 **Examples:**
 
@@ -616,13 +616,13 @@ Text and Button components use the unified `action` prop for all link and intera
 
 A few interactive patterns look like "just add a prop" but hit real SDK bugs or missing features. For marketing sites that depend on them (modals, mega menus, scroll-styled navs, text tickers), drop the documented inject payload into `ROOT.props.inject.head` + `inject.footer` rather than reinventing. Assemble **all needed workarounds into one inject payload** in a single `patch_site_node` call — splitting across patches loses whichever half gets overwritten.
 
-| Pattern | Bug / gap | Workaround doc |
-|---|---|---|
-| Modal & drawer flex layout | twMerge collapses `hidden` + `flex` (same display group). The visible-state layout (centered modal, column drawer) has to live in `:not(.hidden)` CSS. ESC + backdrop close are SDK-native — no JS inject needed | [.claude/known-issues/modal-show-hide-gotchas.md](../../.claude/known-issues/modal-show-hide-gotchas.md) |
-| Mega menu / dropdown hover gap | `group-hover` breaks when panel is `fixed` far from trigger; cursor leaves `.group` element crossing the void | [.claude/known-issues/dropdown-hover-gap-and-positioning.md](../../.claude/known-issues/dropdown-hover-gap-and-positioning.md) |
-| Transparent fixed nav + scroll-to-glass | No `scrollTrigger` primitive for toggling nav bg state or shrinking the logo on scroll | [.claude/known-issues/transparent-fixed-nav-pattern.md](../../.claude/known-issues/transparent-fixed-nav-pattern.md) |
-| Text marquee seamless loop | `cssMarquee` preset + `gap-X` utility = half-gap boundary mismatch on wrap (visible jump). Image marquees use the Container "Image Marquee" preset (`cssMarquee` animation + `[&>*]:mr-X` per-child margin); text tickers don't have an equivalent block yet | [.claude/known-issues/marquee-seamless-loop.md](../../.claude/known-issues/marquee-seamless-loop.md) |
-| Body / html styling needs (sticky-CTA padding, body bg, html selectors) | `<body>` and `<html>` aren't Craft nodes — no `className` reaches them. Per-page: `update_page({ bodyClass })` (client-side only, fine for non-critical paint). Site-wide / first-paint: inline `<style>body{...}</style>` in `ROOT.props.inject.head` | [.claude/known-issues/body-and-html-styling.md](../../.claude/known-issues/body-and-html-styling.md) |
+| Pattern                                                                 | Bug / gap                                                                                                                                                                                                                                                    | Workaround doc                                                                                                                 |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| Modal & drawer flex layout                                              | twMerge collapses `hidden` + `flex` (same display group). The visible-state layout (centered modal, column drawer) has to live in `:not(.hidden)` CSS. ESC + backdrop close are SDK-native — no JS inject needed                                             | [.claude/known-issues/modal-show-hide-gotchas.md](../../.claude/known-issues/modal-show-hide-gotchas.md)                       |
+| Mega menu / dropdown hover gap                                          | `group-hover` breaks when panel is `fixed` far from trigger; cursor leaves `.group` element crossing the void                                                                                                                                                | [.claude/known-issues/dropdown-hover-gap-and-positioning.md](../../.claude/known-issues/dropdown-hover-gap-and-positioning.md) |
+| Transparent fixed nav + scroll-to-glass                                 | No `scrollTrigger` primitive for toggling nav bg state or shrinking the logo on scroll                                                                                                                                                                       | [.claude/known-issues/transparent-fixed-nav-pattern.md](../../.claude/known-issues/transparent-fixed-nav-pattern.md)           |
+| Text marquee seamless loop                                              | `cssMarquee` preset + `gap-X` utility = half-gap boundary mismatch on wrap (visible jump). Image marquees use the Container "Image Marquee" preset (`cssMarquee` animation + `[&>*]:mr-X` per-child margin); text tickers don't have an equivalent block yet | [.claude/known-issues/marquee-seamless-loop.md](../../.claude/known-issues/marquee-seamless-loop.md)                           |
+| Body / html styling needs (sticky-CTA padding, body bg, html selectors) | `<body>` and `<html>` aren't Craft nodes — no `className` reaches them. Per-page: `update_page({ bodyClass })` (client-side only, fine for non-critical paint). Site-wide / first-paint: inline `<style>body{...}</style>` in `ROOT.props.inject.head`       | [.claude/known-issues/body-and-html-styling.md](../../.claude/known-issues/body-and-html-styling.md)                           |
 
 Each doc includes copy-paste-ready inject CSS/JS, the required `className` / `attrs` tags on the affected nodes, and the "SDK TODO" note for the proper fix. Use these as reference when building contractor / services / marketing sites that need a real modal + mega menu + transparent-fixed nav combo.
 
@@ -638,11 +638,11 @@ PageHub supports live Stripe data display and shopping cart checkout. Users conn
 
 ### Components
 
-| Component        | Where to place   | Purpose                                                                     |
-| ---------------- | ---------------- | --------------------------------------------------------------------------- |
-| `CartDrawer`     | Site root (once) | Slide-out shopping cart. Children: header + footer. Cart items auto-render. |
+| Component        | Where to place   | Purpose                                                                                                       |
+| ---------------- | ---------------- | ------------------------------------------------------------------------------------------------------------- |
+| `CartDrawer`     | Site root (once) | Slide-out shopping cart. Children: header + footer. Cart items auto-render.                                   |
 | `CartBadge`      | Navbar/header    | Cart icon wrapper with live item count. Use a child Button action `toggle-cart` (default preset includes it). |
-| `CheckoutBanner` | Site root (once) | Post-checkout notification. Auto-shows after Stripe redirect.               |
+| `CheckoutBanner` | Site root (once) | Post-checkout notification. Auto-shows after Stripe redirect.                                                 |
 
 ### Data-bound sections — use `Data`, not `Container`
 
@@ -821,7 +821,7 @@ A Text node is for **one piece of content** — a heading, a paragraph, a captio
 | Wrong (one Text node)                                                         | Right (separate nodes)                                    |
 | ----------------------------------------------------------------------------- | --------------------------------------------------------- |
 | `"123 Main St<br/>Los Angeles<br/>(555) 123-4567"`                            | 3 Text nodes: street, city, phone — each with own styling |
-| `"© 2026 Acme · <a href='/privacy'>Privacy</a> · <a href='/terms'>Terms</a>"` | 1 Text node for copyright + Container of link Buttons  |
+| `"© 2026 Acme · <a href='/privacy'>Privacy</a> · <a href='/terms'>Terms</a>"` | 1 Text node for copyright + Container of link Buttons     |
 | `"Company Name<br/>Tagline<br/>Address"`                                      | Container with 3 child Text nodes                         |
 
 **Why:** Each Text node can have its own `tagName`, `fontSize`, `fontWeight`, `color`. When you cram everything into one node, you lose all typographic control. The footer example above — copyright, address, and nav links all in one `<p>` — means you can't style the nav links differently from the address, can't change font sizes, can't adjust spacing between lines.
@@ -1053,6 +1053,7 @@ Compare your output to the reference. A viewer should see the family resemblance
 - `get_component_schema(component?)` — component prop reference
 
 **Container overflow vs scroll effects:** `overflow.dragScroll`, `overflow.autoHide`, `overflow.wheelHorizontal`, and `overflow.hideDelay` control **CSS horizontal overflow** (drag-to-scroll and auto-hide scrollbar on strips using `overflow-x-auto` in `className`). They are unrelated to **`scrollEffect`** (`horizontal-scroll` / `scroll-timeline`), which are **GSAP pin/transform** section effects. Do not use both GSAP horizontal-scroll and the overflow props on the same container.
+
 - `get_style_reference()` — full prop key and variable list
 - `list_example_blocks(slug)` — blocks in decoded examples
 - `extract_block(slug, sectionRootId)` — extract for reuse
