@@ -45,6 +45,12 @@ module.exports = {
     return result;
   },
 
+  async duplicate_site(args) {
+    const result = await delegated.duplicate_site(args);
+    config.activeTemplate = null;
+    return result;
+  },
+
   list_templates: delegated.list_templates,
   pull_template: delegated.pull_template,
   save_template: delegated.save_template,
