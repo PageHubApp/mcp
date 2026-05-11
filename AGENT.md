@@ -1060,6 +1060,20 @@ Compare your output to the reference. A viewer should see the family resemblance
 - `save_as_block_template(...)` — save to block library
 - `audit_accessibility(url/html)` — WCAG audit (Playwright full or jsdom structural)
 
+### Collections (per-site headless CMS)
+
+A site can have arbitrary typed collections (staff, FAQ, menu items, events, business hours, …). Bind in the editor exactly like Stripe products today: drop a `Data` node with `dataSource: { provider: "collection", collection: "<slug>" }` and repeat children with `{{item.<fieldKey>}}`.
+
+- `list_collections()` — see what the active site already has.
+- `get_collection(slug)` — full schema, source, isPublic.
+- `create_collection({ name, slug, schema, source?, isPublic? })` — `schema` is an array of `{ key, label, type, required?, ...typeConfig }`. Source defaults to `{ type: "manual" }`. For Airtable sync (Business+): `{ type: "airtable", baseId, tableId, viewId?, columnMap: { fieldKey: "Airtable Field Name" } }`. Secrets live in `ConnectorCredential`.
+- `update_collection_schema(slug, schema)` — replace the field list.
+- `delete_collection(slug)` — hard delete + all rows.
+- `list_collection_rows(slug, { limit?, cursor? })` — paginated rows.
+- `create_collection_row(slug, data)` / `update_collection_row(slug, row_id, data)` / `delete_collection_row(slug, row_id)`.
+
+Forms can also write into a collection — set `submissionType: "collection"`, `collectionSlug: "<slug>"`, optional `collectionFieldMap: { fieldKey: "formInputName" }` (omit to match by identical keys). Plan-gated like every other collection write.
+
 ### Concurrency Notes
 
 - `delete_node` and `insert_node` are serialized through a mutex — safe to call rapidly without race conditions on the template file.
