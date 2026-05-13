@@ -16,4 +16,5 @@ module.exports = {
   search_site_nodes: delegatedNodes.search_site_nodes,
   set_integrations: delegatedSiteConfig.set_integrations,
   set_redirects: delegatedSiteConfig.set_redirects,
+  set_favicon: delegatedSiteConfig.set_favicon,
 };

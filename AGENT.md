@@ -55,9 +55,10 @@ Full policy, layering rules, and icons: **`BLOCKS-AI-CONTEXT.md`** in the repo r
 5. apply_kit_block(slug, target:"footer")         → footer from block library
 6. set_integrations(...)                          → GA4, GTM, Search Console, Meta Pixel
 7. set_redirects(...)                             → 301/302 redirect rules
-8. patch_site_node(slug, nodeId, ...)             → surgical tweaks
-9. audit_accessibility(url/html)                  → check WCAG compliance
-10. encode_all_templates()                        → finalize
+8. set_favicon(...)                               → browser-tab icon (mediaId / URL / SVG)
+9. patch_site_node(slug, nodeId, ...)             → surgical tweaks
+10. audit_accessibility(url/html)                 → check WCAG compliance
+11. encode_all_templates()                        → finalize
 ```
 
 ### Using Presets
