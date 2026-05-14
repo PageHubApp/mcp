@@ -14,6 +14,7 @@ module.exports = {
   move_node: delegatedNodes.move_node,
   list_site_nodes: delegatedNodes.list_site_nodes,
   search_site_nodes: delegatedNodes.search_site_nodes,
+  get_site_node: delegatedNodes.get_site_node,
   set_integrations: delegatedSiteConfig.set_integrations,
   set_redirects: delegatedSiteConfig.set_redirects,
   set_favicon: delegatedSiteConfig.set_favicon,
