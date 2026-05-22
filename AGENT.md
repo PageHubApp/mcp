@@ -86,6 +86,18 @@ Patterns provide battle-tested node structures for complex layouts. Always check
 3. patch_site_node / patch_site_bulk               → customize content
 ```
 
+**Reuse from this site (cheaper than the library).** `search_blocks` also surfaces existing sections on the current site under "Reusable from this site" when they're rich enough to adapt (≥5 descendants, ≥2 child component types). Clone instead of stamping a fresh library block by passing `sourceNodeId` instead of `slug`:
+
+```
+apply_kit_block({
+  sourceNodeId: "sec_hero",           // from search_blocks site list
+  sectionContainerId: "sec_hero_bottom",
+  contentOverrides: { Heading: { text: "..." }, Description: { text: "..." } }
+})
+```
+
+Pass EITHER `slug` OR `sourceNodeId` — never both. The cloned subtree gets fresh ids and is stamped with `custom.source = { type: "site-clone", fromNodeId }`. Headers/footers (target: "header"/"footer") still require a fresh library `slug`.
+
 **Do NOT pass `style` or `preset` to `search_blocks`.** The server auto-injects the site's `buildStyle` (set by `set_theme`) as a hard filter so results stay visually cohesive with the rest of the page. If nothing matches, the server widens automatically to universal blocks — you'll see a `(Style widened: …)` note in the response. Trust it; don't re-query without the filter.
 
 Styles are 6 aesthetic vibes (`aurora`, `brutalist`, `corporate`, `editorial`, `minimal`, `organic`) — many templates share a vibe, many blocks share a vibe. Canonical list: `packages/mcp-core/src/vibes.js`. Full architecture: repo path `.claude/known-issues/template-style-system.md`.
