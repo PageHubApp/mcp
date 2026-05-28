@@ -1,6 +1,6 @@
 const { delegateHandlers } = require("../config");
-const coreNodes = require("@pagehub/mcp-core/src/handlers/nodes");
-const coreSiteConfig = require("@pagehub/mcp-core/src/handlers/site-config");
+const coreNodes = require("@pagehub/mcp-core/handlers/nodes");
+const coreSiteConfig = require("@pagehub/mcp-core/handlers/site-config");
 
 // Node-level + site-config tools live in mcp-core. Re-export them through the
 // MCP wrapper's context so the stdio server advertises them. (Regression fix:

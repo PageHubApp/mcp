@@ -1,5 +1,5 @@
 const { config, delegateHandlers } = require("../config");
-const coreHandlers = require("@pagehub/mcp-core/src/handlers/remote");
+const coreHandlers = require("@pagehub/mcp-core/handlers/remote");
 
 // Delegate most handlers to mcp-core
 const delegated = delegateHandlers(coreHandlers);
