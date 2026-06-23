@@ -20,6 +20,7 @@ const pageHandlers = require("./handlers/pages");
 const seoHandlers = require("./handlers/seo");
 const stockImageHandlers = require("./handlers/stock-images");
 const stockVideoHandlers = require("./handlers/stock-videos");
+const collectionHandlers = require("./handlers/collections");
 
 const baseHandlers = {
   ...discoveryHandlers,
@@ -33,6 +34,7 @@ const baseHandlers = {
   ...seoHandlers,
   ...stockImageHandlers,
   ...stockVideoHandlers,
+  ...collectionHandlers,
 };
 
 const handlers = baseHandlers;
