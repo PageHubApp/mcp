@@ -1079,13 +1079,17 @@ A site can have arbitrary typed collections (staff, FAQ, menu items, events, bus
 
 - `list_collections()` — see what the active site already has.
 - `get_collection(slug)` — full schema, source, isPublic.
-- `create_collection({ name, slug, schema, source?, isPublic? })` — `schema` is an array of `{ key, label, type, required?, ...typeConfig }`. Source defaults to `{ type: "manual" }`. For Airtable sync (Business+): `{ type: "airtable", baseId, tableId, viewId?, columnMap: { fieldKey: "Airtable Field Name" } }`. Secrets live in `ConnectorCredential`.
+- `create_collection({ name, slug, schema, source?, isPublic? })` — `schema` is an array of `{ key, label, type, required?, formWritable?, ...typeConfig }`. Source defaults to `{ type: "manual" }`. For Airtable sync (Business+): `{ type: "airtable", baseId, tableId, viewId?, columnMap: { fieldKey: "Airtable Field Name" } }`. Secrets live in `ConnectorCredential`.
+  - `formWritable: false` on a field = public forms can **never** write it (owner-only fields like `status`, `publishedAt`, `price`). Default is writable. Enforced server-side against the DB schema, so it's a real lock, not a UI hint.
 - `update_collection_schema(slug, schema)` — replace the field list.
 - `delete_collection(slug)` — hard delete + all rows.
 - `list_collection_rows(slug, { limit?, cursor? })` — paginated rows.
 - `create_collection_row(slug, data)` / `update_collection_row(slug, row_id, data)` / `delete_collection_row(slug, row_id)`.
 
-Forms can also write into a collection — set `submissionType: "collection"`, `collectionSlug: "<slug>"`, optional `collectionFieldMap: { fieldKey: "formInputName" }` (omit to match by identical keys). Plan-gated like every other collection write.
+Forms can also write into a collection — set `submissionType: "collection"`, `collectionSlug: "<slug>"`, optional `collectionFieldMap: { fieldKey: "formInputName" }` (omit an entry to match by identical name; must be an **object**, a JSON string is ignored), optional `collectionFieldValues: { fieldKey: value }` (constants forced on submit), optional `collectionSkipEmail: true`. Plan-gated like every other collection write. Rules to get it right:
+- **Required fields must be fillable.** A required field with no `default` that no form input maps to (or that is `formWritable: false`) makes every submission `400`. Either add a `FormElement` whose `name` matches the field key, map one explicitly, give the field a `default`, or mark it optional. A field with a fixed value in `collectionFieldValues` counts as filled.
+- **Locked fields are silently dropped.** Fields with `formWritable: false` are stripped server-side even if you map them — don't rely on a form to set owner-only fields.
+- **Fixed values are the moderation primitive.** `collectionFieldValues: { public: false }` makes every form-submitted row land unapproved while dashboard-created rows use your chosen value. It's enforced server-authoritatively (the endpoint reads the saved form node by id, not the request body), so a crafted POST can't spoof `public: true`. A field is EITHER input-mapped OR fixed-valued, not both.
 
 ### Concurrency Notes
 
