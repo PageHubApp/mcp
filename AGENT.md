@@ -625,6 +625,21 @@ Text and Button components use the unified `action` prop for all link and intera
 - External links: set `target: "_blank"` (gets `rel="noopener noreferrer"` automatically).
 - Legacy `link-url`, `link-page`, `scroll-to`, `email`, `phone` types still render correctly via a runtime shim, but DO NOT emit them in new content.
 
+### Per-item detail page (collection / product PDP)
+
+One page node that renders a **different** item based on a URL slug — car detail, product detail, blog post. Works for any first-party `collection`, not just the storefront `product`.
+
+1. **Item needs a slug.** Add a `slug` text field to the collection (`update_collection_schema`) and set `data.slug` per row (e.g. `2019-porsche-911-gt3-rs`). It denormalizes into the query columns so the filter matches.
+2. **Detail page.** `add_page({ name: "Car" })` → page node at `/car` (URL segment from displayName). Then `patch_site_node(page_car, { propsPatch: { pathPattern: ":slug" } })` so it serves `/car/:slug`.
+3. **Bind by the URL param.** Inside the page, a `Data` node whose `dataSource` filters on the param:
+   ```json
+   { "provider": "collection", "collection": "listings", "filter": { "slug": "{{params.slug}}" }, "limit": 1 }
+   ```
+   `{{params.slug}}` is filled from the matched path tail. **All** detail content (title, gallery via a nested `Data` `scope: "item.photos"`, spec rows) lives INSIDE this `Data` node so `{{item.*}}` resolves.
+4. **Link to it.** The list row / card fires `action: [{ "type": "link", "href": "ref:page_car/{{item.slug}}" }]`. `{{item.slug}}` interpolates per repeater item (works on `Container`, `Button`, `Link`); the renderer rewrites `ref:` → the real path.
+5. **Optional/empty rows.** Gate each row that may be blank with an `item` `exists` condition (`conditionGroups`) — SSR-evaluated, so they show/hide correctly per item. (Client-reactive `state` gates fail-open on `item` conditions — don't use them for this.)
+6. **Move shared overlays to ROOT.** A detail-page CTA that opens the site's quote/contact modal — and the shared header's own CTA + hamburger — only work if the modal/drawer nodes are direct children of ROOT, not inside `page_home` (`move_node(<modalId>, ROOT)`). Otherwise they don't render on subpages and `show-hide` silently no-ops. Full authoring flow: [.claude/known-issues/multi-page-template-expansion.md](../../.claude/known-issues/multi-page-template-expansion.md).
+
 ### Known gotchas — patterns that need `ROOT.props.inject` workarounds
 
 A few interactive patterns look like "just add a prop" but hit real SDK bugs or missing features. For marketing sites that depend on them (modals, mega menus, scroll-styled navs, text tickers), drop the documented inject payload into `ROOT.props.inject.head` + `inject.footer` rather than reinventing. Assemble **all needed workarounds into one inject payload** in a single `patch_site_node` call — splitting across patches loses whichever half gets overwritten.
