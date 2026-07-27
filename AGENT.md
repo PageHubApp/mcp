@@ -1100,6 +1100,9 @@ A site can have arbitrary typed collections (staff, FAQ, menu items, events, bus
 - `delete_collection(slug)` — hard delete + all rows.
 - `list_collection_rows(slug, { limit?, cursor? })` — paginated rows.
 - `create_collection_row(slug, data)` / `update_collection_row(slug, row_id, data)` / `delete_collection_row(slug, row_id)`.
+- `create_collection_rows(slug, rows)` — bulk insert, up to 500 rows/call; all-or-nothing validation (reports the bad `rowIndex`).
+- `import_collection_csv(slug, csv, { mode? })` — CSV → rows, columns matched to field keys by name; `mode: append|replace|upsert` (upsert keys on an `externalId`/`id` column). ~8 MB cap.
+- `upload_file({ fileUrl?|dataBase64?, mimeType?, filename? })` — upload any plan-allowed file. Image → CDN (`type: "cdn"`); video/audio/pdf/zip → R2 (`type: "r2"`, public `url`). Store the returned `url` in a collection `url`/`media` field or a Video node (`provider: "r2"`, `videoId: mediaId`). `mimeType` required for non-image `dataBase64`. (`upload_image` stays the image-only shortcut.)
 
 Forms can also write into a collection — set `submissionType: "collection"`, `collectionSlug: "<slug>"`, optional `collectionFieldMap: { fieldKey: "formInputName" }` (omit an entry to match by identical name; must be an **object**, a JSON string is ignored), optional `collectionFieldValues: { fieldKey: value }` (constants forced on submit), optional `collectionSkipEmail: true`. Plan-gated like every other collection write. Rules to get it right:
 - **Required fields must be fillable.** A required field with no `default` that no form input maps to (or that is `formWritable: false`) makes every submission `400`. Either add a `FormElement` whose `name` matches the field key, map one explicitly, give the field a `default`, or mark it optional. A field with a fixed value in `collectionFieldValues` counts as filled.
