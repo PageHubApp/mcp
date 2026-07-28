@@ -322,13 +322,13 @@ The renderer combines the overlay gradient and image into a single CSS `backgrou
 - **Use reliable image sources.** Unsplash URLs with `?w=600` or `?w=800` are reliable. Always include width parameter.
 - **Never use placeholder URLs** like `via.placeholder.com` or broken CDN links.
 - **Alt text is required** on every image. It should describe what's in the image, not be generic ("image 1").
-- **Image type:** Use `"type": "url"` for external URLs. Only use `"type": "cdn"` for uploaded media IDs.
+- **Image type:** `"type": "cdn"` + a bare **mediaId** in `src` for anything in the media library or returned by `upload_image` — this unlocks responsive delivery (per-viewport srcset + `format=auto`). NEVER paste a full-size CDN delivery url (`imagedelivery.net/.../public`) as `type: "url"`. Use `"type": "url"` ONLY for external URLs you don't control (Unsplash, off-site). `sizes` and above-the-fold `eager`/priority are derived/stamped automatically — don't hand-set them.
 
 **Automatic URL validation:** `add_custom_block` and `insert_node` send a HEAD request to every image URL before writing. The timeout is 8 seconds. If any URL fails (non-200 status or timeout), the entire operation is **blocked** — you'll get an error listing each bad URL and its status. Fix the URLs and retry.
 
 **What's validated:**
 
-- `Image` component `content` prop (when `type: "url"` or URL starts with `http`)
+- `Image` component `src` prop (when `type: "url"` or URL starts with `http`)
 - `background.image` props on any node
 
 **Not validated:** `add_block` does NOT validate image URLs passed via `contentOverrides`. If you need guaranteed validation, use `add_custom_block` instead.
