@@ -12,6 +12,16 @@ Before building anything, call these discovery tools:
 4. **`list_presets`** — curated theme presets by mood
 5. **`search_blocks`** — find proven block patterns in the library; use with `apply_kit_block`. Two scopes: `blockType: "section"` (full page sections, default) and `blockType: "component"` (reusable patterns like dropdowns, cards, accordions that go inside sections)
 
+## Your edits are STAGED, not live
+
+Every site write lands in the **draft**. The published site keeps serving its previous version until someone publishes.
+
+- Edit freely on a live site — visitors do not see your work in progress.
+- **`publish_site` is what makes it live.** It promotes the staged draft.
+- Write results say `Saved to DRAFT` and whether unpublished changes are outstanding. Do not report an edit as live until you have published.
+- Reads (`get_site_node`, `list_site_nodes`, `search_site_nodes`) return the **draft**, so you always see the latest work in progress — including unpublished edits made in the editor by a human.
+- Ask before publishing someone's site unless they asked you to. The draft may contain their unfinished work as well as yours.
+
 ## Live Editing Guardrails (Non-Negotiable)
 
 Default to remote, surgical MCP edits. Do not rebuild full site JSON locally for routine work.
