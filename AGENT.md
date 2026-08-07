@@ -71,6 +71,69 @@ Full policy, layering rules, and icons: **`BLOCKS-AI-CONTEXT.md`** in the repo r
 11. encode_all_templates()                        → finalize
 ```
 
+## Custom Domains
+
+Attaching a domain is two halves, and **you can only do the first one**. `set_domain`
+registers the domain on PageHub's Vercel project; the user then has to create DNS
+records at their registrar. Until they do, the site is not reachable on that domain
+no matter what PageHub reports.
+
+```
+1. check_domain(domain: "example.com")   → is it free? any conflict? what records?
+2. set_domain(domain: "example.com")     → attach + get the records back
+3. …user creates the DNS records…
+4. get_domain_status()                   → "DNS live" once it has propagated
+```
+
+### Always hand over the records verbatim
+
+`set_domain`, `check_domain`, and `get_domain_status` all return a **DNS records to
+create** block. Those values are **per-project** — Vercel issues targets like
+`d3adb33f.vercel-dns-017.com`, not the generic `cname.vercel-dns.com` you may have
+seen in older docs. Copy the returned rows out to the user exactly. Do not
+substitute a value you remember; a wrong target verifies never, and the failure
+looks identical to "DNS hasn't propagated yet".
+
+### Apex vs subdomain — different record types
+
+| Domain the user gave you | What gets attached | Records returned |
+|---|---|---|
+| `example.com` or `www.example.com` | **both** apex + www | `A` at `@` **and** `CNAME` at `www` |
+| `ads.example.com` (any deeper subdomain) | that host only | one `CNAME` at `ads` |
+
+An apex cannot be a CNAME — that is a DNS rule, not a PageHub one — which is why
+the apex gets an `A` record and every subdomain gets a `CNAME`. The `name` column
+in the returned rows is **zone-relative** (`@`, `www`, `ads`), which is what
+registrar UIs expect. If a variant is already correct, it simply produces no rows.
+
+A TXT row may also appear: that is Vercel's ownership challenge, returned when the
+domain is claimed by another Vercel account. It is *additional* to the routing
+record, not a replacement.
+
+### apex ↔ www pairing
+
+For a pair, `redirectMode` decides which half is canonical — `to-apex` (default,
+recommended) 308s `www` → apex, `to-www` does the reverse, `none` serves both (which
+splits SEO ranking signals — avoid). Change it later without touching the domain via
+`set_domain_redirect_mode`.
+
+### Detaching
+
+`clear_domain()` — or `set_domain(domain: null)` — detaches every variant from
+Vercel and resets the redirect mode. The DNS records at the registrar are the
+user's to remove; PageHub cannot touch their zone.
+
+### Gotchas
+
+- **Plan-gated.** Free plans cannot attach a custom domain; the call returns a 403
+  with `upgrade: true`.
+- **409 conflict** means a variant is already on another Vercel project. Nobody can
+  fix that from here — the user detaches it in the Vercel dashboard, then you retry.
+- **Certificates are async.** Right after DNS goes live, Vercel may still serve a
+  cert error for a few minutes. That is normal; do not re-attach to "fix" it.
+- **Publishing is separate.** A domain attaches to an unpublished site perfectly
+  happily and serves nothing. Call `publish_site` too.
+
 ### Using Presets
 
 Presets are the fastest way to establish a professional design system. Each preset bundles 12 palette colors, Google Font families, and styleGuide tokens (spacing, radius, shadows, input styling).
