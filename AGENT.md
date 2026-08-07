@@ -682,6 +682,19 @@ PageHub supports live Stripe data display and shopping cart checkout. Users conn
 | `CartDrawer`     | Site root (once) | Slide-out shopping cart. Children: header + footer. Cart items auto-render.                                   |
 | `CartBadge`      | Navbar/header    | Cart icon wrapper with live item count. Use a child Button action `toggle-cart` (default preset includes it). |
 | `CheckoutBanner` | Site root (once) | Post-checkout notification. Auto-shows after Stripe redirect.                                                 |
+| `MapPoint`       | Child of `Map`   | A pin. `lat` / `lng` plus optional `title` / `description` for the popup.                                      |
+| `MapPath`        | Child of `Map`   | A route line. `path` = `lat,lng` pairs, one per line, in travel order (2+ required).                          |
+
+**`Map` accepts only `MapPoint` and `MapPath` children.** Reach for `MapPath` when a
+business is hard to find — set back from the street, behind another building, in a
+shared lot, unmarked driveway. Pair them: `MapPath` draws the way in, `MapPoint` marks
+the destination. Options on `MapPath`: `label` (short caption drawn on the map,
+centred halfway along the line with a halo so it survives busy tiles — "Enter here"),
+`color` (default `var(--color-primary)`), `weight` (4), `opacity` (1), `dashed`
+(true — dashes read as "follow this", a solid line reads as a boundary). `title` is
+the accessible name only and is never drawn. It renders on all three paths — editor, viewer, and static
+export — so it survives publishing. Prefer it over hand-drawing an SVG site map: the
+route stays registered to real tiles at every zoom.
 
 ### Data-bound sections — use `Data`, not `Container`
 
