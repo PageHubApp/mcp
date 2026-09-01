@@ -60,7 +60,8 @@ module.exports = {
   publish_site: delegated.publish_site,
   unpublish_site: delegated.unpublish_site,
   pull_site: delegated.pull_site,
-  upload_image: delegated.upload_image,
+  // upload_image / upload_file live in ./media — they add local `filePath`
+  // support, which mcp-core can't have (it also backs the hosted agent).
   set_theme: delegated.set_theme,
   patch_site_node: delegated.patch_site_node,
   patch_site_bulk: delegated.patch_site_bulk,

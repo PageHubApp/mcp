@@ -33,7 +33,8 @@
   },
   "optionalDependencies": {
     "@axe-core/playwright": "^4.11.2",
-    "playwright-core": "^1.59.1"
+    "playwright-core": "^1.59.1",
+    "sharp": "^0.34.5"
   },
   "scripts": {
     "start": "node index.js"
