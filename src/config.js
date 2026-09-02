@@ -1,5 +1,10 @@
 // ── Re-export shared context & HTTP utilities from mcp-core ──
-const { runWithContext, getContext: _getContext, normalizeBaseUrl } = require("@pagehub/mcp-core");
+const {
+  runWithContext,
+  getContext: _getContext,
+  normalizeBaseUrl,
+  runToolWithPublishTrailer,
+} = require("@pagehub/mcp-core");
 
 // Re-export getContext as-is for handlers, but internally we need
 // to distinguish "real context" from the {} fallback for the Proxy.
@@ -107,7 +112,10 @@ function delegateHandlers(coreHandlers) {
           activeSite: config.activeSite,
           activeTemplate: config.activeTemplate,
         },
-        () => fn(args)
+        // Same wrapper the hosted dispatch uses, so a stdio caller gets the
+        // publish-state trailer too — the state is a property of the write, not
+        // of which transport asked for it.
+        () => runToolWithPublishTrailer(fn, args, _getContext())
       );
   }
   return wrapped;
