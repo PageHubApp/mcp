@@ -729,6 +729,8 @@ A few interactive patterns look like "just add a prop" but hit real SDK bugs or 
 
 Each doc includes copy-paste-ready inject CSS/JS, the required `className` / `attrs` tags on the affected nodes, and the "SDK TODO" note for the proper fix. Use these as reference when building contractor / services / marketing sites that need a real modal + mega menu + transparent-fixed nav combo.
 
+**The table above is the whole list.** `inject` exists for third-party snippets and the narrow gaps documented here — a tracking tag, a chat widget, one CSS rule. It is never where page content goes. Content written as an HTML string is invisible to the editor, to `list_site_nodes`, to SEO and to static export, so nobody can edit it afterwards and every later patch silently no-ops against it. Worst case, a script that rebuilds `document.body` deletes the real page on load and the site quietly stops matching what the tools report — those writes are rejected outright. If a pattern isn't in the table, build it with `add_nodes` / `apply_kit_block`.
+
 ---
 
 ## E-commerce — Stripe Cart System
