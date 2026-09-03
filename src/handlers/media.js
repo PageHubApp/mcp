@@ -17,8 +17,10 @@ const { basename, extname, resolve } = require("node:path");
 const { uploadBytesToSite, formatUploadResult } = require("@pagehub/mcp-core");
 const { config, getActiveTarget, delegateHandlers, runWithContext } = require("../config");
 const coreHandlers = require("@pagehub/mcp-core/handlers/remote");
+const coreSiteConfig = require("@pagehub/mcp-core/handlers/site-config");
 
 const delegated = delegateHandlers(coreHandlers);
+const delegatedSiteConfig = delegateHandlers(coreSiteConfig);
 
 /**
  * mcp-core's `apiFetch` reads the API key off AsyncLocalStorage, which only
@@ -246,6 +248,31 @@ async function uploadLocalFiles(args, { restrictToImages }) {
   return { content: [{ type: "text", text }] };
 }
 
+/**
+ * A favicon from a local file is just an image upload whose mediaId is written
+ * to `ROOT.props.seo.favicon` — so it takes the same direct-upload path as
+ * `upload_image` (bytes to the CDN, no 4.5 MB body cap, sharp prep) and hands
+ * core the mediaId.
+ */
+async function uploadFaviconFile(args) {
+  const target = getActiveTarget(args);
+  if (target.type === "template") {
+    throw new Error("set_favicon is not supported for templates — favicons are per-site only.");
+  }
+  const paths = toPathList(args.filePath);
+  if (paths.length !== 1) {
+    throw new Error(`set_favicon takes one filePath; got ${paths.length}.`);
+  }
+  if (extname(String(paths[0])).toLowerCase() === ".ico") {
+    throw new Error(
+      "Cloudflare Images can't store .ico. Pass a 512px PNG or an SVG — /api/favicon " +
+        "resizes it for every icon slot, including the 16px tab icon."
+    );
+  }
+  const { data } = await uploadOneFile(target.id, paths[0], true);
+  return data.mediaId;
+}
+
 module.exports = {
   async upload_image(args) {
     if (args.filePath) {
@@ -259,5 +286,11 @@ module.exports = {
       return withContext(() => uploadLocalFiles(args, { restrictToImages: false }));
     }
     return delegated.upload_file(args);
+  },
+
+  async set_favicon(args) {
+    if (!args.filePath) return delegatedSiteConfig.set_favicon(args);
+    const mediaId = await withContext(() => uploadFaviconFile(args));
+    return delegatedSiteConfig.set_favicon({ ...args, filePath: undefined, mediaId });
   },
 };
