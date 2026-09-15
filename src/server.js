@@ -7,6 +7,7 @@ const {
   ListResourceTemplatesRequestSchema,
 } = require("@modelcontextprotocol/sdk/types.js");
 const { getServerTools, isToolEnabled } = require("./tools");
+const { SERVER_INSTRUCTIONS } = require("@pagehub/mcp-core");
 
 // Handler modules — each exports { toolName: async (args) => result }
 const discoveryHandlers = require("./handlers/discovery");
@@ -43,9 +44,11 @@ const baseHandlers = {
 
 const handlers = baseHandlers;
 
+// `instructions` rides the initialize response into the client's system prompt —
+// the condensed half of AGENT.md, delivered without the user pasting anything.
 const server = new Server(
   { name: "pagehub", version: "0.1.0" },
-  { capabilities: { tools: {}, resources: {} } }
+  { capabilities: { tools: {}, resources: {} }, instructions: SERVER_INSTRUCTIONS }
 );
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
