@@ -542,6 +542,16 @@ For EVERY block, follow this process:
 
 ## Interactive Features
 
+### State — quizzes, checklists, scores, toggles (no JS)
+
+All interactive UI runs on one key/value store. Full table + a scored-checklist recipe: `get_style_reference()` → "Interactive State". The short version:
+
+- **Write:** `action: [{ type: "set-state", key, value }]` on click; add `trigger: "load"` to seed defaults (fires once on mount, never on click).
+- **Derive:** Container `computedStateBindings: [{ key, from: [keys], compute: { type: "count", value: "Y" } }]` — also `all-truthy`, `first-truthy`, `join`.
+- **Show:** Text `{{state.<key>}}`.
+- **Style / show-hide:** `stateModifiers` (names must exist in `ROOT.props.modifiers[Component]`, classes `!`-prefixed) or `conditionGroups` with `type: "state"` (operators include `not-contains`).
+- **Verify:** `screenshot_site({ selector })` — none of this shows in the node tree.
+
 ### Animations (Preset System — No One-Offs)
 
 All animations use the CSS Animation Preset system via `root.animation`. Users can customize duration, delay, and easing in the toolbar.
@@ -1166,6 +1176,7 @@ Compare your output to the reference. A viewer should see the family resemblance
 
 ## Inspecting and Debugging
 
+- `screenshot_site({ selector?, width?, path? })` — render the draft in a real browser and see what actually paints. Use it after every section, at the design's width and at 390 for mobile, and compare against the approved design. Prefer `selector` over `fullPage` for below-the-fold content.
 - `read_template(slug)` — dump full node tree for IDs and current props
 - `list_blocks()` — available block templates with visual descriptions
 - `list_presets(mood?)` — theme presets (18 curated, filterable by mood)
