@@ -4,11 +4,9 @@ MCP server that lets AI assistants build, theme, and deploy complete websites on
 
 Works with Claude Desktop, Cursor, VS Code, and any MCP-compatible client.
 
-## Quick Start
+## Connect
 
-### Remote (Recommended)
-
-Zero install. Add the URL to your MCP client config — authentication is handled via OAuth:
+This package isn't published to npm. Connect to the hosted server instead — there's nothing to install:
 
 ```json
 {
@@ -20,16 +18,20 @@ Zero install. Add the URL to your MCP client config — authentication is handle
 }
 ```
 
-If your MCP client does not support OAuth, provide `Authorization: Bearer ph_...` manually.
+The first time you connect, your MCP client opens a browser so you can sign in to PageHub (or create an account). After that it stays signed in.
 
-### Local (stdio)
+If your client can't do browser sign-in, send an API key as a header instead: `Authorization: Bearer ph_...`. Create a key at [pagehub.dev/dashboard/api-key](https://pagehub.dev/dashboard/api-key).
+
+### Running it locally (PageHub contributors)
+
+The stdio server in this folder depends on `@pagehub/mcp-core` through the PageHub monorepo workspace, so it only runs from inside that repo. Run `pnpm install` from the repo root, then point your client at it:
 
 ```json
 {
   "mcpServers": {
     "PageHub": {
-      "command": "npx",
-      "args": ["-y", "@pagehub/mcp"],
+      "command": "node",
+      "args": ["/path/to/pagehub.dev/packages/mcp/index.js"],
       "env": {
         "PAGEHUB_API_BASE_URL": "https://pagehub.dev",
         "PAGEHUB_API_KEY": "ph_your_key_here"
@@ -39,31 +41,14 @@ If your MCP client does not support OAuth, provide `Authorization: Bearer ph_...
 }
 ```
 
-`stdio` is API-first by default (same remote-backed tool behavior as `/api/mcp`), so it works outside this repository.
+It calls the same API as `/api/mcp`. Set `PAGEHUB_API_BASE_URL` to `http://localhost:3000` to use a local dev server. Needs Node.js 18+.
 
-Get your API key from [pagehub.dev/dashboard](https://pagehub.dev/dashboard). Override `PAGEHUB_API_BASE_URL` for a local dev server when needed.
+| Variable               | Required | Description                                                                         |
+| ---------------------- | -------- | ----------------------------------------------------------------------------------- |
+| `PAGEHUB_API_KEY`      | Yes      | API key from [pagehub.dev/dashboard/api-key](https://pagehub.dev/dashboard/api-key) |
+| `PAGEHUB_API_BASE_URL` | No       | API base URL (default: `https://pagehub.dev`)                                       |
 
-### From Source
-
-```bash
-git clone https://github.com/PageHubApp/mcp.git
-cd mcp
-npm install
-npm start
-```
-
-## Requirements
-
-- **Node.js 18+** (stdio mode only)
-
-## Configuration
-
-| Variable               | Required | Description                                                         |
-| ---------------------- | -------- | ------------------------------------------------------------------- |
-| `PAGEHUB_API_KEY`      | Yes      | API key from [pagehub.dev/dashboard](https://pagehub.dev/dashboard) |
-| `PAGEHUB_API_BASE_URL` | No       | API base URL (default: `https://pagehub.dev`)                       |
-
-All configuration is passed via environment variables in the `env` block of your MCP client config. No config files are written to your project.
+Settings come only from the `env` block of your MCP client config. Nothing is written to your project.
 
 ## Tools
 
@@ -120,7 +105,7 @@ Use `search_blocks` + `apply_kit_block` for block composition. (Advanced block-l
 - **Per-page script (one landing page's A/B test, one product's schema.org JSON-LD):** `update_page({ pageId, headCode, bodyClass })`.
 - **Inline iframe / Stripe Buy Button / static HTML at a spot:** `Embed` with `service: "custom"` and `code: "<iframe…>"`. ⚠️ Scripts inside `code` silently do not execute — put scripts in `headCode` / `footCode` instead.
 
-**Custom 404 (`is404Page`):** Paid plans can mark one page as the site’s not-found canvas; unknown URLs render that page (with HTTP 404 on subdomains, `noindex` on ISR static). Free accounts cannot persist `is404Page` — the editor hides the toggle, `/api/save` strips the flag from compressed content, and `PUT /api/v1/sites/:id` strips it from decoded JSON before save.
+**Custom 404 (`is404Page`):** Every plan can mark one page as the site’s not-found page. Unknown URLs render that page (with HTTP 404 on subdomains, `noindex` on ISR static).
 
 ### Blocks
 
@@ -202,11 +187,7 @@ WCAG compliance auditing with two engines:
 
 Supports WCAG levels A, AA (default), and AAA. Results are grouped by severity (critical, serious, moderate, minor) with HTML snippets and fix suggestions.
 
-```bash
-# For full audits including contrast checks, install Playwright:
-npm install playwright-core @axe-core/playwright
-npx playwright install chromium
-```
+`playwright-core` and `@axe-core/playwright` are optional dependencies of this package, so `pnpm install` from the monorepo root adds them. Contrast checks also need a browser: run `pnpm --filter @pagehub/mcp exec playwright-core install chromium` from the repo root.
 
 ### Site Integrations & Redirects
 
@@ -230,11 +211,9 @@ set_redirects(redirects: [
 
 ### Authentication
 
-**Remote** — OAuth 2.1. Your MCP client opens a browser, you sign in or register, token is stored automatically. Zero configuration.
+**Hosted (`https://pagehub.dev/api/mcp`)** — OAuth 2.1. Your MCP client opens a browser, you sign in or create an account, and the client keeps the token.
 
-**Local (stdio)** — Set `PAGEHUB_API_KEY` in the `env` block of your MCP client config. Get your key from [pagehub.dev/dashboard](https://pagehub.dev/dashboard).
-
-No config files are written to your project.
+**Local (stdio)** — Set `PAGEHUB_API_KEY` in the `env` block of your MCP client config. Create a key at [pagehub.dev/dashboard/api-key](https://pagehub.dev/dashboard/api-key).
 
 ## Agent Instructions
 
