@@ -134,6 +134,31 @@ user's to remove; PageHub cannot touch their zone.
 - **Publishing is separate.** A domain attaches to an unpublished site perfectly
   happily and serves nothing. Call `publish_site` too.
 
+## Site Emails
+
+The emails a site's visitors get — order receipt, subscription welcome, gift
+cards, sign-in link, download delivery / update — are node trees the owner can
+design. Tools: `list_site_emails`, `get_site_email`, `update_site_email`,
+`preview_site_email`.
+
+- **Only email-safe parts.** Container, Text, Button, Image and `EmailSlot`.
+  No `btn` / `card` / `shadow` / gradients / `absolute`; buttons are styled with
+  `bg-*` / `text-*` / `px-*` / `py-*` / `rounded-*`. Layout is tables, so
+  `flex-row` or `grid-cols-N` become columns that stack on phones.
+- **Slots are locked data.** `EmailSlot` nodes (`slot`: `brand`, `cta`,
+  `order-lines`, `gift-code`, `gift-message`, `download-files`,
+  `version-notes`) are filled in when the email is sent. `brand` is the site's
+  logo, or its name styled by the slot's `className` when there's no logo; it's
+  optional on every kind. Move and style them; keep each required one exactly
+  once. The `cta` slot's `label` is the button text.
+- **Variables** are `{{variables.<key>}}` — only the keys `get_site_email`
+  lists — plus `{{company.*}}` and `{{year}}`. Anything else is rejected on save.
+- **Don't write** `ROOT.props.theme` / `company` / `variables` / `emailSlots` /
+  `pageMedia`: they're injected from the site at send time. CDN images use ids
+  from the site's media library.
+- Always `preview_site_email` after `update_site_email`. `reset: true` goes back
+  to the default.
+
 ### Using Presets
 
 Presets are the fastest way to establish a professional design system. Each preset bundles 12 palette colors, Google Font families, and styleGuide tokens (spacing, radius, shadows, input styling).
