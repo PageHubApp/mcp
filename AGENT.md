@@ -8,7 +8,7 @@ Before building anything, call these discovery tools:
 
 1. **`list_blocks`** — see pre-built block templates with visual descriptions
 2. **`get_component_schema`** — learn component types and their props
-3. **`get_style_reference`** — palette variables, layout props, styling rules
+3. **`get_style_reference`** — palette variables, layout props, styling rules. Pass `topic` for a focused guide: `design`, `accessibility`, `domains`, `blocks` (search_blocks / apply_kit_block usage + override examples), `editing` (patch fields, merge semantics, custom code, add_nodes / insert_node shapes), `theme` (palette names, styleGuide keys), `pages`, `media`, `integrations`, `section-tree`. Tool descriptions stay short and point at these.
 4. **`list_presets`** — curated theme presets by mood
 5. **`search_blocks`** — find proven block patterns in the library; use with `apply_kit_block`. Two scopes: `blockType: "section"` (full page sections, default) and `blockType: "component"` (reusable patterns like dropdowns, cards, accordions that go inside sections)
 
@@ -119,7 +119,7 @@ splits SEO ranking signals — avoid). Change it later without touching the doma
 
 ### Detaching
 
-`clear_domain()` — or `set_domain(domain: null)` — detaches every variant from
+`clear_domain()` detaches every variant from
 Vercel and resets the redirect mode. The DNS records at the registrar are the
 user's to remove; PageHub cannot touch their zone.
 
@@ -1209,7 +1209,7 @@ Compare your output to the reference. A viewer should see the family resemblance
 
 **Container overflow vs scroll effects:** `overflow.dragScroll`, `overflow.autoHide`, `overflow.wheelHorizontal`, and `overflow.hideDelay` control **CSS horizontal overflow** (drag-to-scroll and auto-hide scrollbar on strips using `overflow-x-auto` in `className`). They are unrelated to **`scrollEffect`** (`horizontal-scroll` / `scroll-timeline`), which are **GSAP pin/transform** section effects. Do not use both GSAP horizontal-scroll and the overflow props on the same container.
 
-- `get_style_reference()` — full prop key and variable list
+- `get_style_reference({ topic? })` — full prop key and variable list; `topic` returns one guide (see Quick Start)
 - `list_example_blocks(slug)` — blocks in decoded examples
 - `extract_block(slug, sectionRootId)` — extract for reuse
 - `save_as_block_template(...)` — save to block library
