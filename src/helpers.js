@@ -1,0 +1,54 @@
+// Re-export shared helpers from mcp-core
+const { parseMaybeJson, applyNodePatches, normalizeNodePatchArgs } = require("@pagehub/mcp-core");
+
+// ── Image URL validation (MCP-only — uses fetch HEAD) ──
+
+function extractImageUrls(props, resolvedName) {
+  const urls = [];
+  if (!props) return urls;
+  const imgSrc = resolvedName === "Image" ? (props.src ?? props.content) : null;
+  if (imgSrc && typeof imgSrc === "string") {
+    if (props.type === "url" || (!props.type && imgSrc.startsWith("http"))) {
+      urls.push(imgSrc);
+    }
+  }
+  const bgImage = props.background?.image;
+  if (bgImage && typeof bgImage === "string" && bgImage.startsWith("http")) {
+    urls.push(bgImage);
+  }
+  return urls;
+}
+
+async function validateImageUrls(urls) {
+  const failures = [];
+  for (const url of urls) {
+    try {
+      const resp = await fetch(url, { method: "HEAD", signal: AbortSignal.timeout(8000) });
+      if (!resp.ok) {
+        failures.push({ url, status: resp.status });
+      }
+    } catch (e) {
+      failures.push({ url, status: `error: ${e.message}` });
+    }
+  }
+  return failures;
+}
+
+function collectAllImageUrls(nodes) {
+  const urls = [];
+  for (const [id, node] of Object.entries(nodes)) {
+    const resolved = node.type?.resolvedName;
+    const found = extractImageUrls(node.props, resolved);
+    for (const url of found) urls.push({ nodeId: id, url });
+  }
+  return urls;
+}
+
+module.exports = {
+  parseMaybeJson,
+  extractImageUrls,
+  validateImageUrls,
+  collectAllImageUrls,
+  applyNodePatches,
+  normalizeNodePatchArgs,
+};

@@ -1,0 +1,53 @@
+{
+  "name": "@pagehub/mcp",
+  "version": "0.1.1",
+  "description": "MCP server for building, theming, and deploying PageHub websites",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PageHubApp/mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PageHubApp/mcp/issues"
+  },
+  "homepage": "https://pagehub.dev",
+  "bin": {
+    "pagehub-mcp": "./index.js"
+  },
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "src/",
+    "AGENT.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@pagehub/mcp-core": "workspace:*",
+    "axe-core": "^4.11.3",
+    "jsdom": "^29.0.2"
+  },
+  "optionalDependencies": {
+    "@axe-core/playwright": "^4.11.2",
+    "playwright-core": "^1.59.1",
+    "sharp": "^0.34.5"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "pagehub",
+    "website-builder",
+    "ai",
+    "templates",
+    "craftjs",
+    "claude",
+    "cursor"
+  ]
+}

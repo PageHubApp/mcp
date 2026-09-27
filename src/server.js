@@ -1,0 +1,86 @@
+const { Server } = require("@modelcontextprotocol/sdk/server/index.js");
+const { StdioServerTransport } = require("@modelcontextprotocol/sdk/server/stdio.js");
+const {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+  ListResourcesRequestSchema,
+  ListResourceTemplatesRequestSchema,
+} = require("@modelcontextprotocol/sdk/types.js");
+const { getServerTools, isToolEnabled } = require("./tools");
+const { SERVER_INSTRUCTIONS } = require("@pagehub/mcp-core");
+
+// Handler modules — each exports { toolName: async (args) => result }
+const discoveryHandlers = require("./handlers/discovery");
+const remoteHandlers = require("./handlers/remote");
+const nodeHandlers = require("./handlers/nodes");
+const kitHandlers = require("./handlers/kit");
+const accessibilityHandlers = require("./handlers/accessibility");
+const portalHandlers = require("./handlers/portal");
+const componentHandlers = require("./handlers/components");
+const pageHandlers = require("./handlers/pages");
+const seoHandlers = require("./handlers/seo");
+const stockImageHandlers = require("./handlers/stock-images");
+const stockVideoHandlers = require("./handlers/stock-videos");
+const collectionHandlers = require("./handlers/collections");
+const mediaHandlers = require("./handlers/media");
+
+const baseHandlers = {
+  ...discoveryHandlers,
+  ...remoteHandlers,
+  ...nodeHandlers,
+  ...kitHandlers,
+  ...portalHandlers,
+  ...accessibilityHandlers,
+  ...componentHandlers,
+  ...pageHandlers,
+  ...seoHandlers,
+  ...stockImageHandlers,
+  ...stockVideoHandlers,
+  ...collectionHandlers,
+  // Last: overrides remote's upload_image with the filePath-aware version and
+  // registers upload_file, which the stdio server never exposed.
+  ...mediaHandlers,
+};
+
+const handlers = baseHandlers;
+
+// `instructions` rides the initialize response into the client's system prompt —
+// the condensed half of AGENT.md, delivered without the user pasting anything.
+const server = new Server(
+  { name: "pagehub", version: "0.1.0" },
+  { capabilities: { tools: {}, resources: {} }, instructions: SERVER_INSTRUCTIONS }
+);
+
+server.setRequestHandler(ListToolsRequestSchema, async () => ({
+  tools: getServerTools(handlers),
+}));
+
+server.setRequestHandler(ListResourcesRequestSchema, async () => ({
+  resources: [],
+}));
+
+server.setRequestHandler(ListResourceTemplatesRequestSchema, async () => ({
+  resourceTemplates: [],
+}));
+
+server.setRequestHandler(CallToolRequestSchema, async request => {
+  try {
+    const name = request.params.name;
+    const args = request.params.arguments || {};
+    if (!isToolEnabled(name, handlers)) {
+      throw new Error(`Tool "${name}" is not available in this server mode.`);
+    }
+    const handler = handlers[name];
+    return await handler(args);
+  } catch (error) {
+    return { isError: true, content: [{ type: "text", text: error.message }] };
+  }
+});
+
+async function run() {
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+  console.error("PageHub MCP Server Connected (api-first mode).");
+}
+
+module.exports = { server, run };
