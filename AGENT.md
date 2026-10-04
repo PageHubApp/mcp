@@ -577,18 +577,22 @@ All interactive UI runs on one key/value store. Full table + a scored-checklist 
 - **Style / show-hide:** `stateModifiers` (names must exist in `ROOT.props.modifiers[Component]`, classes `!`-prefixed) or `conditionGroups` with `type: "state"` (operators include `not-contains`).
 - **Verify:** `screenshot_site({ selector })` — none of this shows in the node tree.
 
-### Animations (Preset System — No One-Offs)
+### Animations (built-in preset or site animation — no one-offs)
 
-All animations use the CSS Animation Preset system via `root.animation`. Users can customize duration, delay, and easing in the toolbar.
+Every animation goes through `root.animation`, which takes exactly one of:
 
-**Preset keys:**
+1. **A built-in preset key** — available on every site. Full current list: `get_style_reference({ topic: "animation" })`.
+2. **`site:<key>`** — an animation this site defines in `theme.animations` with `set_theme({ animations: [...] })`.
+
+Any other value is rejected on write (`patch_site_node`, `patch_site_bulk`, `add_nodes`, `insert_node`). Per-node `animationDuration`, `animationDelay`, `animationEasing`, `animationTrigger` and `animationLoop` on `root` work for both kinds; stagger a row by stepping `animationDelay`. Reduced motion is handled automatically.
+
+**Common built-ins:**
 
 | Category          | Keys                                                                                                                                                     | Best For                                    |
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
 | Entrance (scroll) | `cssFadeIn`, `cssFadeUp`, `cssFadeDown`, `cssFadeLeft`, `cssFadeRight`, `cssScaleUp`, `cssBlurIn`, `cssSlideUp`, `cssFlipIn`, `cssSpring`, `cssBounceIn` | Cards, images, sections appearing on scroll |
 | Hover             | `cssHoverGrow`, `cssHoverLift`, `cssHoverGlow`, `cssHoverPress`                                                                                          | Buttons, cards, interactive elements        |
 | Continuous        | `cssSpin`, `cssPulse`, `cssWiggle`, `cssMarquee`, `cssMarqueeSlow`                                                                                       | Spinners, tickers, decorative               |
-| Spotlight         | `cssChainSpotlight1/2/3`, `cssGridSpotlight1/2/3/4`                                                                                                      | Sequential card/tile highlights             |
 
 **Example — cards that fade in on scroll:**
 
@@ -601,11 +605,24 @@ All animations use the CSS Animation Preset system via `root.animation`. Users c
 }
 ```
 
+**Site animations.** New *site-specific* motion (a line drawing in, dashes marching, a bar filling) = a site animation; new motion every site should have = a built-in preset in `packages/sdk/src/utils/animations/animations.ts`. Shape: `{ key, label, trigger: "scroll" | "load" | "continuous", duration, easing, iterations, direction?, keyframes: [{ at: 0–100, style: { "<css-property>": "<value>" } }] }` — 2–12 stops including 0 and 100, allowlisted properties only (transform, opacity, clip-path, background-position, filter, colors, …), **no layout properties** (width/height/top/margin animate on the main thread and shift the page; use `transform: scaleX()` or `clip-path: inset()`). Up to 50 per site; `removeAnimations: ["key"]` deletes.
+
+```js
+set_theme({ id, animations: [{
+  key: "line-draw", label: "Line draw", trigger: "scroll", duration: 1.2, easing: "easeInOut", iterations: "1",
+  keyframes: [
+    { at: 0,   style: { "clip-path": "inset(0 100% 0 0)" } },
+    { at: 100, style: { "clip-path": "inset(0 0 0 0)" } }
+  ]
+}] })
+// then on the node: root: { animation: "site:line-draw" }
+```
+
 **Usage:** Apply to 2-4 key sections for visual interest. Overusing animations makes the page feel gimmicky.
 
 **DO NOT animate:** Headers, footers, hero sections (above the fold — already visible), or text-only blocks.
 
-**NEVER** add custom `@keyframes`, `--animate-*` CSS vars, or `animate-*` classes in `className`. All animations must go through `root.animation` with a preset key. If a new animation pattern is needed, it must be added as a preset in `packages/sdk/src/utils/animations/animations.ts`.
+**NEVER** add `@keyframes` in `inject.head` / `headCode`, `--animate-*` CSS vars, or `animate-*` classes in `className`. They bypass the scroll trigger, the per-node controls and reduced-motion handling.
 
 ### Tabs / Show-Hide Content Switching
 
