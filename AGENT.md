@@ -756,7 +756,7 @@ Text and Button components use the unified `action` prop for all link and intera
 One page node that renders a **different** item based on a URL slug — car detail, product detail, blog post. Works for any first-party `collection`, not just the storefront `product`.
 
 1. **Item needs a slug.** Add a `slug` text field to the collection (`update_collection_schema`) and set `data.slug` per row (e.g. `2019-porsche-911-gt3-rs`). It denormalizes into the query columns so the filter matches.
-2. **Detail page.** `add_page({ name: "Car" })` → page node at `/car` (URL segment from displayName). Then `patch_site_node(page_car, { propsPatch: { pathPattern: ":slug" } })` so it serves `/car/:slug`.
+2. **Detail page.** `add_page({ name: "Car" })` → page node at `/car` (URL segment from displayName). Then `update_page({ pageId: "page_car", pathPattern: ":slug" })` so it serves `/car/:slug`. The pattern is the tail AFTER the page slug — never repeat the slug in it (`products/:handle` on "Car" would serve `/car/products/<handle>`).
 3. **Bind by the URL param.** Inside the page, a `Data` node whose `dataSource` filters on the param:
    ```json
    { "provider": "collection", "collection": "listings", "filter": { "slug": "{{params.slug}}" }, "limit": 1 }
