@@ -1243,7 +1243,7 @@ A site can have arbitrary typed collections (staff, FAQ, menu items, events, bus
 - `update_collection_schema(slug, schema)` — replace the field list.
 - `delete_collection(slug)` — hard delete + all rows.
 - `list_collection_rows(slug, { limit?, cursor? })` — paginated rows.
-- `create_collection_row(slug, data)` / `update_collection_row(slug, row_id, data)` / `delete_collection_row(slug, row_id)`.
+- `create_collection_row(slug, data)` / `update_collection_row(slug, rowId, data)` / `delete_collection_row(slug, rowId)`.
 - `create_collection_rows(slug, rows)` — bulk insert, up to 500 rows/call; all-or-nothing validation (reports the bad `rowIndex`).
 - `import_collection_csv(slug, csv, { mode? })` — CSV → rows, columns matched to field keys by name; `mode: append|replace|upsert` (upsert keys on an `externalId`/`id` column). ~8 MB cap.
 - `upload_file({ filePath?|fileUrl?|dataBase64?, mimeType?, filename? })` — upload any plan-allowed file. Image → CDN (`type: "cdn"`); video/audio/pdf/zip → R2 (`type: "r2"`, public `url`). Store the returned `url` in a collection `url`/`media` field or a Video node (`provider: "r2"`, `videoId: mediaId`). **`filePath` (string or array) is the right input for anything on disk** — the only one that handles video-sized files, since `dataBase64` caps near 3 MB. `mimeType` required for non-image `dataBase64`. (`upload_image` stays the image-only shortcut.)
