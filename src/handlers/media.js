@@ -166,7 +166,7 @@ function toPathList(filePath) {
   return [s];
 }
 
-async function uploadOneFile(siteId, rawPath, restrictToImages) {
+async function uploadOneFile(siteId, rawPath, restrictToImages, isPrivate = false) {
   const abs = resolve(String(rawPath).replace(/^~(?=\/)/, process.env.HOME || "~"));
   const name = basename(abs);
   const ext = extname(abs).toLowerCase();
@@ -181,6 +181,19 @@ async function uploadOneFile(siteId, rawPath, restrictToImages) {
     throw new Error(
       `${abs} is a directory. Pass the individual files as an array: filePath: ["a.jpg", "b.jpg"].`
     );
+  }
+
+  // Private files (game builds, model packs) are any type and are stored
+  // byte-for-byte: they're downloaded as attachments, never rendered.
+  if (isPrivate) {
+    const data = await uploadBytesToSite({
+      siteId,
+      bytes: await readFile(abs),
+      contentType: MIME_BY_EXT[ext] || "application/octet-stream",
+      filename: name,
+      private: true,
+    });
+    return { data, name };
   }
 
   const contentType = MIME_BY_EXT[ext];
@@ -230,7 +243,12 @@ async function uploadLocalFiles(args, { restrictToImages }) {
   const failures = [];
   for (const p of paths) {
     try {
-      const { data, name, note } = await uploadOneFile(target.id, p, restrictToImages);
+      const { data, name, note } = await uploadOneFile(
+        target.id,
+        p,
+        restrictToImages,
+        !restrictToImages && args.private === true
+      );
       const label = paths.length > 1 || note ? `${name}${note ? ` (${note})` : ""}` : undefined;
       blocks.push(formatUploadResult(data, { label }));
     } catch (e) {
@@ -286,6 +304,29 @@ module.exports = {
       return withContext(() => uploadLocalFiles(args, { restrictToImages: false }));
     }
     return delegated.upload_file(args);
+  },
+
+  list_downloads: delegated.list_downloads,
+  remove_download: delegated.remove_download,
+
+  // With a local filePath: upload it privately, then publish that file.
+  async set_download(args) {
+    if (!args.filePath) return delegated.set_download(args);
+    const paths = toPathList(args.filePath);
+    if (paths.length !== 1) {
+      throw new Error(`set_download takes one filePath; got ${paths.length}.`);
+    }
+    const target = getActiveTarget(args);
+    if (target.type === "template") {
+      throw new Error("set_download is not supported for templates — downloads are per-site.");
+    }
+    const { data, name } = await withContext(() => uploadOneFile(target.id, paths[0], false, true));
+    return delegated.set_download({
+      ...args,
+      filePath: undefined,
+      mediaId: data.mediaId,
+      filename: args.filename || name,
+    });
   },
 
   async set_favicon(args) {
