@@ -42,8 +42,7 @@ Default to remote, surgical MCP edits. Do not rebuild full site JSON locally for
 ### Structural Error Escalation
 
 1. Retry with corrected IDs from `list_site_nodes` (lightweight tree, ~2KB) or `search_site_nodes(q, type)` and apply the smallest possible patch. Avoid `pull_site` (100KB+).
-2. If the target is a standard layout (nav, hero, pricing, testimonials), switch to `search_blocks` + `apply_kit_block`.
-3. If still blocked, report the exact MCP error and stop. Do not do a full-JSON reset as recovery.
+2. If still blocked, report the exact MCP error and stop. Do not do a full-JSON reset as recovery.
 
 ### Editing blocks in the **library** (not on a site)
 
@@ -60,9 +59,9 @@ Full policy, layering rules, and icons: **`BLOCKS-AI-CONTEXT.md`** in the repo r
 ```
 1. create_template(slug)                          → scaffold empty template
 2. set_theme(slug, preset, ...)                   → set colors, fonts, spacing
-3. apply_kit_block(slug, target:"header")         → header nav from block library
-4. apply_kit_block(slug) / add_custom_block       → (repeat for each page section)
-5. apply_kit_block(slug, target:"footer")         → footer from block library
+3. add_custom_block / apply_kit_block(target:"header") → header nav
+4. add_custom_block                               → (repeat for each page section; get_block for reference)
+5. add_custom_block / apply_kit_block(target:"footer") → footer
 6. set_integrations(...)                          → GA4, GTM, Search Console, Meta Pixel
 7. set_redirects(...)                             → 301/302 redirect rules
 8. set_favicon(...)                               → browser-tab icon (filePath / mediaId / URL / SVG)
@@ -176,13 +175,15 @@ Every preset ships with input styling tokens, so forms render correctly without 
 
 ### Using Design Patterns
 
-Patterns provide battle-tested node structures for complex layouts. Always check patterns before building from scratch:
+Patterns show battle-tested node structures for complex layouts (forms, accordions, galleries). Read them for how a layout is wired, then build the section for this business:
 
 ```
 1. search_blocks(query: "contact form")            → find matching blocks
-2. apply_kit_block(slug: "contact-form")           → apply to page
-3. patch_site_node / patch_site_bulk               → customize content
+2. get_block(slug: "contact-form")                 → study the structure
+3. add_custom_block                                → build your own version
 ```
+
+Stamp with `apply_kit_block` only when a block already fits the design as-is.
 
 **Reuse from this site (cheaper than the library).** `search_blocks` also surfaces existing sections on the current site under "Reusable from this site" when they're rich enough to adapt (≥5 descendants, ≥2 child component types). Clone instead of stamping a fresh library block by passing `sourceNodeId` instead of `slug`:
 
