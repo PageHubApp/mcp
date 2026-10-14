@@ -109,6 +109,7 @@ function delegateHandlers(coreHandlers) {
         {
           apiKey: config.apiKey,
           apiBaseUrl: config.apiBaseUrl,
+          client: "mcp",
           activeSite: config.activeSite,
           activeTemplate: config.activeTemplate,
         },
