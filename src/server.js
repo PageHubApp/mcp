@@ -1,11 +1,5 @@
-const { Server } = require("@modelcontextprotocol/sdk/server/index.js");
-const { StdioServerTransport } = require("@modelcontextprotocol/sdk/server/stdio.js");
-const {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-  ListResourcesRequestSchema,
-  ListResourceTemplatesRequestSchema,
-} = require("@modelcontextprotocol/sdk/types.js");
+const { Server } = require("@modelcontextprotocol/server");
+const { serveStdio } = require("@modelcontextprotocol/server/stdio");
 const { getServerTools, isToolEnabled } = require("./tools");
 const { SERVER_INSTRUCTIONS } = require("@pagehub/mcp-core");
 
@@ -44,43 +38,46 @@ const baseHandlers = {
 
 const handlers = baseHandlers;
 
-// `instructions` rides the initialize response into the client's system prompt —
-// the condensed half of AGENT.md, delivered without the user pasting anything.
-const server = new Server(
-  { name: "pagehub", version: "0.1.0" },
-  { capabilities: { tools: {}, resources: {} }, instructions: SERVER_INSTRUCTIONS }
-);
+// `instructions` rides the discover/initialize response into the client's
+// system prompt — the condensed half of AGENT.md, delivered without the user
+// pasting anything.
+function buildServer() {
+  const server = new Server(
+    { name: "pagehub", version: "0.1.0" },
+    { capabilities: { tools: {}, resources: {} }, instructions: SERVER_INSTRUCTIONS }
+  );
 
-server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: getServerTools(handlers),
-}));
+  server.setRequestHandler("tools/list", async () => ({
+    tools: getServerTools(handlers),
+  }));
+  server.setRequestHandler("resources/list", async () => ({ resources: [] }));
+  server.setRequestHandler("resources/templates/list", async () => ({
+    resourceTemplates: [],
+  }));
 
-server.setRequestHandler(ListResourcesRequestSchema, async () => ({
-  resources: [],
-}));
-
-server.setRequestHandler(ListResourceTemplatesRequestSchema, async () => ({
-  resourceTemplates: [],
-}));
-
-server.setRequestHandler(CallToolRequestSchema, async request => {
-  try {
-    const name = request.params.name;
-    const args = request.params.arguments || {};
-    if (!isToolEnabled(name, handlers)) {
-      throw new Error(`Tool "${name}" is not available in this server mode.`);
+  server.setRequestHandler("tools/call", async request => {
+    try {
+      const name = request.params.name;
+      const args = request.params.arguments || {};
+      if (!isToolEnabled(name, handlers)) {
+        throw new Error(`Tool "${name}" is not available in this server mode.`);
+      }
+      const handler = handlers[name];
+      return await handler(args);
+    } catch (error) {
+      return { isError: true, content: [{ type: "text", text: error.message }] };
     }
-    const handler = handlers[name];
-    return await handler(args);
-  } catch (error) {
-    return { isError: true, content: [{ type: "text", text: error.message }] };
-  }
-});
+  });
 
+  return server;
+}
+
+// serveStdio answers both protocol eras: the client's opening message
+// (2026-07-28 `server/discover` or 2025 `initialize`) picks one for the
+// connection.
 async function run() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
+  serveStdio(buildServer);
   console.error("PageHub MCP Server Connected (api-first mode).");
 }
 
-module.exports = { server, run };
+module.exports = { run };
