@@ -91,7 +91,7 @@ test("a folder is zipped, PUT to the signed URL and imported", () =>
     const text = res.content[0].text;
     assert.ok(!res.isError);
     assert.match(text, /Editor: http:\/\/pagehub\.test\/build\/site1/);
-    assert.match(text, /Preview: http:\/\/pagehub\.test\/view\/site1/);
+    assert.match(text, /Preview: http:\/\/pagehub\.test\/view\/d1/, "preview keys on draftId, not the site id");
     assert.match(text, /Redirects from the old page addresses: 1/);
     assert.match(text, /about\.html links to a missing file/);
   }));
