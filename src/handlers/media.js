@@ -21,30 +21,12 @@ const { readFile, stat } = require("node:fs/promises");
 const { basename, extname } = require("node:path");
 const { resolveUploadPath } = require("../uploadPath");
 const { uploadBytesToSite, formatUploadResult } = require("@pagehub/mcp-core");
-const { config, getActiveTarget, delegateHandlers, runWithContext } = require("../config");
+const { getActiveTarget, delegateHandlers, withContext } = require("../config");
 const coreHandlers = require("@pagehub/mcp-core/handlers/remote");
 const coreSiteConfig = require("@pagehub/mcp-core/handlers/site-config");
 
 const delegated = delegateHandlers(coreHandlers);
 const delegatedSiteConfig = delegateHandlers(coreSiteConfig);
-
-/**
- * mcp-core's `apiFetch` reads the API key off AsyncLocalStorage, which only
- * `delegateHandlers` seeds. Handlers written here have to seed it themselves
- * before calling into core.
- */
-function withContext(fn) {
-  return runWithContext(
-    {
-      apiKey: config.apiKey,
-      apiBaseUrl: config.apiBaseUrl,
-      client: "mcp",
-      activeSite: config.activeSite,
-      activeTemplate: config.activeTemplate,
-    },
-    fn
-  );
-}
 
 /** Extension → MIME. Covers every type `allowedMediaTypes` permits. */
 const MIME_BY_EXT = {

@@ -17,6 +17,7 @@ const stockImageHandlers = require("./handlers/stock-images");
 const stockVideoHandlers = require("./handlers/stock-videos");
 const collectionHandlers = require("./handlers/collections");
 const mediaHandlers = require("./handlers/media");
+const importHandlers = require("./handlers/import");
 
 const baseHandlers = {
   ...discoveryHandlers,
@@ -31,9 +32,12 @@ const baseHandlers = {
   ...stockImageHandlers,
   ...stockVideoHandlers,
   ...collectionHandlers,
-  // Last: overrides remote's upload_image with the filePath-aware version and
+  // Overrides remote's upload_image with the filePath-aware version and
   // registers upload_file, which the stdio server never exposed.
   ...mediaHandlers,
+  // import_site with a local filePath (zips a folder, uploads it itself);
+  // other modes and get_import_status delegate to mcp-core.
+  ...importHandlers,
 };
 
 const handlers = baseHandlers;

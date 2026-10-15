@@ -70,6 +70,8 @@ Full policy, layering rules, and icons: **`BLOCKS-AI-CONTEXT.md`** in the repo r
 11. encode_all_templates()                        → finalize
 ```
 
+**Bringing in a site the user already built** (plain HTML, or the output folder of a React/Vite/Next build): `import_site({ filePath: "./dist" })` — it zips the folder, uploads it and waits, then returns the new draft site's editor link. Don't rebuild it by hand with `add_nodes`. Recipe: https://pagehub.dev/skill.md
+
 ## Custom Domains
 
 Attaching a domain is two halves, and **you can only do the first one**. `set_domain`

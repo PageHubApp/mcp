@@ -96,6 +96,26 @@ function getEditorUrl(siteId) {
   return `${base}/build/${siteId}`;
 }
 
+/** The per-call context mcp-core reads, seeded from the MCP CLI config. */
+function cliContext() {
+  return {
+    apiKey: config.apiKey,
+    apiBaseUrl: config.apiBaseUrl,
+    client: "mcp",
+    activeSite: config.activeSite,
+    activeTemplate: config.activeTemplate,
+  };
+}
+
+/**
+ * Run `fn` inside that context. Handlers written in this package that call
+ * into mcp-core (whose `apiFetch` reads the API key off AsyncLocalStorage)
+ * need this; `delegateHandlers` does it for wrapped core handlers.
+ */
+function withContext(fn) {
+  return runWithContext(cliContext(), fn);
+}
+
 /**
  * Wrap an mcp-core handler map so each call runs inside a context
  * seeded from the MCP CLI config. This lets mcp-core handlers (which
@@ -106,13 +126,7 @@ function delegateHandlers(coreHandlers) {
   for (const [name, fn] of Object.entries(coreHandlers)) {
     wrapped[name] = args =>
       runWithContext(
-        {
-          apiKey: config.apiKey,
-          apiBaseUrl: config.apiBaseUrl,
-          client: "mcp",
-          activeSite: config.activeSite,
-          activeTemplate: config.activeTemplate,
-        },
+        cliContext(),
         // Same wrapper the hosted dispatch uses, so a stdio caller gets the
         // publish-state trailer too — the state is a property of the write, not
         // of which transport asked for it.
@@ -130,4 +144,5 @@ module.exports = {
   getActiveTarget,
   getEditorUrl,
   delegateHandlers,
+  withContext,
 };
