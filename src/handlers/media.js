@@ -10,10 +10,16 @@
  * hosted agent, where "the disk" is PageHub's server. The core handler rejects
  * `filePath` explicitly for that reason; anything without one delegates
  * straight through to it.
+ *
+ * The path comes from the model, and an upload is published on a public site,
+ * so reads are confined to one folder (`PAGEHUB_UPLOAD_ROOT`, else the
+ * server's working directory), hidden files and folders are refused, and
+ * private downloads take an extension allowlist — see `../uploadPath.js`.
  */
 
 const { readFile, stat } = require("node:fs/promises");
-const { basename, extname, resolve } = require("node:path");
+const { basename, extname } = require("node:path");
+const { resolveUploadPath } = require("../uploadPath");
 const { uploadBytesToSite, formatUploadResult } = require("@pagehub/mcp-core");
 const { config, getActiveTarget, delegateHandlers, runWithContext } = require("../config");
 const coreHandlers = require("@pagehub/mcp-core/handlers/remote");
@@ -61,6 +67,29 @@ const MIME_BY_EXT = {
   ".ogg": "audio/ogg",
   ".pdf": "application/pdf",
   ".zip": "application/zip",
+};
+
+/**
+ * Private uploads (`private: true`, `set_download`) are offered as downloads
+ * on a public site, so only file types people actually sell or share are
+ * allowed — never whatever happens to sit on disk (keys, configs, databases).
+ */
+const PRIVATE_MIME_BY_EXT = {
+  ...MIME_BY_EXT,
+  ".doc": "application/msword",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ".xls": "application/vnd.ms-excel",
+  ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  ".ppt": "application/vnd.ms-powerpoint",
+  ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  ".odt": "application/vnd.oasis.opendocument.text",
+  ".ods": "application/vnd.oasis.opendocument.spreadsheet",
+  ".odp": "application/vnd.oasis.opendocument.presentation",
+  ".rtf": "application/rtf",
+  ".txt": "text/plain",
+  ".csv": "text/csv",
+  ".epub": "application/epub+zip",
+  ".flac": "audio/flac",
 };
 
 const IMAGE_EXTS = Object.entries(MIME_BY_EXT)
@@ -168,29 +197,31 @@ function toPathList(filePath) {
 }
 
 async function uploadOneFile(siteId, rawPath, restrictToImages, isPrivate = false) {
-  const abs = resolve(String(rawPath).replace(/^~(?=\/)/, process.env.HOME || "~"));
+  const abs = await resolveUploadPath(rawPath);
   const name = basename(abs);
   const ext = extname(abs).toLowerCase();
 
-  let info;
-  try {
-    info = await stat(abs);
-  } catch {
-    throw new Error(`File not found: ${abs}`);
-  }
+  const info = await stat(abs);
   if (info.isDirectory()) {
     throw new Error(
       `${abs} is a directory. Pass the individual files as an array: filePath: ["a.jpg", "b.jpg"].`
     );
   }
 
-  // Private files (game builds, model packs) are any type and are stored
-  // byte-for-byte: they're downloaded as attachments, never rendered.
+  // Private files are stored byte-for-byte: they're downloaded as
+  // attachments, never rendered. Only allowlisted types.
   if (isPrivate) {
+    const privateType = PRIVATE_MIME_BY_EXT[ext];
+    if (!privateType) {
+      throw new Error(
+        `${name} can't be offered as a download — "${ext || "(none)"}" isn't an allowed type. ` +
+          `Allowed: ${Object.keys(PRIVATE_MIME_BY_EXT).join(", ")}.`
+      );
+    }
     const data = await uploadBytesToSite({
       siteId,
       bytes: await readFile(abs),
-      contentType: MIME_BY_EXT[ext] || "application/octet-stream",
+      contentType: privateType,
       filename: name,
       private: true,
     });
