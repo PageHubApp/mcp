@@ -137,7 +137,7 @@ user's to remove; PageHub cannot touch their zone.
 
 ## Site Emails
 
-The emails a site's visitors get — order receipt, subscription welcome, gift
+The emails a site's visitors get — order receipt, order shipped, subscription welcome, gift
 cards, sign-in link, download delivery / update — are node trees the owner can
 design. Tools: `list_site_emails`, `get_site_email`, `update_site_email`,
 `preview_site_email`.
