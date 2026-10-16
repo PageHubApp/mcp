@@ -866,7 +866,7 @@ Pages (and any node) can use the `auth` condition type to show/hide based on log
 
 ### Storefront setup flow
 
-1. User connects Stripe in Site Settings → Connectors (enters secret key)
+1. Connect Stripe: the owner does it in the dashboard (Connect or a secret key), or over MCP with `stripe_connect` (hand the owner the onboarding URL, call it again until `ready`). Once connected, the Stripe catalog syncs into the site's `products` collection on its own; `refresh_products` re-syncs on demand and returns the product count (use it after products change in Stripe, or if the collection isn't there yet)
 2. Drop a storefront-navbar block (has CartBadge)
 3. Drop a connector-product-grid block (data-bound to Stripe products)
 4. Drop a cart-drawer block (CartDrawer with checkout button)
