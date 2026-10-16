@@ -848,7 +848,7 @@ Customer orders use the same `{{item.title}}`, `{{item.price.formatted}}`, `{{it
 
 Site visitors (not PageHub users) authenticate via magic link email. Separate from NextAuth.
 
-- **Login**: Form block with `submissionType: "custom"`, action `/api/customer/magic-link`. Collects email, sends magic link. Site resolved from Host header.
+- **Login**: Form block with `submissionType: "custom"`, action `/api/customer/magic-link`. Collects email, sends magic link. Site resolved from the Host header (or a `pageId` field). Optional hidden FormElement `name: "returnTo"` with a path (e.g. `"/account"`) sets where the emailed sign-in link lands; it must be a path on this site, anything else falls back to the home page.
 - **Token detection**: `useCustomerToken` hook on all rendering routes. Detects `?token=` in URL, verifies via `/api/customer/verify`, sets `ph-customer` cookie, strips token from URL.
 - **Customer data**: Blocks use `Data` nodes with `dataSource: { provider: "customer", collection: "orders" }` — fetched client-side with cookie auth.
 - **Plan gating**: Free plan cannot use site customers. Pro: 500, Business: 10k, Agency: 100k max customers.
