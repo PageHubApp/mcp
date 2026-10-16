@@ -720,7 +720,7 @@ Text and Button components use the unified `action` prop for all link and intera
 | `open-modal`    | `anchor`                                  | Open a modal by ID                                                              |
 | `add-to-cart`   | `quantity?` (default 1)                   | Add current data-bound item to cart (inside Stripe dataSource `Data` node only) |
 | `toggle-cart`   | —                                         | Open/close the CartDrawer (on CartBadge or nav buttons)                         |
-| `cart-checkout` | —                                         | Redirect to Stripe Checkout with cart contents                                  |
+| `cart-checkout` | `successHref?`, `cancelHref?` (`ref:<pageId>`) | Redirect to Stripe Checkout with cart contents. Point `successHref` at an order-confirmed page; it returns with `?checkout=success&session_id=…`, so a Data node `{ provider: "order", collection: "session", stateInputs: { session: "url:session_id" } }` can show the order |
 
 **Examples:**
 
