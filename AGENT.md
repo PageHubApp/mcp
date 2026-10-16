@@ -718,7 +718,7 @@ Text and Button components use the unified `action` prop for all link and intera
 | --------------- | ----------------------------------------- | ------------------------------------------------------------------------------- |
 | `show-hide`     | `target`, `direction`, `method`, `group?` | Mobile menus, dropdowns, tabs, cookie consent dismiss                           |
 | `open-modal`    | `anchor`                                  | Open a modal by ID                                                              |
-| `add-to-cart`   | `quantity?` (default 1)                   | Add current data-bound item to cart (inside Stripe dataSource `Data` node only) |
+| `add-to-cart`   | `quantity?` (default 1), `quantityField?`, `variantMatchStateKey?` | Add current data-bound item to cart (inside a `Data` node bound to products). Buy now = `[add-to-cart, cart-checkout]` in one array |
 | `toggle-cart`   | —                                         | Open/close the CartDrawer (on CartBadge or nav buttons)                         |
 | `cart-checkout` | `successHref?`, `cancelHref?` (`ref:<pageId>`) | Redirect to Stripe Checkout with cart contents. Point `successHref` at an order-confirmed page; it returns with `?checkout=success&session_id=…`, so a Data node `{ provider: "order", collection: "session", stateInputs: { session: "url:session_id" } }` can show the order. Its `name` / `email` / `shipTo` / `shipToName` come back empty 48 hours after checkout, so design the page to read fine without them |
 
@@ -794,6 +794,8 @@ Each doc includes copy-paste-ready inject CSS/JS, the required `className` / `at
 PageHub supports live Stripe data display and shopping cart checkout. Users connect their Stripe account in Site Settings → Connectors.
 
 **Human-readable reference (architecture, collections, bindings, variables, code map):** [`docs/stripe/README.md`](../../docs/stripe/README.md)
+
+**Building a shop:** start from `create_site({ template: "modern-store" })` or `"moss-and-fern"` when you can. Otherwise the parts are: a shop page (`Data` on `products` with `stateInputs` for `url:q` / `url:category` / `url:page` / `url:sort`); a product page with `pathPattern: ":handle"`; a cart drawer and the `checkout-cancelled-banner` block as ROOT children; the `order-confirmed` block on its own page, with every `cart-checkout` given `successHref` pointing at it; and the `customer-account` block at `/account`. Filter product bindings on row fields (`categories`, `tags`, `subcategory`), never Stripe metadata. The full checklist is in `get_style_reference({ topic: "integrations" })`.
 
 > **Shopify → Stripe product migration** is a separate dashboard feature (not MCP-callable). Site owners connect a Shopify Admin API token in `/dashboard/sites/[id]` → "Migrate from Shopify"; a Vercel-cron-driven background queue creates Stripe products + prices + maps Shopify metadata. See [`docs/stripe/SHOPIFY-IMPORT.md`](../../docs/stripe/SHOPIFY-IMPORT.md). Do not attempt to build / drive this from MCP — there are no tools for it, and direct Stripe writes would bypass the idempotency map.
 
