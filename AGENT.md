@@ -871,23 +871,18 @@ Pages (and any node) can use the `auth` condition type to show/hide based on log
 1. Connect Stripe: the owner does it in the dashboard (Connect or a secret key), or over MCP with `stripe_connect` (hand the owner the onboarding URL, call it again until `ready`). Once connected, the Stripe catalog syncs into the site's `products` collection on its own; `refresh_products` re-syncs on demand and returns the product count (use it after products change in Stripe, or if the collection isn't there yet)
 2. Drop a storefront-navbar block (has CartBadge)
 3. Drop a connector-product-grid block (data-bound to Stripe products)
-4. Drop a cart-drawer block (CartDrawer with checkout button)
-5. Drop a checkout-banner block (success/cancel feedback)
+4. Drop a cart-drawer block (CartDrawer with checkout button) and a checkout-cancelled-banner block, both as ROOT children
+5. Add an order-confirmed page (the `order-confirmed` block) and point the checkout's `successHref` at it
 6. Stripe credentials are stored encrypted — NOT in `set_integrations` or ROOT.props
 
 ### Stripe blocks (category: "stripe")
 
-Products: `connector-product-grid`, `connector-product-list`, `connector-product-hero`, `connector-product-strip`, `product-detail`
-Prices: `connector-pricing-cards`
-Customers: `connector-customer-list`
-Orders: `connector-order-table`
-Subscriptions: `connector-subscription-cards`
-Invoices: `connector-invoice-table`
-Coupons: `connector-coupon-grid`
+Products: `connector-product-grid`, `connector-product-hero`, `connector-product-strip`, `storefront-product-detail`
+Shop chrome: `storefront-facet-filter`, `storefront-filter-sidebar`, `storefront-search-bar`, `storefront-pagination`, `storefront-promo-code`
 Cart: `cart-drawer`, `cart-mini-bar`
-Checkout: `checkout-banner`, `checkout-success`
+Checkout: `order-confirmed`, `checkout-cancelled-banner`
 Navigation: `storefront-navbar`
-Site Customer Auth: `customer-login`, `customer-profile`, `customer-orders`
+Site customer accounts: `customer-account` (sign-in, profile and orders in one)
 
 ---
 
