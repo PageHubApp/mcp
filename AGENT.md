@@ -1240,7 +1240,7 @@ A site can have arbitrary typed collections (staff, FAQ, menu items, events, bus
 - `get_collection(slug)` — full schema, source, isPublic.
 - `create_collection({ name, slug, schema, source?, isPublic? })` — `schema` is an array of `{ key, label, type, required?, formWritable?, ...typeConfig }`. Source defaults to `{ type: "manual" }`. For Airtable sync (Business+): `{ type: "airtable", baseId, tableId, viewId?, columnMap: { fieldKey: "Airtable Field Name" } }`. Secrets live in `ConnectorCredential`.
   - `formWritable: false` on a field = public forms can **never** write it (owner-only fields like `status`, `publishedAt`, `price`). Default is writable. Enforced server-side against the DB schema, so it's a real lock, not a UI hint.
-- `update_collection_schema(slug, schema)` — replace the field list.
+- `update_collection_schema(slug, schema?, requiredPlans?, memberFields?, requiresCustomerLogin?)` — replace the field list and/or set member gates. `requiredPlans` (plan slugs) limits every row to those plans' members. To lock single lessons instead, add a text field keyed `requiredPlans` and write comma-separated plan slugs on those rows; a visitor without one gets the row minus `memberFields`, with `locked: true`.
 - `delete_collection(slug)` — hard delete + all rows.
 - `list_collection_rows(slug, { limit?, cursor? })` — paginated rows.
 - `create_collection_row(slug, data)` / `update_collection_row(slug, rowId, data)` / `delete_collection_row(slug, rowId)`.
