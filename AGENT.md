@@ -483,6 +483,8 @@ Sites MUST comply with WCAG 2.1 Level AA to avoid lawsuits under California's Un
 - Set `autocomplete` on personal data fields: `"name"`, `"email"`, `"tel"`, `"street-address"`, `"postal-code"`, `"organization"`.
 - Mark required fields with `required: true`.
 - Use descriptive `formName` on Form containers (used as `aria-label`).
+- **After-submit states are exactly three:** `form:<id>:fields`, `form:<id>:loading`, `form:<id>:loaded` (`<id>` = the Form's `stateKey`, else its node id), read via Container `visibilityStateKey`. There is **no failure state** — an invented `form:<id>:error` Container stays hidden forever, and on the React renderer a failed submission can still show the `loaded` (thank-you) Container. Keep thank-you copy neutral and put a fallback contact (phone / email) in it.
+- **Filters and search are not Forms.** Bind each input / select / checkbox straight to URL state with FormElement `stateBinding: { key: "url:<name>", mode?: "checked", debounceMs?: 300, defaultValue? }` (`mode: "checked"` for checkbox / radio; `debounceMs` for typed search) and list the same keys in the grid's `dataSource.stateInputs`. Don't wrap them in a `Form`: a Form only navigates when `submissionType: "custom"` + `method: "GET"` + `action` are set — anything else POSTs to `/api/submissions` and fills the owner's inbox with filter clicks.
 
 #### Buttons, Links, Icons
 
@@ -491,6 +493,7 @@ Sites MUST comply with WCAG 2.1 Level AA to avoid lawsuits under California's Un
 - **`Icon`** = standalone decorative or semantic icon. Renders `<span>` with inline SVG. No action, no text. Use for feature-tile icons, check bullets, hero badges. For an icon paired with text in a CTA or link, use the `icon` prop on `Button` / `Link` — do NOT place an `Icon` node next to a `Text` node when they form a single visual unit.
 - Icon-only buttons MUST have text in the `text` prop (used as `aria-label` when `icon.only` is true). Same rule for `Link`.
 - Standalone `Icon` nodes are decorative by default (`aria-hidden`). Pass `aria-label` only when the icon carries meaning on its own (status, warning, standalone indicator).
+- **Aria props:** only `role`, `aria-label`, `aria-hidden`, `aria-describedby` and `aria-live` work as top-level props. Any other aria attribute (`aria-pressed`, `aria-current`, `aria-expanded`, `aria-controls`, …) set as a prop is silently dropped — put it in `attrs` instead (`attrs: { "aria-current": "page" }`; Container, Button, Link, Text, FormElement). `attrs` values are static; they don't follow state.
 - Links to external URLs automatically get `rel="noopener noreferrer"` — no action needed.
 - Link text must be descriptive. Never use "Click here" or "Read more" alone — include context: "Read more about our pricing".
 
@@ -574,11 +577,14 @@ For EVERY block, follow this process:
 
 All interactive UI runs on one key/value store. Full table + a scored-checklist recipe: `get_style_reference()` → "Interactive State". The short version:
 
-- **Write:** `action: [{ type: "set-state", key, value }]` on click; add `trigger: "load"` to seed defaults (fires once on mount, never on click).
+- **Write:** `action: [{ type: "set-state", key, value }]` on click; add `trigger: "load"` to seed defaults (fires once on mount, never on click; load actions only run on a Container).
 - **Derive:** Container `computedStateBindings: [{ key, from: [keys], compute: { type: "count", value: "Y" } }]` — also `all-truthy`, `first-truthy`, `join`.
 - **Show:** Text `{{state.<key>}}`.
 - **Style / show-hide:** `stateModifiers` (names must exist in `ROOT.props.modifiers[Component]`, classes `!`-prefixed) or `conditionGroups` with `type: "state"` (operators include `not-contains`).
 - **Verify:** `screenshot_site({ selector })` — none of this shows in the node tree.
+- **Unset keys — seed them.** The two renderers disagree on an unset key: React treats `equals` / `not-equals` against it as unknown and SHOWS the node, static HIDES it. So a "default = `not-equals 'yearly'`" pattern breaks on one of them. Seed every key you gate on with a `trigger: "load"` `set-state` on a **Container** (load actions only run on Container), and gate each variant with a positive `equals` (`monthly` → `equals monthly`, `yearly` → `equals yearly`). `exists` / `not-exists` are safe on unset keys.
+- **Counters:** `increment-state` / `decrement-state` take `step`, `min` (number), `max` (number or `"state:<key>"` to read another key — `"{{state.x}}"` does NOT resolve and silently removes the bound), `wrap`. An unset key starts at `min` (default 0).
+- **Timers:** `trigger: "interval"` + `intervalMs` (number, ≥ 50) — not `interval`. Container only; runs `increment-state`, `decrement-state`, `set-state`, `toggle-state`, `clear-state`, `show-hide`. It does **not** run on statically rendered pages (`staticPublish` sites and the default `/view` preview), and there is no pause-on-hover. Never make autoplay the only way through a carousel — always add prev / next buttons.
 
 ### Animations (built-in preset or site animation — no one-offs)
 
@@ -750,7 +756,7 @@ Text and Button components use the unified `action` prop for all link and intera
 **Rules:**
 
 - Always use `type: "link"` for navigation. Pick the right `href` shape — the prefix tells the browser/renderer everything.
-- Mobile nav / modal overlays: `show-hide` with default `method: "class"`. Overlay Container starts with `hidden` in className (NOT `root.style: "display: none"`). The SDK's `showHideStore` keeps the toggle stable across React rerenders. ESC closes most-recently-shown overlay automatically.
+- Mobile nav / modal overlays: `show-hide` with default `method: "class"`. Overlay Container starts with `hidden` in className (NOT `root.style: "display: none"`). The SDK's `showHideStore` keeps the toggle stable across React rerenders. ESC closes most-recently-shown overlay automatically; backdrop-click close needs `props.handlers.onClick` on the overlay (see "Known gotchas" below).
 - External links: set `target: "_blank"` (gets `rel="noopener noreferrer"` automatically).
 - Legacy `link-url`, `link-page`, `scroll-to`, `email`, `phone` types still render correctly via a runtime shim, but DO NOT emit them in new content.
 
@@ -774,7 +780,7 @@ One page node that renders a **different** item based on a URL slug — car deta
 
 A few interactive patterns look like "just add a prop" but hit real SDK bugs or missing features. For marketing sites that depend on them (mega menus, scroll-styled navs, text tickers), drop the documented inject payload into `ROOT.props.inject.head` + `inject.footer` rather than reinventing. Assemble **all needed workarounds into one inject payload** in a single `patch_site_node` call — splitting across patches loses whichever half gets overwritten.
 
-**Modals and drawers are NOT on this list** — they need no inject at all. Put `ph-overlay` (centered) or `ph-drawer` (column) next to `hidden` in the overlay's className and the SDK theme CSS supplies the shown-state layout; ESC and backdrop close are already native. See [modal-show-hide-gotchas.md](../../.claude/known-issues/modal-show-hide-gotchas.md).
+**Modals and drawers are NOT on this list** — they need no inject at all. Put `ph-overlay` (centered) or `ph-drawer` (column) next to `hidden` in the overlay's className and the SDK theme CSS supplies the shown-state layout. ESC close is native; **backdrop close is not** — add it yourself: the overlay root gets `handlers: { "onClick": "if (event.target === event.currentTarget) event.currentTarget.classList.add('hidden');" }` and the card inside gets `handlers: { "onClick": "event.stopPropagation()" }` so clicks inside it never close the modal. Both renderers run `handlers`. See [modal-show-hide-gotchas.md](../../.claude/known-issues/modal-show-hide-gotchas.md).
 
 | Pattern                                                                 | Bug / gap                                                                                                                                                                                                                                                    | Workaround doc                                                                                                                 |
 | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -859,7 +865,7 @@ Site visitors (not PageHub users) authenticate via magic link email. Separate fr
 
 Pages (and any node) can use the `auth` condition type to show/hide based on login state.
 
-- **Condition type**: `auth` — values: `logged-in` or `logged-out`. Available in the condition builder on any node or in Page Settings → Access tab.
+- **Condition type**: `auth` with **`key: "status"`**, `operator: "equals"` (or `not-equals`), `value: "logged-in"` or `"logged-out"` — e.g. `conditionGroups: [{ logic: "all", conditions: [{ type: "auth", key: "status", operator: "equals", value: "logged-in" }] }]`. The key is required; `key: "customer"` compares an object and never matches. Member gates use `key: "customer.isMember"` (`equals "true"`) or `key: "customer.plans.<slug>"` (`exists`); a field a signed-out visitor lacks counts as `not-equals` anything. Available in the condition builder on any node or in Page Settings → Access tab.
 - **Page Settings → Access tab**: Set conditions on a page + choose what happens when access is denied:
   - "Hide page content" (default)
   - "Redirect to URL" (e.g. `/login`)
@@ -1110,6 +1116,8 @@ Desktop overrides use `md:` prefix: `md:flex-row md:gap-8 md:py-24`
   "linkedNodes": {}
 }
 ```
+
+**Never set Container / Data `type: "component"`** on cards, repeater rows or any visible content. It marks a reusable-component master and is hidden on the published site (React adds `hidden`, static export renders nothing), so the whole grid comes out empty. Cards are `type: ""` / `"container"`.
 
 ---
 
