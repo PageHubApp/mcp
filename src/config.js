@@ -93,7 +93,7 @@ function getActiveTarget(args = {}) {
 
 function getEditorUrl(siteId) {
   const base = normalizeBaseUrl(config.apiBaseUrl) || "https://pagehub.dev";
-  return `${base}/build/${siteId}`;
+  return `${base}/dashboard/sites/${siteId}/design`;
 }
 
 /** The per-call context mcp-core reads, seeded from the MCP CLI config. */
