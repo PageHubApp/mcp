@@ -577,14 +577,14 @@ For EVERY block, follow this process:
 
 All interactive UI runs on one key/value store. Full table + a scored-checklist recipe: `get_style_reference()` → "Interactive State". The short version:
 
-- **Write:** `action: [{ type: "set-state", key, value }]` on click; add `trigger: "load"` to seed defaults (fires once on mount, never on click; load actions only run on a Container).
+- **Write:** `action: [{ type: "set-state", key, value }]` on click; add `trigger: "load"` to seed defaults (fires once on mount, never on click; works on any node that takes `action`).
 - **Derive:** Container `computedStateBindings: [{ key, from: [keys], compute: { type: "count", value: "Y" } }]` — also `all-truthy`, `first-truthy`, `join`.
 - **Show:** Text `{{state.<key>}}`.
 - **Style / show-hide:** `stateModifiers` (names must exist in `ROOT.props.modifiers[Component]`, classes `!`-prefixed) or `conditionGroups` with `type: "state"` (operators include `not-contains`).
 - **Verify:** `screenshot_site({ selector })` — none of this shows in the node tree.
-- **Unset keys — seed them.** The two renderers disagree on an unset key: React treats `equals` / `not-equals` against it as unknown and SHOWS the node, static HIDES it. So a "default = `not-equals 'yearly'`" pattern breaks on one of them. Seed every key you gate on with a `trigger: "load"` `set-state` on a **Container** (load actions only run on Container), and gate each variant with a positive `equals` (`monthly` → `equals monthly`, `yearly` → `equals yearly`). `exists` / `not-exists` are safe on unset keys.
+- **Unset keys read as `""`.** Before anything writes a key: `equals 'x'` is false, `not-equals 'x'` is true, `exists` false, `not-exists` true, `greater-than` / `less-than` false — the same on every renderer. So "default = `not-equals 'yearly'`, variant = `equals 'yearly'`" works with no seed. Seed with a `trigger: "load"` `set-state` only when other UI must read the value (active-chip styling, `{{state.x}}` text).
 - **Counters:** `increment-state` / `decrement-state` take `step`, `min` (number), `max` (number or `"state:<key>"` to read another key — `"{{state.x}}"` does NOT resolve and silently removes the bound), `wrap`. An unset key starts at `min` (default 0).
-- **Timers:** `trigger: "interval"` + `intervalMs` (number, ≥ 50) — not `interval`. Container only; runs `increment-state`, `decrement-state`, `set-state`, `toggle-state`, `clear-state`, `show-hide`. It does **not** run on statically rendered pages (`staticPublish` sites and the default `/view` preview), and there is no pause-on-hover. Never make autoplay the only way through a carousel — always add prev / next buttons.
+- **Timers:** `trigger: "interval"` + `intervalMs` (number, ≥ 50) — not `interval`. Works on any node that takes `action`, on every renderer; runs `increment-state`, `decrement-state`, `set-state`, `toggle-state`, `clear-state`, `show-hide`. `conditions` are re-checked each tick. There is no pause-on-hover, so never make autoplay the only way through a carousel — always add prev / next buttons.
 
 ### Animations (built-in preset or site animation — no one-offs)
 
