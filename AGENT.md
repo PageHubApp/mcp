@@ -126,7 +126,8 @@ user's to remove; PageHub cannot touch their zone.
 
 ### Gotchas
 
-- **Plan-gated.** Free plans cannot attach a custom domain; the call returns a 403
+- **Plan-gated by count.** Custom domains are capped per account across all the
+  owner's sites — Free allows 1. Attaching beyond the plan's limit returns a 403
   with `upgrade: true`.
 - **409 conflict** means a variant is already on another Vercel project. Nobody can
   fix that from here — the user detaches it in the Vercel dashboard, then you retry.
