@@ -22,6 +22,18 @@ Every site write lands in the **draft**. The published site keeps serving its pr
 - Reads (`get_site_node`, `list_site_nodes`, `search_site_nodes`) return the **draft**, so you always see the latest work in progress — including unpublished edits made in the editor by a human.
 - Ask before publishing someone's site unless they asked you to. The draft may contain their unfinished work as well as yours.
 
+## HTML-first sites (`format: html`)
+
+Some sites are stored as HTML + Liquid files instead of a node tree. `list_sites` and `select_site` say `format: html`. On those:
+
+- **Files, not nodes.** `list_site_files` → `read_site_file` → `edit_site_file` (exact `oldText` → `newText`, smallest span) or `write_site_file` (whole file, needs the `baseVersion` you read). `search_site_files` finds text across files. The node tools (`get_site_node`, `patch_site_node`, `add_nodes`, `apply_kit_block`, `set_theme`, …) refuse with `SITE_IS_HTML`.
+- **Format rules:** `get_style_reference({ topic: "liquid" })`: files, PageHub tags (`{% form %}`, `{% section %}`, `{% map %}`, `{% paginate %}`), filters (`image_url`, `icon`, `money`…), data (`collections.<slug>`, `products`, `customer`, `request`), lint rules. Generated from the renderer, so it is current.
+- **Every write is checked.** Lint errors come back with the line and rule, and nothing is saved: fix that spot and write again. A version conflict means someone else saved: read again. `on*` attributes and `<script>` you write are stripped. In maintenance, writes are paused.
+- **Pages** are records plus files: `add_page` takes the page's `text`; `update_page` sets route, SEO and flags; markup changes (`bodyClass`, head code) go in the file.
+- **Theme:** the custom properties in `theme.css`. Company, `lang`, fonts: `site.json`.
+- Keep `data-edit-*` attributes: they are the element ids history and review comments use.
+- `screenshot_site`, `audit_seo`, `audit_accessibility`, collections, media, Stripe, domains and `publish_site` work unchanged.
+
 ## Live Editing Guardrails (Non-Negotiable)
 
 Default to remote, surgical MCP edits. Do not rebuild full site JSON locally for routine work.
