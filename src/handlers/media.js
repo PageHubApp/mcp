@@ -243,12 +243,6 @@ async function uploadOneFile(siteId, rawPath, restrictToImages, isPrivate = fals
  */
 async function uploadLocalFiles(args, { restrictToImages }) {
   const target = getActiveTarget(args);
-  if (target.type === "template") {
-    throw new Error(
-      `${restrictToImages ? "upload_image" : "upload_file"} is not supported for templates. ` +
-        'Use hardcoded URLs (type: "url") instead.'
-    );
-  }
 
   const paths = toPathList(args.filePath);
   if (!paths.length) throw new Error("filePath is empty.");
@@ -288,9 +282,6 @@ async function uploadLocalFiles(args, { restrictToImages }) {
  */
 async function uploadFaviconFile(args) {
   const target = getActiveTarget(args);
-  if (target.type === "template") {
-    throw new Error("set_favicon is not supported for templates — favicons are per-site only.");
-  }
   const paths = toPathList(args.filePath);
   if (paths.length !== 1) {
     throw new Error(`set_favicon takes one filePath; got ${paths.length}.`);
@@ -331,9 +322,6 @@ module.exports = {
       throw new Error(`set_download takes one filePath; got ${paths.length}.`);
     }
     const target = getActiveTarget(args);
-    if (target.type === "template") {
-      throw new Error("set_download is not supported for templates — downloads are per-site.");
-    }
     const { data, name } = await withContext(() => uploadOneFile(target.id, paths[0], false, true));
     return delegated.set_download({
       ...args,

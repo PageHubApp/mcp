@@ -4,36 +4,21 @@ const { getServerTools, isToolEnabled } = require("./tools");
 const { SERVER_INSTRUCTIONS } = require("@pagehub/mcp-core");
 
 // Handler modules — each exports { toolName: async (args) => result }
-const discoveryHandlers = require("./handlers/discovery");
-const remoteHandlers = require("./handlers/remote");
-const nodeHandlers = require("./handlers/nodes");
-const kitHandlers = require("./handlers/kit");
+const { handlers: coreHandlers } = require("@pagehub/mcp-core");
+const { delegateHandlers } = require("./config");
 const accessibilityHandlers = require("./handlers/accessibility");
-const portalHandlers = require("./handlers/portal");
-const componentHandlers = require("./handlers/components");
-const pageHandlers = require("./handlers/pages");
-const seoHandlers = require("./handlers/seo");
-const stockImageHandlers = require("./handlers/stock-images");
-const stockVideoHandlers = require("./handlers/stock-videos");
-const collectionHandlers = require("./handlers/collections");
+const remoteHandlers = require("./handlers/remote");
 const mediaHandlers = require("./handlers/media");
 const importHandlers = require("./handlers/import");
 
 const baseHandlers = {
-  ...discoveryHandlers,
-  ...remoteHandlers,
-  ...nodeHandlers,
-  ...kitHandlers,
-  ...portalHandlers,
   ...accessibilityHandlers,
-  ...componentHandlers,
-  ...pageHandlers,
-  ...seoHandlers,
-  ...stockImageHandlers,
-  ...stockVideoHandlers,
-  ...collectionHandlers,
-  // Overrides remote's upload_image with the filePath-aware version and
-  // registers upload_file, which the stdio server never exposed.
+  // Every mcp-core tool, run inside a context seeded from the CLI config.
+  ...delegateHandlers(coreHandlers),
+  // Keep the selected site across calls (each call gets a fresh context).
+  ...remoteHandlers,
+  // Overrides upload_image with the filePath-aware version and registers upload_file, set_download and
+  // set_favicon with local-file support.
   ...mediaHandlers,
   // import_site with a local filePath (zips a folder, uploads it itself);
   // other modes and get_import_status delegate to mcp-core.

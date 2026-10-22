@@ -54,66 +54,73 @@ Settings come only from the `env` block of your MCP client config. Nothing is wr
 
 ### Discovery
 
-| Tool                   | Description                                                                              |
-| ---------------------- | ---------------------------------------------------------------------------------------- |
-| `list_blocks`          | Browse pre-built block templates with visual descriptions and overridable displayNames   |
-| `get_component_schema` | CraftJS component types and props reference (Container, Text, Image, Button, Form, etc.) |
-| `get_style_reference`  | Palette CSS variables, styleGuide tokens, layout prop keys, responsive patterns          |
-| `list_presets`         | Curated theme presets by mood (see [Theme Presets](#theme-presets))                      |
+| Tool                  | Description                                                                         |
+| --------------------- | ----------------------------------------------------------------------------------- |
+| `list_blocks`         | Browse library blocks (Liquid snippets) with descriptions                           |
+| `get_style_reference` | Palette CSS variables, styleGuide tokens, spacing, the HTML + Liquid format (`liquid`) |
+| `list_presets`        | Curated theme presets by mood (see [Theme Presets](#theme-presets))                 |
 
 ### Site Building
 
-| Tool               | Description                                                                            |
-| ------------------ | -------------------------------------------------------------------------------------- |
-| `set_theme`        | Configure palette, fonts, spacing, JSON-LD — supports loading a preset as base         |
-| `insert_node`      | Add a new node to an existing parent (validates image URLs)                            |
-| `delete_node`      | Remove a node and descendants (protects structural nodes)                              |
-| `set_integrations` | Configure analytics/tracking (GA4, GTM, Search Console, Meta Pixel) — just pass the ID |
-| `set_redirects`    | Configure 301/302 redirect rules for SEO (old path → new path)                         |
-| `apply_kit_block`  | Add a library section block by slug to a page/header/footer                            |
-| `add_nodes`        | Merge new nodes into a site efficiently                                                |
+A site is HTML + Liquid files. Edit them with the file tools; the server lints, sanitizes and versions every write.
+
+| Tool                | Description                                                                              |
+| ------------------- | ---------------------------------------------------------------------------------------- |
+| `list_site_files`   | Every draft file, and which page each serves                                             |
+| `read_site_file`    | A file's text and version (optionally a line range)                                      |
+| `search_site_files` | Plain-text line search across files                                                      |
+| `edit_site_file`    | Exact-text replacement in one file (`oldText` → `newText`)                               |
+| `edit_site_files`   | Exact-text edits across several files as one atomic write                                |
+| `write_site_file`   | Create a file, or replace one against the version you read                               |
+| `delete_site_file`  | Remove a non-page file                                                                   |
+| `set_theme`         | Palette, fonts, spacing into `theme.css` — supports loading a preset as base             |
+| `set_integrations`  | Configure analytics/tracking (GA4, GTM, Search Console, Meta Pixel, Google Ads)          |
+| `set_redirects`     | Configure 301/302 redirect rules for SEO (old path → new path)                           |
+| `apply_kit_block`   | Place a library block (a copy, with fresh ids) into a page file                          |
+| `list_components` / `rename_component` / `delete_component` | The site's partials: usage, rename (rewrites every `{% render %}`), delete |
 
 ### Block Library
 
-Use `search_blocks` + `apply_kit_block` for block composition. (Advanced block-library mutation tools are available on the full remote API surface.)
+Use `search_blocks` + `get_block` for reference and `apply_kit_block` to place one. Library authoring (admin or tenant owner): `save_block`, `update_block`, `patch_block` (exact-text edits to a block's Liquid), `delete_block`.
+
+### Templates
+
+`list_templates`, `pull_template` (a template's files; `path` for one). Authoring (admin or tenant owner/editor): `save_template` (from `files`, or a site's draft with `fromSite`), `update_template`, `publish_site_as_template`, `delete_template`.
 
 ### Remote API
 
-| Tool                               | Description                                                                                   |
-| ---------------------------------- | --------------------------------------------------------------------------------------------- |
-| `list_templates` / `pull_template` | Browse and download stock templates from the API                                              |
-| `list_sites` / `select_site`       | List tenant's sites and set active site context                                               |
-| `delete_site`                      | Delete a site                                                                                 |
-| `upload_image`                     | Upload to tenant CDN (validates MIME type)                                                    |
-| `patch_site_node`                  | Edit a single node on a live site                                                             |
-| `patch_site_bulk`                  | Apply multiple node patches atomically (race-condition safe — GET/PATCH/PUT in one operation) |
+| Tool                               | Description                                                       |
+| ---------------------------------- | ----------------------------------------------------------------- |
+| `list_sites` / `select_site`       | List tenant's sites and set active site context                   |
+| `create_site` / `duplicate_site`   | Start a site from a template, or copy one                         |
+| `publish_site` / `unpublish_site`  | Make the draft live, or take the site down                        |
+| `delete_site`                      | Delete a site                                                     |
+| `upload_image` / `upload_file`     | Upload to the CDN (images) or R2 (video, audio, pdf, zip)         |
 
 ### Pages
 
-| Tool          | Description                                                                            |
-| ------------- | -------------------------------------------------------------------------------------- |
-| `list_pages`  | List all pages in a site with flags (home, 404, hidden)                                |
-| `add_page`    | Create a new page with SEO props and auto-positioning                                  |
-| `update_page` | Update page name, home/404/hidden flags, SEO metadata, per-page head code / body class |
-| `delete_page` | Remove a page and descendants (auto-promotes new home page)                            |
+| Tool          | Description                                                                          |
+| ------------- | ------------------------------------------------------------------------------------ |
+| `list_pages`  | List all pages in a site with flags (home, 404, hidden)                              |
+| `add_page`    | Create a page (its HTML + Liquid in `text`) with SEO props                           |
+| `update_page` | Update page name, home/404/hidden flags, SEO metadata, `pathPattern`                 |
+| `delete_page` | Remove a page and its file (auto-promotes a new home page)                           |
 
-**Custom code (raw HTML / scripts / styles):** four scopes — pick the one whose reach matches what you're adding.
+**Custom code (raw HTML / scripts / styles):** pick the scope whose reach matches what you're adding.
 
 - **Analytics / pixels (GA4, GTM, Meta Pixel, Search Console):** use `set_integrations`. Always. Handles consent, de-dup, and load point.
-- **Site-wide widget (every page — Intercom, Crisp, HubSpot, site-wide custom CSS):** `patch_site_node({ nodeId: "ROOT", propsPatch: { inject: { head: "<script>…</script>", footer: "<script>…</script>" } } })`. `inject.head` parses into `<head>` during SSR; `inject.footer` emits inline before `</body>`. Script tags execute at HTML-parse time.
-- **Reusable block with its own widget (Cal.com popup, per-section Calendly):** add an `Embed` with `headCode` / `footCode`. Parsed and emitted the same way as `ROOT.props.inject.head`, but scoped to the block and deduped across blocks by content hash — the block ships its own init, no site-level setup. It never runs in the editor, so widget popups/boots don't fire while designing. Pair with a `Button` using `props.handlers.onClick` to invoke the loaded widget's API.
-- **Per-page script (one landing page's A/B test, one product's schema.org JSON-LD):** `update_page({ pageId, headCode, bodyClass })`.
-- **Inline iframe / Stripe Buy Button / static HTML at a spot:** `Embed` with `service: "custom"` and `code: "<iframe…>"`. ⚠️ Scripts inside `code` silently do not execute — put scripts in `headCode` / `footCode` instead.
+- **Site-wide widget (every page — Intercom, Crisp, HubSpot, site-wide custom CSS):** `site.json` `inject` (`head` / `footer`) via `edit_site_file`. Third-party snippets only; hand-built bars, banners and popups are markup in a page or partial.
+- **Per-page script (one landing page's A/B test, one product's JSON-LD):** a tag in that page file's `<head>`.
+- **Inline iframe / widget at a spot:** the markup in the page file; scripts are stripped from what an agent writes, so a widget that needs one goes in `site.json` inject.
 
-**Custom 404 (`is404Page`):** Every plan can mark one page as the site’s not-found page. Unknown URLs render that page (with HTTP 404 on subdomains, `noindex` on ISR static).
+**Custom 404 (`is404Page`):** Every plan can mark one page as the site's not-found page. Unknown URLs render that page.
 
 ### Blocks
 
-| Tool               | Description                                                      |
-| ------------------ | ---------------------------------------------------------------- |
-| `search_blocks`    | Search the block library with filters (category, tags, source)   |
-| `get_block`        | Get full block structure by slug                                 |
-| `list_block_nodes` | List deterministic `lib_*` node ids for patching a library block |
+| Tool            | Description                                                    |
+| --------------- | -------------------------------------------------------------- |
+| `search_blocks` | Search the block library with filters (category, tags, style)  |
+| `get_block`     | Get a block's Liquid by slug                                   |
 
 ### Portal
 
@@ -152,7 +159,7 @@ Every preset includes input styling tokens (`inputBorderColor`, `inputBorderRadi
 
 ### Design Patterns
 
-Production-ready node structure recipes for layouts that pre-built templates don't cover:
+Library blocks for layouts that plain sections don't cover (read one with `get_block`, then write the section for this business):
 
 | Pattern               | Description                                               |
 | --------------------- | --------------------------------------------------------- |
@@ -164,17 +171,9 @@ Production-ready node structure recipes for layouts that pre-built templates don
 | `multi-column-footer` | 3-4 column footer with nav links, contact, social         |
 | `horizontal-scroller` | Horizontal scroll strip of tags/categories                |
 
-Each pattern returns a complete flat node map ready for `add_nodes`.
+### Safe edits
 
-### Image Validation
-
-`insert_node` validates image URLs before writing. A HEAD request is sent with an 8-second timeout. If any URL returns a non-200 status or times out, the operation is blocked with a detailed error listing each failed URL and its status.
-
-This prevents broken images from being saved into templates.
-
-### Concurrency Safety
-
-File write operations (`delete_node`, `insert_node`) are serialized through a mutex to prevent concurrent writes from corrupting template JSON files. `patch_site_bulk` uses atomic GET/PATCH/PUT to prevent race conditions on live sites.
+`edit_site_file` and `edit_site_files` apply exact-text replacements to the text just read and write against that version, so an edit never silently overwrites someone else's change; `edit_site_files` saves several files as one atomic write.
 
 ### Accessibility Audit
 

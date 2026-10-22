@@ -20,7 +20,6 @@ const _config = {
   apiKey: process.env.PAGEHUB_API_KEY || null,
   apiBaseUrl: normalizeBaseUrl(process.env.PAGEHUB_API_BASE_URL) || "https://pagehub.dev",
   activeSite: null, // in-memory only, per session
-  activeTemplate: null, // in-memory only, per session
 };
 
 /**
@@ -84,11 +83,9 @@ async function apiFetch(pathStr, opts = {}) {
 /* ── Shared helpers (eliminate repeated boilerplate in handlers) ── */
 
 function getActiveTarget(args = {}) {
-  if (args.slug && !args.id) return { type: "template", id: args.slug };
   if (args.id) return { type: "site", id: args.id };
-  if (config.activeTemplate) return { type: "template", id: config.activeTemplate.slug };
   if (config.activeSite) return { type: "site", id: config.activeSite.id };
-  throw new Error("No site or template selected. Run select_site or select_template first.");
+  throw new Error("No site selected. Run select_site first.");
 }
 
 function getEditorUrl(siteId) {
@@ -103,7 +100,6 @@ function cliContext() {
     apiBaseUrl: config.apiBaseUrl,
     client: "mcp",
     activeSite: config.activeSite,
-    activeTemplate: config.activeTemplate,
   };
 }
 
