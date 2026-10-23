@@ -111,7 +111,7 @@ Use `search_blocks` + `get_block` for reference and `apply_kit_block` to place o
 - **Analytics / pixels (GA4, GTM, Meta Pixel, Search Console):** use `set_integrations`. Always. Handles consent, de-dup, and load point.
 - **Site-wide widget (every page — Intercom, Crisp, HubSpot, site-wide custom CSS):** `site.json` `inject` (`head` / `footer`) via `edit_site_file`. Third-party snippets only; hand-built bars, banners and popups are markup in a page or partial.
 - **Per-page script (one landing page's A/B test, one product's JSON-LD):** a tag in that page file's `<head>`.
-- **Inline iframe / widget at a spot:** the markup in the page file; scripts are stripped from what an agent writes, so a widget that needs one goes in `site.json` inject.
+- **Inline iframe / widget at a spot:** the markup in the page file, with its `<script>` next to it (a site may carry JS; a vendor loader shared by every page goes in `site.json` inject).
 
 **Custom 404 (`is404Page`):** Every plan can mark one page as the site's not-found page. Unknown URLs render that page.
 

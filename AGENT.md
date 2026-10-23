@@ -38,7 +38,7 @@ Every site write lands in the **draft**. The published site keeps serving its pr
 Rules:
 
 1. Read before you edit; change the smallest span. Keep every `data-edit-*` attribute you did not mean to remove: they are the element ids history and review comments use.
-2. Every write is checked. Lint errors come back as `line L:C [rule] message` and nothing is saved: fix that spot and write again. A version conflict means someone else saved: read again. `on*` attributes and `<script>` you write are stripped. In maintenance, writes are paused: tell the user and stop.
+2. Every write is checked. Lint errors come back as `line L:C [rule] message` and nothing is saved: fix that spot and write again. A version conflict means someone else saved: read again. In maintenance, writes are paused: tell the user and stop.
 3. Liquid logic wraps WHOLE elements (no `{% if %}` inside a tag's attribute list). Close every element you open.
 4. One writer per site. If a write keeps failing, report the exact error and stop; never rebuild a page to recover.
 5. Site-wide third-party code (tracking, chat loaders) goes in `site.json` inject — never page content. Analytics ids: `set_integrations`.
@@ -167,7 +167,7 @@ For complex layouts (forms, accordions, galleries) read a block for how it is wi
 
 ## Interactive Features
 
-Behaviour is native HTML or one `data-*` runtime attribute — no inline JS (`on*` and `<script>` are stripped).
+Behaviour is native HTML or one `data-*` runtime attribute first. When the site needs its own JavaScript it may carry it, and nothing strips it: `<script>`, `on*` handlers, `{% javascript %}…{% endjavascript %}` in a section or partial, or a file `assets/<name>.js` linked with `<script src="{{ 'app.js' | asset_url }}" defer></script>`. It runs on the preview and the live site, not in the editor canvas.
 
 - Modal: `<dialog id="book" closedby="any">` + `<button commandfor="book" command="show-modal">`. Menus, drawers, dropdowns: `popover` + `popovertarget`. Accordion: `<details name="faq">`. Tabs and toggles: radio inputs + `has-[:checked]:` / `peer-checked:` classes.
 - **State is the URL.** Filters, sort, search and pagination are `?query` params read as `request.query.<name>`; a filter form is `<form method="get" data-autosubmit>`.
