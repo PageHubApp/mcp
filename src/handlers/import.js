@@ -15,7 +15,7 @@ const { readFile, stat } = require("node:fs/promises");
 const { extname } = require("node:path");
 const { apiFetch, formatImportStatus, presignImport, startImport } = require("@pagehub/mcp-core");
 const coreHandlers = require("@pagehub/mcp-core/handlers/remote");
-const { config, delegateHandlers, normalizeBaseUrl, withContext } = require("../config");
+const { delegateHandlers, withContext } = require("../config");
 const { zipFolder } = require("../folderZip");
 const { resolveUploadPath } = require("../uploadPath");
 
@@ -51,7 +51,6 @@ async function importLocalSite(args) {
   }
 
   const { importId } = await startImport({ uploadKey: key, name: args.name });
-  const base = normalizeBaseUrl(config.apiBaseUrl) || "https://pagehub.dev";
   const deadline = Date.now() + TIMEOUT_MS;
   let status = await fetchStatus(importId);
   while (!DONE.has(status.status) && Date.now() < deadline) {
@@ -59,7 +58,7 @@ async function importLocalSite(args) {
     status = await fetchStatus(importId);
   }
 
-  const text = formatImportStatus(status, base);
+  const text = formatImportStatus(status);
   if (status.status === "failed") return { isError: true, content: [{ type: "text", text }] };
   return { content: [{ type: "text", text }] };
 }

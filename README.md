@@ -157,19 +157,19 @@ set_theme(preset: "warm-editorial", palette: [...overrides])
 
 Every preset includes input styling tokens (`inputBorderColor`, `inputBorderRadius`, etc.) so forms render correctly out of the box.
 
-### Design Patterns
+### Design patterns
 
-Library blocks for layouts that plain sections don't cover (read one with `get_block`, then write the section for this business):
+Library blocks are copy-source examples (read one with `get_block`, then write the section for this business). Worth reading for how a behaviour is wired, all plain HTML + Liquid + `data-*` attributes:
 
-| Pattern               | Description                                               |
-| --------------------- | --------------------------------------------------------- |
-| `bento-gallery`       | Asymmetric photo grid (2x2 with one tall image)           |
-| `rich-contact`        | Hours + address + map + multi-field form                  |
-| `quote-testimonials`  | Star ratings + quote cards in a grid                      |
-| `offering-list`       | Menu/service list with title, description, optional price |
-| `split-feature`       | Text left + image right (or reversed), with eyebrow label |
-| `multi-column-footer` | 3-4 column footer with nav links, contact, social         |
-| `horizontal-scroller` | Horizontal scroll strip of tags/categories                |
+| Block | Shows |
+| --- | --- |
+| `image-carousel` | `data-carousel` with `data-carousel-prev` / `-next` / `-dot` |
+| `gallery-lightbox` | a photo grid with `data-lightbox` and a popover viewer |
+| `cookie-consent` | `data-show-on="load"` gated by `data-show-if="!ls:seen"` |
+| `mobile-call-bar` | a fixed bottom call bar |
+| `modal-newsletter` | a `popover="manual"` opened on load (`data-show-on`) and closed with `commandfor` |
+| `contact-map-hours` | hours + address + a `data-map` map + a form |
+| `accordion-faq` | `<details name>` |
 
 ### Safe edits
 
@@ -222,7 +222,7 @@ See [AGENT.md](./AGENT.md) for detailed tool usage rules and design guidelines.
 
 The main app is a **pnpm** monorepo: install and run from the **repo root** (`pnpm install`, `pnpm run build`). See root **`README.md`**, **`.cursorrules`**, and **`CLAUDE.md`** for workspace rules (`pnpm-lock.yaml`, **`@pagehub/sdk`** deps, **`verify:vercel`**, CI).
 
-Library blocks live in **`scripts/seed/data/blocks/*.block.json`** (single source of truth — metadata + structure in one file). They are not the live MCP library until synced to the database. Run **`node scripts/sync-repo-to-mongo.js`** (`--dry-run` / `--slugs=`) with **`MONGODB_URI`** to compare or push to Mongo. See **`BLOCKS-AI-CONTEXT.md`** for block building rules.
+Library blocks live in **`scripts/seed/data/blocks/<slug>.block.liquid`** (the markup) and **`<slug>.block.json`** (name, category, styles, tags). They are not the live MCP library until synced to the database. Run **`node scripts/sync-repo-to-mongo.js --blocks`** (`--dry-run` / `--slugs=`) with **`MONGODB_URI`** to compare or push to Mongo. Blocks and templates carry no JavaScript; see **`.claude/rules/templates.md`** and **`.claude/rules/block-template-sync.md`** for the rules.
 
 ## Project Structure
 
@@ -231,17 +231,13 @@ index.js              Entry point (shebang)
 src/
   server.js           MCP server setup and request routing
   config.js           Project detection, config persistence, API client
-  helpers.js          Mutex, JSON parsing, image validation, node patching
+  helpers.js          Mutex, JSON parsing, image validation
   tools.js            Tool schema loading from mcp-core
   handlers/
-    discovery.js      Schema, style reference, design patterns, presets
-    remote.js         API tools (sites, templates, upload)
-    pages.js          Page CRUD (list, add, update, delete)
-    components.js     Block library (search, get, list nodes, patch, save, update, delete)
-    portal.js         Portal configuration
-    ai.js             AI image generation and copy writing
+    remote.js         Delegates every API tool to @pagehub/mcp-core
+    import.js         import_site from a local folder or .zip
+    media.js          upload_image / upload_file / set_favicon from local files
     accessibility.js  WCAG audit (Playwright + jsdom fallback)
-    seo.js            SEO audit (meta, headings, images, content)
 ```
 
 ## License

@@ -8,7 +8,7 @@ A PageHub site is **HTML + Liquid files** (`pages/*.liquid`, `partials/*.liquid`
 
 Before building anything, call these discovery tools:
 
-1. **`get_style_reference`** — palette variables, spacing tokens, layout rules. Pass `topic` for a focused guide: `design`, `accessibility`, `domains`, `blocks`, `editing`, `theme`, `pages`, `site`, `media`, `integrations`, `animation`, and **`liquid`** (the tag, filter, object and lint reference, generated from the renderer so it is current). Tool descriptions stay short and point at these.
+1. **`get_style_reference`** — palette variables, spacing tokens, layout rules. Pass `topic` for a focused guide: `design`, `accessibility`, `domains`, `blocks`, `editing`, `theme`, `pages`, `site`, `media`, `integrations`, `animation`, and **`liquid`** (the tag, filter, object and lint reference, generated from the renderer so it is current, plus the runtime `data-*` attributes, site JavaScript, forms and form webhooks, dates and maps, each with an example). Tool descriptions stay short and point at these.
 2. **`list_presets`** / **`suggest_palettes`** — curated themes by mood.
 3. **`search_blocks`** / **`list_blocks`** / **`get_block`** — proven sections as Liquid. Two scopes: `blockType: "section"` (full page sections, default) and `blockType: "component"` (patterns that go inside sections: dropdowns, cards, accordions).
 4. **`find_icon`** — resolves an icon ref instead of guessing.
@@ -61,7 +61,7 @@ Files: `pages/<slug>.liquid` (one per page; `pages/index.liquid` is home; `pages
 5. each page section                             → get_block / search_blocks for reference, then edit_site_file
 6. update_page seo.title + seo.description       → on every page
 7. set_integrations / set_redirects / set_favicon
-8. audit_seo, audit_accessibility, screenshot_site → fix what they report
+8. audit_seo, audit_accessibility, screenshot_site → fix what they report; hand the user the previewUrl a tool returned (never build /view/… links: previews live on per-site hosts)
 9. publish_site                                  → only when the user says so
 ```
 
@@ -167,11 +167,36 @@ For complex layouts (forms, accordions, galleries) read a block for how it is wi
 
 ## Interactive Features
 
-Behaviour is native HTML or one `data-*` runtime attribute first. When the site needs its own JavaScript it may carry it, and nothing strips it: `<script>`, `on*` handlers, `{% javascript %}…{% endjavascript %}` in a section or partial, or a file `assets/<name>.js` linked with `<script src="{{ 'app.js' | asset_url }}" defer></script>`. It runs on the preview and the live site, not in the editor canvas.
+Behaviour is native HTML or one `data-*` runtime attribute first. When the site needs its own JavaScript it may carry it, and nothing strips it. It runs on the preview and the live site, never in the editor canvas (check it with `screenshot_site` or the `previewUrl`). Library blocks and templates carry no JavaScript (it is stripped when they are saved), and PageHub AI inside the app never writes it; a site you build over MCP may.
+
+```html
+<!-- inline -->
+<button type="button" onclick="document.getElementById('promo').remove()">Hide</button>
+
+<!-- a section's or partial's own script: raw (no Liquid inside), added once per page before </body>, each block isolated -->
+{% javascript %}
+  document.querySelectorAll('[data-year]').forEach(function (el) { el.textContent = new Date().getFullYear(); });
+{% endjavascript %}
+
+<!-- a file: write_site_file assets/app.js, then link it (the URL carries the content hash) -->
+<script src="{{ 'app.js' | asset_url }}" defer></script>
+
+<!-- declarative call into your script -->
+<button data-on="click:openChat">Chat</button>
+<script>
+  window.PageHub = window.PageHub || { fns: {}, on: function (n, f) { this.fns[n] = f; } };
+  PageHub.on("openChat", function (event, el) { /* … */ });
+</script>
+```
+
+The editor's Scripts panel lists `assets/*.js`; "load on every page" adds a file to `partials/site-scripts.liquid`. Third-party vendor loaders still go in `site.json` inject.
 
 - Modal: `<dialog id="book" closedby="any">` + `<button commandfor="book" command="show-modal">`. Menus, drawers, dropdowns: `popover` + `popovertarget`. Accordion: `<details name="faq">`. Tabs and toggles: radio inputs + `has-[:checked]:` / `peer-checked:` classes.
 - **State is the URL.** Filters, sort, search and pagination are `?query` params read as `request.query.<name>`; a filter form is `<form method="get" data-autosubmit>`.
-- Runtime attributes: `data-cart="add|open|checkout"`, `data-cart-count`, `data-autosubmit`, `data-autoplay="5s"`, `data-animate="fade-up"`, `data-track="ga4:<event>"`, `data-theme-toggle`, `data-copy`, `data-dismiss`, `data-scrollspy`.
+- Runtime attributes (full contracts and examples: `get_style_reference({ topic: "liquid" })`): `data-cart`, `data-autosubmit`, `data-animate`, `data-track`, `data-theme-toggle`, `data-copy`, `data-dismiss`, `data-scrollspy`, `data-autoplay`; `data-carousel="dots arrows wrap"` with your own `data-carousel-prev` / `-next` / `-dot`; `data-lightbox` (+ `-step`, `-grid`, `-caption`); `data-show-on="load|hover"`; `data-close-link`, `data-print`, `data-scroll-by`, `data-set-field`, `data-key-click`; `data-on` + `PageHub.on`; `data-state-*`; `data-refetch`.
+- **Overlays from any element:** `commandfor` + `command` work on a non-button too (a gallery tile, a card): `<div commandfor="viewer" command="show-popover">`. An overlay that names itself closes only on a click on its own backdrop; an element with content inside the overlay it names (a drawer panel) never acts.
+- **Carousel:** `<div data-carousel="dots arrows wrap" class="flex snap-x snap-mandatory overflow-x-auto">…slides…</div>` builds the controls; `wrap` loops past either end.
+- **Dates:** `{{ post.date | date: '%B %d, %Y' }}`, `time_tag`, `{{ year }}` and `{{ site.timezone }}` use the site's timezone (`update_site` `timezone`); unset is UTC.
 - **Animations**: `data-animate="<preset>"` (`fade-in`, `fade-up`, `fade-down`, `fade-left`, `fade-right`, `scale-up`, `blur-in`, `slide-up`, `flip-in`, `spring`, `bounce-in`, `thud-in`, `tile-flip`), `data-animate-trigger="load"`, `data-animate-stagger="80ms"` on the parent, `data-animate-exit`. A motion no preset covers: `@keyframes` and a class in `theme.css`, animating `transform`/`opacity`/`clip-path`, never layout properties.
 - **Maps**: `{% map lat: 1, lng: 2, zoom: 12, tiles: 'osm' %}` with pin and route children. Use a route line when a business is hard to find (set back from the street, shared lot). Always `tiles: 'osm'`.
 - **Detail pages**: `update_page` with `pathPattern` (`:slug` on page "Car" serves `/car/<slug>`); read the row with `request.params.<name>`.
@@ -196,6 +221,7 @@ A site can have typed collections (staff, FAQ, menu items, events, hours…). Lo
 - `upload_file({ filePath?|fileUrl?|dataBase64?, mimeType?, filename? })` — images go to the CDN, video/audio/pdf/zip to R2. `filePath` (string or array) is the right input for anything on disk. Use `{{ '<mediaId>' | file_url }}` in markup.
 - **Hosting a file for download** (game build, installer): `set_download({ name, filePath })` uploads privately and returns a stable link; a new build keeps the link (`downloadId`). `list_downloads`, `remove_download`. Pro+ for files; installers need Agency. Never put a download in `upload_file` without `private: true`.
 - Forms write into a collection with `{% form 'name', map: 'fieldKey=inputName' %}` naming the collection; required fields with no input and no default make every submission 400, and `formWritable: false` fields are dropped.
+- **Form webhooks:** `{% form 'leads', webhook: 'https://example.com/hooks/leads' %}` POSTs every submission as JSON (`event: "form_submission"`, `submissionId`, `site`, `formName`, `pagePath`, `submittedAt`, `data`, `attribution`), signed with `X-PageHub-Timestamp` and `X-PageHub-Signature: sha256=<hex HMAC-SHA256 of "<timestamp>.<raw body>">`. 5xx, 429 and network errors retry up to 6 attempts (1 min, 5 min, 30 min, 2 h, 12 h); other statuses fail without retry; receivers dedupe on `submissionId`. Each submission records its delivery (delivered, retrying, failed) and the owner can Resend it; the signing secret is set under the submissions screen's Webhook signing. The runtime also posts how the visitor arrived (`utm_*`, `gclid`, landing path, referrer) as the reserved `_ph_attribution` field, shown as `attribution`.
 
 ## Inspecting and Debugging
 

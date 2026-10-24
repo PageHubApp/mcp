@@ -43,6 +43,7 @@ const READY = {
   skippedMedia: [],
   siteId: "site1",
   draftId: "d1",
+  previewUrl: "https://d1.preview.pagehub.test/view/d1",
   error: null,
   result: { redirects: [{ from: "/about.html", to: "/about" }] },
 };
@@ -91,7 +92,7 @@ test("a folder is zipped, PUT to the signed URL and imported", () =>
     const text = res.content[0].text;
     assert.ok(!res.isError);
     assert.match(text, /Editor: http:\/\/pagehub\.test\/dashboard\/sites\/site1\/design/);
-    assert.match(text, /Preview: http:\/\/pagehub\.test\/view\/d1/, "preview keys on draftId, not the site id");
+    assert.match(text, /Preview: https:\/\/d1\.preview\.pagehub\.test\/view\/d1/, "the preview link is the server's previewUrl, never built from the API origin");
     assert.match(text, /Redirects from the old page addresses: 1/);
     assert.match(text, /about\.html links to a missing file/);
   }));
