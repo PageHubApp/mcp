@@ -39,7 +39,7 @@ async function readSiteZip(rawPath) {
 const POLL_MS = 3000;
 const TIMEOUT_MS = 90_000;
 
-/** @param {object} args - { filePath, name? } */
+/** @param {object} args - { filePath, name?, pages? } */
 async function importLocalSite(args) {
   const bytes = await readSiteZip(args.filePath);
   const { key, uploadUrl, contentType } = await presignImport(bytes.length);
@@ -50,7 +50,7 @@ async function importLocalSite(args) {
     throw new Error(`The zip didn't upload (HTTP ${put.status}). Try the import again.${detail ? `\n${detail}` : ""}`);
   }
 
-  const { importId } = await startImport({ uploadKey: key, name: args.name });
+  const { importId } = await startImport({ uploadKey: key, name: args.name, pages: args.pages });
   const deadline = Date.now() + TIMEOUT_MS;
   let status = await fetchStatus(importId);
   while (!DONE.has(status.status) && Date.now() < deadline) {
@@ -66,8 +66,8 @@ async function importLocalSite(args) {
 module.exports = {
   async import_site(args = {}) {
     if (args.filePath === undefined || args.filePath === null) return delegated.import_site(args);
-    if (["size", "uploadKey", "files"].some(k => args[k] !== undefined && args[k] !== null)) {
-      throw new Error("Pass one of filePath, size, uploadKey or files.");
+    if (["size", "uploadKey", "files", "restOf"].some(k => args[k] !== undefined && args[k] !== null)) {
+      throw new Error("Pass one of filePath, size, uploadKey, files or restOf.");
     }
     return withContext(() => importLocalSite(args));
   },

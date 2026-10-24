@@ -135,5 +135,34 @@ test("files mode starts an inline import; no mode at all is refused", async () =
     autoConfirm: true,
   });
   assert.match(res.content[0].text, /importId: imp1/);
-  await assert.rejects(import_site({}), /Pass one of filePath, size, uploadKey or files/);
+  await assert.rejects(import_site({}), /Pass one of filePath, size, uploadKey, files or restOf/);
+});
+
+test("restOf brings a capped import's other pages into its site; pages picks which pages fill the limit", async () => {
+  let calls = stubFetch(READY);
+  const res = await import_site({ restOf: "imp0" });
+  const start = calls.find(c => c.url.endsWith("/api/import"));
+  assert.deepEqual(JSON.parse(start.body), { restOf: "imp0" });
+  assert.match(res.content[0].text, /importId: imp1/);
+
+  calls = stubFetch(READY);
+  await import_site({ files: [{ path: "index.html", content: "<h1>Hi</h1>" }], pages: ["about.html"] });
+  const picked = JSON.parse(calls.find(c => c.url.endsWith("/api/import")).body);
+  assert.deepEqual(picked.options.pagePaths, ["about.html"]);
+});
+
+test("a capped status names the pages left out and the call that brings them in", async () => {
+  const { formatImportStatus } = require("@pagehub/mcp-core");
+  const plan = {
+    pages: [{ id: "index.html" }, { id: "about.html" }],
+    allPages: ["index.html", "about.html", "contact.html"].map(p => ({ id: p, path: p, title: p })),
+  };
+  const base = { ...READY, siteId: "s1", plan, pageCap: { kept: 2, total: 3 } };
+  const waiting = formatImportStatus({ ...base, leftOut: { importId: "imp1", kept: 2, total: 3, maxPages: 2, canBring: false } });
+  assert.match(waiting, /2 of 3 pages imported .* The home page is always included/);
+  assert.match(waiting, /Left out: contact\.html/);
+  assert.match(waiting, /upgrades at https?:\/\/[^ ]+\/pricing, then call import_site\(\{ restOf: "imp1" \}\)/);
+  const upgraded = formatImportStatus({ ...base, leftOut: { importId: "imp1", kept: 2, total: 3, maxPages: 50, canBring: true } });
+  assert.match(upgraded, /call import_site\(\{ restOf: "imp1" \}\)/);
+  assert.doesNotMatch(upgraded, /upgrades at/);
 });
