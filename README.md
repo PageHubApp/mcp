@@ -67,8 +67,9 @@ A site is HTML + Liquid files. Edit them with the file tools; the server lints, 
 | Tool                | Description                                                                              |
 | ------------------- | ---------------------------------------------------------------------------------------- |
 | `list_site_files`   | Every draft file, and which page each serves                                             |
-| `read_site_file`    | A file's text and version (optionally a line range)                                      |
-| `search_site_files` | Plain-text line search across files                                                      |
+| `read_site_file`    | A file's text and version (optionally a line range); `paths` reads several at once       |
+| `search_site_files` | Text or regex search across files: path, line, column and the text around the match      |
+| `outline_page`      | A page's sections, headings and rendered partials with line numbers                      |
 | `edit_site_file`    | Exact-text replacement in one file (`oldText` → `newText`)                               |
 | `edit_site_files`   | Exact-text edits across several files as one atomic write                                |
 | `write_site_file`   | Create a file, or replace one against the version you read                               |

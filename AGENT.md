@@ -27,11 +27,12 @@ Every site write lands in the **draft**. The published site keeps serving its pr
 
 | Tool | What |
 | --- | --- |
-| `list_site_files` | Every draft path, and which page each file serves |
-| `read_site_file` | Text plus its version (a content hash); `startLine` / `endLine` read a slice |
-| `search_site_files` | Plain-text, case-insensitive line search (no regex), optional `path` prefix |
-| `edit_site_file` | `edits: [{ oldText, newText, replaceAll? }]` applied to the text just read; `oldText` must match exactly once |
-| `edit_site_files` | The same across several files as **one atomic write**: all land or none do. Use it when a change spans a partial and its pages |
+| `list_site_files` | Every draft path (optionally by `glob`), and which page each file serves |
+| `read_site_file` | Text plus its version (a content hash); `startLine` / `endLine` read a slice; `paths` reads up to 40 files in one call |
+| `search_site_files` | Case-insensitive search (`regex`, `glob`, `context`); each hit is `path:line:column` with the text around the match, so you can copy `oldText` from it |
+| `outline_page` | A page's sections, headings and rendered partials (expanded in place) with line numbers |
+| `edit_site_file` | `edits: [{ oldText, newText, replaceAll? }]` or `{ insertAfter / insertBefore, newText }` applied to the text just read; the anchor must match exactly once. A missing `oldText` names the closest match; the reply shows how the stored text differs from what you sent |
+| `edit_site_files` | The same across several files as **one atomic write**: all land or none do. Use it when a change spans a partial and its pages; an entry with `text` creates a file, and a new `pages/<slug>.liquid` also creates its page, so a page plus its nav link is one call |
 | `write_site_file` | Create a file, or replace one with the `baseVersion` you read |
 | `delete_site_file` | Non-page files (pages: `delete_page`) |
 
