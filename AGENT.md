@@ -16,9 +16,10 @@ Before building anything, call these discovery tools:
 
 ## Your edits are STAGED, not live
 
-Every site write lands in the **draft**. The published site keeps serving its previous version until someone publishes.
+File, page and theme writes land in the **draft**. The published site keeps serving its previous version until someone publishes.
 
-- Edit freely on a live site — visitors do not see your work in progress.
+- Edit files freely on a live site — visitors do not see your work in progress.
+- **Some writes are live at once:** collection rows and schemas (create, update, delete, CSV import, sync), domains, redirects, integrations, portal, checkout, downloads and site settings. Treat those as changes to the public site.
 - **`publish_site` is what makes it live.** It promotes the staged draft.
 - Reads (`read_site_file`, `list_site_files`, `search_site_files`) return the **draft**, so you always see the latest work in progress — including unpublished edits made in the editor by a human.
 - Ask before publishing someone's site unless they asked you to. The draft may contain their unfinished work as well as yours.
